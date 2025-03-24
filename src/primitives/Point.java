@@ -57,7 +57,7 @@ public class Point {
      * @param other the point to add
      * @return a new {@link Point} representing the sum
      */
-    public Point add(Point other) {
+    public Point add(Vector other) {
         return new Point(xyz.add(other.xyz));
     }
     

@@ -7,6 +7,10 @@ import static primitives.Util.isZero;
 import primitives.*;
 
 /**
+ * Presenter 1:
+ * Meitav Bin - Nun, 216004739, meitav.bin@gmail.com
+ * Presenter 2:
+ * Eti Zilberlicht, 328491782, eszilber29@gmail.com
  * Test program for the 1st stage
  * @author Dan Zilberstein
  */

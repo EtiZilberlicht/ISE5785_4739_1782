@@ -22,12 +22,6 @@ public class Ray {
         this.direction = direction.normalize();
     }
     
-    /**
-     * Checks if this ray is equal to another object.
-     *
-     * @param obj the object to compare to
-     * @return true if the objects are equal, false otherwise
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -36,11 +30,6 @@ public class Ray {
                 && this.direction.equals(other.direction);
     }
     
-    /**
-     * Returns a string representation of the ray.
-     *
-     * @return a string describing the ray
-     */
     @Override
     public String toString() {
         return "Ray [head=" + head + ", direction=" + direction + "]";

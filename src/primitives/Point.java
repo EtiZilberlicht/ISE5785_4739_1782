@@ -30,26 +30,15 @@ public class Point {
         this.xyz = xyz;
     }
     
-    /**
-     * Checks if this point is equal to another object.
-     * 
-     * @param obj the object to compare to
-     * @return true if the objects are equal, false otherwise
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         return (obj instanceof Point other) && this.xyz.equals(other.xyz);
     }
     
-    /**
-     * Returns a string representation of the point.
-     * 
-     * @return a string representing the point
-     */
     @Override
     public String toString() {
-        return "Point [xyz=" + xyz.toString() + "]";
+        return "Point ["+xyz+"]";
     }
     
     /**

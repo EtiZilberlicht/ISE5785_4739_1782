@@ -30,22 +30,14 @@ public class Vector extends Point {
             throw new IllegalArgumentException("Unable to create zero vector");
     }
 
-    /**
-     * Checks if this vector is equal to another object.
-     * @param obj The object to compare with.
-     * @return true if the objects are equal, false otherwise.
-     */
+    @Override
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
 
-    /**
-     * Returns a string representation of the vector.
-     * @return A string describing the vector.
-     */
     @Override
     public String toString() {
-        return "Vector [xyz=" + xyz.toString() + "]";
+        return "Vector ["+xyz+"]";
     }
 
     /**
@@ -89,11 +81,9 @@ public class Vector extends Point {
         double xB = other.xyz.d1();
         double yB = other.xyz.d2();
         double zB = other.xyz.d3();
-        return new Vector(
-            yA * zB - zA * yB,
-            zA * xB - xA * zB,
-            xA * yB - yA * xB
-        );
+        return new Vector(yA * zB - zA * yB,
+                          zA * xB - xA * zB,
+                          xA * yB - yA * xB);
     }
 
     /**

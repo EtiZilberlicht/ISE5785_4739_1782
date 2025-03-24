@@ -37,15 +37,16 @@ public class Plane extends Geometry {
         this.normal = null; // TODO: Compute the normal using cross product of two vectors from the points
     }
 
-    /**
-     * Returns the normal vector to the plane at a given point.
-     * 
-     * @param point A point on the plane (not used in this implementation).
-     * @return The normal vector to the plane.
-     */
     @Override
     public Vector getNormal(Point point) {
         return null; // TODO: Implement the correct normal calculation
     }
+
+	@Override
+	public String toString() {
+		return "Plane [point=" + point + ", normal=" + normal + "]";
+	}
+    
+    
 }
 

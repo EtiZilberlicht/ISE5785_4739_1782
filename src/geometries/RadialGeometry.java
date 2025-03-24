@@ -18,5 +18,11 @@ public abstract class RadialGeometry extends Geometry {
     public RadialGeometry(double radius) {
         this.radius = radius;
     }
+
+	@Override
+	public String toString() {
+		return "RadialGeometry [radius=" + radius + "]";
+	}
+    
 }
 

@@ -9,7 +9,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
- * 
+ * Unit tests for geometries.Tube class
+ * @author Eti and Meitav
  */
 class TubeTests {
 

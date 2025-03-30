@@ -1,6 +1,7 @@
 package geometries;
 
 import primitives.*;
+import static primitives.Util.isZero;
 
 /**
  * The {@code Tube} class represents an infinite cylindrical tube in 3D space.
@@ -25,7 +26,13 @@ public class Tube extends RadialGeometry {
 
 	@Override
 	public Vector getNormal(Point point) {
-		return null;
+		Point head = axis.getHead();
+		Vector direction = axis.getDirection();
+		double t = direction.dotProduct(point.subtract(head));
+		if (isZero(t))
+			return point.subtract(head).normalize();
+		Point o = head.add(direction.scale(t));
+		return point.subtract(o).normalize();
 	}
 
 	@Override

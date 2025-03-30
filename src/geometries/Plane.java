@@ -35,12 +35,14 @@ public class Plane extends Geometry {
 	 */
 	public Plane(Point x, Point y, Point z) {
 		this.point = x;
-		this.normal = null; // TODO: Compute the normal using cross product of two vectors from the points
+		Vector vector1 = x.subtract(y);
+		Vector vector2 = y.subtract(z);
+		this.normal = vector1.crossProduct(vector2).normalize();
 	}
 
 	@Override
 	public Vector getNormal(Point point) {
-		return null; // TODO: Implement the correct normal calculation
+		return normal; 
 	}
 
 	@Override

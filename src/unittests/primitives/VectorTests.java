@@ -5,10 +5,8 @@ package unittests.primitives;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import primitives.Point;
 import primitives.Vector;
 
 /**
@@ -75,12 +73,12 @@ class VectorTests {
 		// ============ Equivalence Partitions Tests ==============
 
 		// TC01: Checks the correctness of dot product
-		assertEquals(-28, V1.dotProduct(V2), "dotProduct() wrong value");
+		assertEquals(-28, V1.dotProduct(V2), DELTA, "dotProduct() wrong value");
 
 		// =============== Boundary Values Tests ==================
 
 		// TC10: Checks the correctness of dot product to orthogonal vectors
-		assertEquals(0, V1.dotProduct(V3), "dotProduct() for orthogonal vectors is not zero");
+		assertEquals(0, V1.dotProduct(V3), DELTA, "dotProduct() for orthogonal vectors is not zero");
 	}
 
 	/**
@@ -119,7 +117,7 @@ class VectorTests {
 		// ============ Equivalence Partitions Tests ==============
 
 		// TC01: Checks the correctness of length
-		assertEquals(3, V4.lengthSquared(), "length() wrong value");
+		assertEquals(3, V4.length(), "length() wrong value");
 	}
 
 	/**

@@ -44,7 +44,7 @@ class CylinderTests {
 		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(1, 0, 0), normal, "Cylinder normal wrong value");
-		
+
 		// TC02: A point on bottom base
 		Point onSurface2 = new Point(0.5, 0, 0);
 		// ensure there are no exceptions
@@ -55,7 +55,7 @@ class CylinderTests {
 		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, -1), normal, "Cylinder normal wrong value");
-		
+
 		// TC03: A point on top base
 		Point onSurface3 = new Point(0.5, 0, 2);
 		// ensure there are no exceptions
@@ -66,7 +66,7 @@ class CylinderTests {
 		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, 1), normal, "Cylinder normal wrong value");
-		
+
 		// =============== Boundary Values Tests ==================
 
 		// TC10: A point on the center of the bottom base
@@ -79,7 +79,7 @@ class CylinderTests {
 		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, -1), normal, "Cylinder normal wrong value");
-		
+
 		// TC11: A point on the center of the top base
 		Point onSurface5 = new Point(0, 0, 2);
 		// ensure there are no exceptions
@@ -90,7 +90,7 @@ class CylinderTests {
 		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, 1), normal, "Cylinder normal wrong value");
-		
+
 		// TC12: A point on the edge of the bottom base
 		Point onSurface6 = new Point(1, 0, 0);
 		// ensure there are no exceptions
@@ -101,7 +101,7 @@ class CylinderTests {
 		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, -1), normal, "Cylinder normal wrong value");
-		
+
 		// TC13: A point on the edge of the top base
 		Point onSurface7 = new Point(1, 0, 2);
 		// ensure there are no exceptions

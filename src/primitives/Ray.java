@@ -22,29 +22,24 @@ public class Ray {
 		this.head = head;
 		this.direction = direction.normalize();
 	}
-	
-	
 
-    /**
-     * Returns the head (starting point) of the vector.
-     *
-     * @return the head point of the vector.
-     */
-    public Point getHead() {
-        return head;
-    }
+	/**
+	 * Returns the head (starting point) of the vector.
+	 *
+	 * @return the head point of the vector.
+	 */
+	public Point getHead() {
+		return head;
+	}
 
-    /**
-     * Returns the direction of the vector as a unit vector.
-     *
-     * @return the direction of the vector.
-     */
-    public Vector getDirection() {
-        return direction;
-    }
-
-
-
+	/**
+	 * Returns the direction of the vector as a unit vector.
+	 *
+	 * @return the direction of the vector.
+	 */
+	public Vector getDirection() {
+		return direction;
+	}
 
 	@Override
 	public boolean equals(Object obj) {

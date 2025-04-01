@@ -76,8 +76,8 @@ class PolygonTests {
          { new Point(0, 0, 1), new Point(1, 0, 0), new Point(0, 1, 0), new Point(-1, 1, 1) };
       Polygon pol = new Polygon(pts);
       // ensure there are no exceptions
-      assertDoesNotThrow(() -> pol.getNormal(new Point(0, 0, 1)), "");
-      // generate the test result
+		assertDoesNotThrow(() -> pol.getNormal(new Point(0, 0, 1)), "");
+	      // generate the test result
       Vector result = pol.getNormal(new Point(0, 0, 1));
       // ensure |result| = 1
       assertEquals(1, result.length(), DELTA, "Polygon's normal is not a unit vector");

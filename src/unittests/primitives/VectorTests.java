@@ -33,7 +33,7 @@ class VectorTests {
 	private static final Vector V4 = new Vector(1, 2, 2);
 
 	/**
-	 * Test method for {@link geometries.Vctor#Vector(double, double, double)}.
+	 * Test method for {@link primitives.Vector#Vector(double, double, double)}.
 	 */
 	@Test
 	void testVectorDoubleDoubleDouble() {
@@ -50,7 +50,7 @@ class VectorTests {
 	}
 
 	/**
-	 * Test method for {@link geometries.Vctor#Vector(primitives.Double3)}.
+	 * Test method for {@link primitives.Vector#Vector(primitives.Double3)}.
 	 */
 	@Test
 	void testVectorDouble3() {

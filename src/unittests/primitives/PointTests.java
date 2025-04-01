@@ -12,6 +12,7 @@ import primitives.Vector;
 
 /**
  * Unit tests for primitives.Point class
+ * 
  * @author Eti and Meitav
  */
 class PointTests {

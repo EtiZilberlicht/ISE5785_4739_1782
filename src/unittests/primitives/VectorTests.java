@@ -7,10 +7,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import primitives.Vector;
+import primitives.*;
 
 /**
  * Unit tests for primitives.Vector class
+ * 
  * @author Eti and Meitav
  */
 class VectorTests {
@@ -30,6 +31,40 @@ class VectorTests {
 	private static final Vector V3 = new Vector(0, 3, -2);
 	/** A vector for tests to (1,2,2) */
 	private static final Vector V4 = new Vector(1, 2, 2);
+
+	/**
+	 * Test method for {@link geometries.Vctor#Vector(double, double, double)}.
+	 */
+	@Test
+	void testVectorDoubleDoubleDouble() {
+		// ============ Equivalence Partitions Tests ==============
+
+		// TC01: Checks the correctness of creating vector
+		assertDoesNotThrow(() -> new Vector(0, 0, 1), "");
+
+		// =============== Boundary Values Tests ==================
+
+		// TC10: Checks the correctness of creating zero vector
+		assertThrows(IllegalArgumentException.class, //
+				() -> new Vector(0, 0, 0), "Zero Vector does not throw an exception");
+	}
+
+	/**
+	 * Test method for {@link geometries.Vctor#Vector(primitives.Double3)}.
+	 */
+	@Test
+	void testVectorDouble3() {
+		// ============ Equivalence Partitions Tests ==============
+
+		// TC01: Checks the correctness of creating vector
+		assertDoesNotThrow(() -> new Vector(Double3.ONE), "");
+
+		// =============== Boundary Values Tests ==================
+
+		// TC10: Checks the correctness of creating zero vector
+		assertThrows(IllegalArgumentException.class, //
+				() -> new Vector(Double3.ZERO), "Zero Vector does not throw an exception");
+	}
 
 	/**
 	 * Test method for {@link primitives.Vector#add(primitives.Vector)}.
@@ -130,14 +165,14 @@ class VectorTests {
 		// TC01: Checks the correctness of normalize vector as unit vector
 		Vector v4_normalized = V4.normalize();
 		assertEquals(1, v4_normalized.length(), "the normalized vector is not a unit vector");
-		
-		//Checks if the unit vector is parallel to the original vector
+
+		// Checks if the unit vector is parallel to the original vector
 		assertThrows(IllegalArgumentException.class, //
 				() -> V4.crossProduct(v4_normalized), "the normalized vector is not parallel to the original one");
-		
-		//Checks if the unit vector is parallel to the original vector
-				assertThrows(IllegalArgumentException.class, //
-						() -> V4.crossProduct(v4_normalized), "the normalized vector is not parallel to the original one");
+
+		// Checks if the unit vector is parallel to the original vector
+		assertThrows(IllegalArgumentException.class, //
+				() -> V4.crossProduct(v4_normalized), "the normalized vector is not parallel to the original one");
 	}
 
 	/**

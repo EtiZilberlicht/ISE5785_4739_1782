@@ -16,6 +16,13 @@ import primitives.*;
  * @author Eti and Meitav
  */
 class PlaneTests {
+
+	/**
+	 * Default constructor
+	 */
+	public PlaneTests() {
+	}
+
 	/**
 	 * Delta value for accuracy when comparing the numbers of type 'double' in
 	 * assertEquals

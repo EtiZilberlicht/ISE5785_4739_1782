@@ -15,6 +15,13 @@ import primitives.*;
  * @author Eti and Meitav
  */
 class VectorTests {
+
+	/**
+	 * Default constructor
+	 */
+	public VectorTests() {
+	}
+
 	/**
 	 * Delta value for accuracy when comparing the numbers of type 'double' in
 	 * assertEquals

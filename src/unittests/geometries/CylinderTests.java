@@ -16,6 +16,13 @@ import primitives.*;
  * @author Eti and Meitav
  */
 class CylinderTests {
+
+	/**
+	 * Default constructor
+	 */
+	public CylinderTests() {
+	}
+
 	/**
 	 * Delta value for accuracy when comparing the numbers of type 'double' in
 	 * assertEquals
@@ -40,8 +47,6 @@ class CylinderTests {
 		assertDoesNotThrow(() -> cylinder.getNormal(onSurface1), "");
 		// generate the test result
 		Vector normal = cylinder.getNormal(onSurface1);
-		// ensure |normal| = 1
-		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(1, 0, 0), normal, "Cylinder normal wrong value");
 
@@ -51,8 +56,6 @@ class CylinderTests {
 		assertDoesNotThrow(() -> cylinder.getNormal(onSurface2), "");
 		// generate the test result
 		normal = cylinder.getNormal(onSurface2);
-		// ensure |normal| = 1
-		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, -1), normal, "Cylinder normal wrong value");
 
@@ -62,8 +65,6 @@ class CylinderTests {
 		assertDoesNotThrow(() -> cylinder.getNormal(onSurface3), "");
 		// generate the test result
 		normal = cylinder.getNormal(onSurface3);
-		// ensure |normal| = 1
-		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, 1), normal, "Cylinder normal wrong value");
 
@@ -75,8 +76,6 @@ class CylinderTests {
 		assertDoesNotThrow(() -> cylinder.getNormal(onSurface4), "");
 		// generate the test result
 		normal = cylinder.getNormal(onSurface4);
-		// ensure |normal| = 1
-		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, -1), normal, "Cylinder normal wrong value");
 
@@ -86,8 +85,6 @@ class CylinderTests {
 		assertDoesNotThrow(() -> cylinder.getNormal(onSurface5), "");
 		// generate the test result
 		normal = cylinder.getNormal(onSurface5);
-		// ensure |normal| = 1
-		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, 1), normal, "Cylinder normal wrong value");
 
@@ -97,8 +94,6 @@ class CylinderTests {
 		assertDoesNotThrow(() -> cylinder.getNormal(onSurface6), "");
 		// generate the test result
 		normal = cylinder.getNormal(onSurface6);
-		// ensure |normal| = 1
-		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, -1), normal, "Cylinder normal wrong value");
 
@@ -108,8 +103,6 @@ class CylinderTests {
 		assertDoesNotThrow(() -> cylinder.getNormal(onSurface7), "");
 		// generate the test result
 		normal = cylinder.getNormal(onSurface7);
-		// ensure |normal| = 1
-		assertEquals(1, normal.length(), DELTA, "Cylinder normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, 1), normal, "Cylinder normal wrong value");
 

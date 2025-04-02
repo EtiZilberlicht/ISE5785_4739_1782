@@ -17,6 +17,13 @@ import primitives.Vector;
  * @author Eti and Meitav
  */
 class SphereTests {
+
+	/**
+	 * Default constructor
+	 */
+	public SphereTests() {
+	}
+
 	/**
 	 * Delta value for accuracy when comparing the numbers of type 'double' in
 	 * assertEquals
@@ -38,8 +45,6 @@ class SphereTests {
 		assertDoesNotThrow(() -> sphere.getNormal(onSurface), "");
 		// generate the test result
 		Vector normal = sphere.getNormal(onSurface);
-		// ensure |normal| = 1
-		assertEquals(1, normal.length(), DELTA, "Sphere normal is not a unit vector");
 		// correction of normal
 		assertEquals(new Vector(0, 0, 1), normal, "Sphere normal wrong value");
 

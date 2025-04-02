@@ -28,10 +28,14 @@ public class Cylinder extends Tube {
 	public Vector getNormal(Point point) {
 		Point head = axis.getHead();
 		Vector direction = axis.getDirection();
-		if (point.equals(head)) // If the point is exactly at the base of the cylinder, normal is opposite to
-								// the axis direction
+		double t = 0;
+		try {
+			t = direction.dotProduct(point.subtract(head));// If the point is exactly at the base of the cylinder,
+															// normal is opposite to
+															// the axis direction
+		} catch (IllegalArgumentException exception) {
 			return direction.scale(-1);
-		double t = direction.dotProduct(point.subtract(head));
+		}
 		if (isZero(t)) // If the projection results in zero, the point is on the bottom base
 			return direction.scale(-1);
 		if (isZero(t - height)) // If the projection results in the cylinder's height, the point is on the top

@@ -32,6 +32,8 @@ public class Plane extends Geometry {
 	 * @param x The first point defining the plane.
 	 * @param y The second point defining the plane.
 	 * @param z The third point defining the plane.
+	 * @throws IllegalArgumentException If there are collinear points or if the
+	 *                                  points are on the same line
 	 */
 	public Plane(Point x, Point y, Point z) {
 		this.point = x;

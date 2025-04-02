@@ -17,6 +17,13 @@ import primitives.Vector;
  * @author Eti and Meitav
  */
 class TriangleTests {
+
+	/**
+	 * Default constructor
+	 */
+	public TriangleTests() {
+	}
+
 	/**
 	 * Delta value for accuracy when comparing the numbers of type 'double' in
 	 * assertEquals
@@ -39,8 +46,6 @@ class TriangleTests {
 		assertDoesNotThrow(() -> triangle.getNormal(p1), "");
 		// generate the test result
 		Vector normal = triangle.getNormal(p1);
-		// ensure |normal| = 1
-		assertEquals(1, normal.length(), DELTA, "Triangle normal is not a unit vector");
 		// Check if the calculated normal matches one of the expected directions
 		assertTrue(normal.equals(new Vector(0, 0, 1)) || normal.equals(new Vector(0, 0, -1)),
 				"Normal vector should be in one of the two possible directions");

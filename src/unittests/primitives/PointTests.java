@@ -16,6 +16,13 @@ import primitives.Vector;
  * @author Eti and Meitav
  */
 class PointTests {
+
+	/**
+	 * Default constructor
+	 */
+	public PointTests() {
+	}
+
 	/**
 	 * Delta value for accuracy when comparing the numbers of type 'double' in
 	 * assertEquals

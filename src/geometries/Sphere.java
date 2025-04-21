@@ -4,7 +4,6 @@ import java.util.List;
 import primitives.*;
 import static primitives.Util.alignZero;
 
-
 /**
  * The {@code Sphere} class represents a sphere in 3D space. A sphere is defined
  * by a center point and a radius.
@@ -34,10 +33,9 @@ public class Sphere extends RadialGeometry {
 	public String toString() {
 		return "Sphere [center=" + center + "]";
 	}
-	
+
 	@Override
-	public List<Point> findIntersections(Ray ray)
-	{
+	public List<Point> findIntersections(Ray ray) {
 		Point point = ray.getHead();
 		if (center.equals(point))
 			return List.of(ray.getPoint(radius));
@@ -51,13 +49,13 @@ public class Sphere extends RadialGeometry {
 		double t2 = alignZero(tm + th); // always greater than t1
 		double t1 = alignZero(tm - th);
 		if (t1 > 0 && t2 > 0) {
-            return List.of(ray.getPoint(t1), ray.getPoint(t2));
-        } else if (t1 > 0) {
-            return List.of(ray.getPoint(t1));
-        } else if (t2 > 0) {
-            return List.of(ray.getPoint(t2));
-        }
-        return null;
+			return List.of(ray.getPoint(t1), ray.getPoint(t2));
+		} else if (t1 > 0) {
+			return List.of(ray.getPoint(t1));
+		} else if (t2 > 0) {
+			return List.of(ray.getPoint(t2));
+		}
+		return null;
 
 	}
 

@@ -85,47 +85,48 @@ public class Polygon extends Geometry {
 
 	@Override
 	public List<Point> findIntersections(Ray ray) {
-	    // Step 1: Find intersection with the polygon's plane
-	    Plane plane = new Plane(vertices.get(0), vertices.get(1), vertices.get(2));
-	    List<Point> planeIntersections = plane.findIntersections(ray);
-	    if (planeIntersections == null) {
-	        return null;
-	    }
+		// Step 1: Find intersection with the polygon's plane
+		Plane plane = new Plane(vertices.get(0), vertices.get(1), vertices.get(2));
+		List<Point> planeIntersections = plane.findIntersections(ray);
+		if (planeIntersections == null) {
+			return null;
+		}
 
-	    Point p = planeIntersections.get(0); // Only one intersection point with a plane
-	    Vector n = plane.getNormal(Point.ZERO); // Normal to the polygon's plane
+		Point p = planeIntersections.get(0); // Only one intersection point with a plane
+		Vector n = plane.getNormal(Point.ZERO); // Normal to the polygon's plane
 
-	    // Step 2: Check if point is strictly inside the polygon (assuming convex polygon)
-	    int size = vertices.size();
-	    for (int i = 0; i < size; i++) {
-	        Point v1 = vertices.get(i);
-	        Point v2 = vertices.get((i + 1) % size);
+		// Step 2: Check if point is strictly inside the polygon (assuming convex
+		// polygon)
+		int size = vertices.size();
+		for (int i = 0; i < size; i++) {
+			Point v1 = vertices.get(i);
+			Point v2 = vertices.get((i + 1) % size);
 
-	        Vector edge;
-	        Vector vp;
+			Vector edge;
+			Vector vp;
 
-	        try {
-	            edge = v2.subtract(v1);
-	            vp = p.subtract(v1);
-	        } catch (IllegalArgumentException e) {
-	            // p == v1 or v2 ⇒ point is on vertex ⇒ exclude
-	            return null;
-	        }
+			try {
+				edge = v2.subtract(v1);
+				vp = p.subtract(v1);
+			} catch (IllegalArgumentException e) {
+				// p == v1 or v2 ⇒ point is on vertex ⇒ exclude
+				return null;
+			}
 
-	        Vector cross;
-	        try {
-	            cross = edge.crossProduct(vp);
-	        } catch (IllegalArgumentException e) {
-	            // vp parallel or identical to edge ⇒ point is on edge ⇒ exclude
-	            return null;
-	        }
+			Vector cross;
+			try {
+				cross = edge.crossProduct(vp);
+			} catch (IllegalArgumentException e) {
+				// vp parallel or identical to edge ⇒ point is on edge ⇒ exclude
+				return null;
+			}
 
-	        double sign = alignZero(n.dotProduct(cross));
-	        if (sign <= 0) {
-	            return null; // Outside or on edge
-	        }
-	    }
+			double sign = alignZero(n.dotProduct(cross));
+			if (sign <= 0) {
+				return null; // Outside or on edge
+			}
+		}
 
-	    return List.of(p); // Point is strictly inside the polygon
+		return List.of(p); // Point is strictly inside the polygon
 	}
 }

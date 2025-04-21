@@ -140,7 +140,7 @@ class CylinderTests {
 		// TC07: Ray intersects the cylinder's top surface (1 point)
 		result = cylinder2.findIntersections(new Ray(new Point(0, 0, 3), new Vector(0, 0, -1)));
 		assertEquals(2, result.size(), "Wrong number of points");
-		
+
 		// =============== Boundary Values Tests ==================
 
 		// TC10: Ray starts at the cylinder's top surface and goes inside (1 point)

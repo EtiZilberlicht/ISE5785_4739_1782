@@ -99,6 +99,7 @@ class PlaneTests {
 				"Normal vector should be in one of the two possible directions");
 
 	}
+
 	/** A point used in some tests */
 	private final Point p122 = new Point(1, 2, 2);
 	/** A point used in some tests */
@@ -138,8 +139,7 @@ class PlaneTests {
 
 		// **** Group: Ray is orthogonal to the plane
 		// TC12: before the plane (1 point)
-		assertEquals(List.of(new Point(1, 1, 1)),
-				plane.findIntersections(new Ray(new Point(1, 1, 0), v001)),
+		assertEquals(List.of(new Point(1, 1, 1)), plane.findIntersections(new Ray(new Point(1, 1, 0), v001)),
 				"Ray is orthogonal to the plane, before the plane");
 
 		// TC13: on the plane

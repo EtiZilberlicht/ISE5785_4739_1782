@@ -66,7 +66,7 @@ class TubeTests {
 		assertEquals(new Vector(1, 0, 0), normal, "Tube normal wrong value");
 
 	}
-	
+
 	/**
 	 * Test method for {@link geometries.Tube#findIntersections(primitives.Ray)}.
 	 */

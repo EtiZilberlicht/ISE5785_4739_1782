@@ -8,7 +8,6 @@ import primitives.*;
  * a method to calculate the normal vector at a given point.
  */
 public abstract class Geometry implements Intersectable {
-	
 
 	/**
 	 * Returns the normal vector to the geometric body at a given point on its

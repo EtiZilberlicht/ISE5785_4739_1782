@@ -3,6 +3,7 @@ package geometries;
 import primitives.*;
 import static primitives.Util.isZero;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -55,7 +56,64 @@ public class Cylinder extends Tube {
 	@Override
 	public List<Point> findIntersections(Ray ray)
 	{
-		return null;
-	}
+		// Initialize intersections list
+        List<Point> intersections = new LinkedList<>();
+
+        // Find intersections with the infinite cylinder
+        Tube tube = new Tube(axis, radius);
+        List<Point> infiniteCylinderIntersections = tube.findIntersections(ray);
+        if (infiniteCylinderIntersections != null) {
+            intersections.addAll(infiniteCylinderIntersections);
+        }
+
+        intersections.removeIf(intersection -> {
+            double t = axis.getDirection().dotProduct(intersection.subtract(axis.getPoint(0d)));
+            return t <= 0d || t >= height;
+        });
+
+
+        // Define planes for the bottom and top bases
+        Plane bottomBase = new Plane(axis.getPoint(0d), axis.getDirection());
+        Plane topBase = new Plane(axis.getPoint(height), axis.getDirection());
+
+        // Return intersections if there are exactly 2 (so they are on the sides of the cylinder)
+        if (intersections.size() == 2) {
+            return List.of(intersections.get(0), intersections.get(1));
+        }
+
+
+        // Find intersections with the bottom base
+        List<Point> bottomBaseIntersections = bottomBase.findIntersections(ray);
+        if (bottomBaseIntersections != null) {
+            Point intersection = bottomBaseIntersections.getFirst();
+            if (axis.getPoint(0d).distanceSquared(intersection) <= radius * radius) {
+                intersections.add(intersection);
+            }
+        }
+
+        // Find intersections with the top base
+        List<Point> topBaseIntersections = topBase.findIntersections(ray);
+        if (topBaseIntersections != null) {
+            Point intersection = topBaseIntersections.getFirst();
+            if (axis.getPoint(height).distanceSquared(intersection) <= radius * radius) {
+                intersections.add(intersection);
+            }
+        }
+
+        // if the ray is tangent to the cylinder
+        if (intersections.size() == 2 && axis.getHead().distanceSquared(intersections.get(0)) == radius * radius &&
+                axis.getPoint(height).distanceSquared(intersections.get(1)) == radius * radius) {
+            Vector v = intersections.get(1).subtract(intersections.get(0));
+            if (v.normalize().equals(axis.getDirection()) || v.normalize().equals(axis.getDirection().scale(-1d)))
+                return null;
+        }
+
+        // Return null if no valid intersections found
+        List<Point> geoPoints = new LinkedList<>();
+        for (Point p : intersections) {
+            geoPoints.add( p);
+        }
+
+        return geoPoints.isEmpty() ? null : geoPoints;	}
 
 }

@@ -4,6 +4,8 @@ import java.util.List;
 
 import primitives.*;
 import static primitives.Util.isZero;
+import static primitives.Util.alignZero;
+
 
 
 /**
@@ -33,46 +35,44 @@ public class Triangle extends Polygon {
 
 	@Override
 	public List<Point> findIntersections(Ray ray) {
-        Point p1 = vertices.get(0);
-        Point p2 = vertices.get(1);
-        Point p3 = vertices.get(2);
-        
-        final double EPSILON = 1e-10;
+	    Point p1 = vertices.get(0);
+	    Point p2 = vertices.get(1);
+	    Point p3 = vertices.get(2);
 
-        Vector edge1 = p2.subtract(p1);
-        Vector edge2 = p3.subtract(p1);
-        Vector h = ray.getDirection().crossProduct(edge2);
-        double a = edge1.dotProduct(h);
+	    Vector edge1 = p2.subtract(p1);
+	    Vector edge2 = p3.subtract(p1);
+	    Vector h = ray.getDirection().crossProduct(edge2);
+	    double a = edge1.dotProduct(h);
 
-        if (isZero(a) || Math.abs(a) < EPSILON) {
-            return null; // Ray is parallel to the triangle
-        }
+	    if (isZero(a)) {
+	        return null; // Ray is parallel to the triangle
+	    }
 
-        double f = 1.0 / a;
-        Vector s = ray.getHead().subtract(p1);
-        double u = f * s.dotProduct(h);
+	    double f = 1.0 / a;
+	    Vector s = ray.getHead().subtract(p1);
+	    double u = alignZero(f * s.dotProduct(h));
 
-        if (u <= EPSILON || u >= 1.0 - EPSILON) {
-            return null; // Point is outside or on edge
-        }
+	    if (u <= 0 || u >= 1) {
+	        return null; // Point is outside or on edge
+	    }
 
-        Vector q = s.crossProduct(edge1);
-        double v = f * ray.getDirection().dotProduct(q);
+	    Vector q = s.crossProduct(edge1);
+	    double v = alignZero(f * ray.getDirection().dotProduct(q));
 
-        if (v <= EPSILON || v >= 1.0 - EPSILON) {
-            return null; // Point is outside or on edge
-        }
+	    if (v <= 0 || v >= 1) {
+	        return null; // Point is outside or on edge
+	    }
 
-        if (u + v >= 1.0 - EPSILON) {
-            return null; // Point is on or outside the third edge
-        }
+	    if (u + v >= 1) {
+	        return null; // Point is on or outside the third edge
+	    }
 
-        double t = f * edge2.dotProduct(q);
-        if (t > EPSILON) {
-            Point intersection = ray.getPoint(t);
-            return List.of(intersection);
-        }
+	    double t = alignZero(f * edge2.dotProduct(q));
+	    if (t > 0) {
+	        Point intersection = ray.getPoint(t);
+	        return List.of(intersection);
+	    }
 
-        return null; // No intersection
+	    return null; // No intersection
 	}
 }

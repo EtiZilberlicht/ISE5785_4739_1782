@@ -1,5 +1,9 @@
 package geometries;
 
+import java.util.List;
+import static primitives.Util.isZero;
+import static primitives.Util.alignZero;
+
 import primitives.*;
 
 /**
@@ -50,6 +54,19 @@ public class Plane extends Geometry {
 	@Override
 	public String toString() {
 		return "Plane [point=" + point + ", normal=" + normal + "]";
+	}
+
+	@Override
+	public List<Point> findIntersections(Ray ray) {
+		Point head = ray.getHead();
+		if (head.equals(this.point))
+			return null;
+		double numerator = this.normal.dotProduct(this.point.subtract(head));
+		double denominator = this.normal.dotProduct(ray.getDirection());
+		if (isZero(numerator) || isZero(denominator))
+			return null;
+		double t = alignZero(numerator / denominator);
+		return t <= 0 ? null : List.of(ray.getPoint(t));
 	}
 
 }

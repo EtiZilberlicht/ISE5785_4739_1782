@@ -3,6 +3,8 @@ package geometries;
 import primitives.*;
 import static primitives.Util.isZero;
 
+import java.util.List;
+
 /**
  * The {@code Cylinder} class represents a three-dimensional cylinder that
  * extends a {@link Tube} with a finite height.
@@ -20,7 +22,7 @@ public class Cylinder extends Tube {
 	 * @param height The height of the cylinder.
 	 */
 	public Cylinder(double radius, Ray axis, double height) {
-		super(radius, axis);
+		super(axis, radius);
 		this.height = height;
 	}
 
@@ -48,6 +50,12 @@ public class Cylinder extends Tube {
 	@Override
 	public String toString() {
 		return "Cylinder [" + height + ",  " + axis + ", " + radius + "]";
+	}
+	
+	@Override
+	public List<Point> findIntersections(Ray ray)
+	{
+		return null;
 	}
 
 }

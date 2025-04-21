@@ -3,6 +3,8 @@ package geometries;
 import primitives.*;
 import static primitives.Util.isZero;
 
+import java.util.List;
+
 /**
  * The {@code Tube} class represents an infinite cylindrical tube in 3D space.
  * It extends {@code RadialGeometry} and is defined by a central axis and a
@@ -19,7 +21,7 @@ public class Tube extends RadialGeometry {
 	 * @param radius the radius of the tube
 	 * @param axis   the central axis of the tube
 	 */
-	public Tube(double radius, Ray axis) {
+	public Tube(Ray axis, double radius) {
 		super(radius);
 		this.axis = axis;
 	}
@@ -36,6 +38,12 @@ public class Tube extends RadialGeometry {
 	@Override
 	public String toString() {
 		return "Tube [axis=" + axis + "]";
+	}
+	
+	@Override
+	public List<Point> findIntersections(Ray ray)
+	{
+		return null;
 	}
 
 }

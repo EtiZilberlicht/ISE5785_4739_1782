@@ -24,12 +24,6 @@ class CylinderTests {
 	}
 
 	/**
-	 * Delta value for accuracy when comparing the numbers of type 'double' in
-	 * assertEquals
-	 */
-	private static final double DELTA = 0.000001;
-
-	/**
 	 * Test method for {@link geometries.Cylinder#getNormal(primitives.Point)}.
 	 */
 	@Test

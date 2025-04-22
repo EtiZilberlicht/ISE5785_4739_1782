@@ -15,6 +15,11 @@ import geometries.*;
  * @author Eti and Meitav
  */
 class GeometriesTests {
+	/**
+	 * default constructor
+	 */
+	public GeometriesTests() {
+	}
 
 	/**
 	 * Test method for

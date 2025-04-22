@@ -46,8 +46,8 @@ public class Sphere extends RadialGeometry {
 		if (alignZero(thSquared) <= 0)
 			return null;
 		double th = Math.sqrt(thSquared); // always positive
-		double t2 = alignZero(tm + th); // always greater than t1
 		double t1 = alignZero(tm - th);
+		double t2 = alignZero(tm + th); // always greater than t1
 		if (t1 > 0 && t2 > 0) {
 			return List.of(ray.getPoint(t1), ray.getPoint(t2));
 		} else if (t1 > 0) {

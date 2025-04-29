@@ -103,7 +103,7 @@ class PolygonTests {
 	/** A vector used in some tests */
 	private static final Vector V001 = new Vector(0, 0, 1);
 	/** A vector used in some tests */
-	private static final Vector V1M11 = new Vector(1,-1,1);
+	private static final Vector V1M11 = new Vector(1, -1, 1);
 
 	/**
 	 * Test method for {@link geometries.Polygon#findIntersections(primitives.Ray)}.
@@ -119,26 +119,32 @@ class PolygonTests {
 				"The point is not in the polygon");
 
 		// TC02: Ray's line is Outside against edge (0 points)
-		assertNull(polygon.findIntersections(new Ray(new Point(1, 5, 2), VM101)), "Bad intersects to polygon - line is Outside against edge");
+		assertNull(polygon.findIntersections(new Ray(new Point(1, 5, 2), VM101)),
+				"Bad intersects to polygon - line is Outside against edge");
 
 		// TC03: Ray's line is Outside against vertex (0 points)
-		assertNull(polygon.findIntersections(new Ray(new Point(1, 3, 7), VM101)), "Bad intersects to polygon - line is Outside against vertex");
+		assertNull(polygon.findIntersections(new Ray(new Point(1, 3, 7), VM101)),
+				"Bad intersects to polygon - line is Outside against vertex");
 
 		// TC04: Ray does not intersect the plane
-		assertNull(polygon.findIntersections(new Ray(new Point(1, 3, 7), V1M11 )), "Bad intersects to polygon - line is Outside against vertex");
+		assertNull(polygon.findIntersections(new Ray(new Point(1, 3, 7), V1M11)),
+				"Bad intersects to polygon - line is Outside against vertex");
 
 		// =============== Boundary Values Tests ==================
 
 		// **** Group: Ray intersects the plane
 
 		// TC11: Ray's line is On edge (0 points)
-		assertNull(polygon.findIntersections(new Ray(new Point(2, 4, 0.5), VM101)), "Bad intersects to polygon - line is On edge");
+		assertNull(polygon.findIntersections(new Ray(new Point(2, 4, 0.5), VM101)),
+				"Bad intersects to polygon - line is On edge");
 
 		// TC12: Ray's line is In vertex (0 points)
-		assertNull(polygon.findIntersections(new Ray(new Point(1, 1, 0), VM101)), "Bad intersects to polygon - line is In vertex");
+		assertNull(polygon.findIntersections(new Ray(new Point(1, 1, 0), VM101)),
+				"Bad intersects to polygon - line is In vertex");
 
 		// TC13: Ray's line is On edge's continuation (0 points)
-		assertNull(polygon.findIntersections(new Ray(new Point(1, 1, 1), VM101)), "Bad intersects to polygon - line is On edge's continuation");
+		assertNull(polygon.findIntersections(new Ray(new Point(1, 1, 1), VM101)),
+				"Bad intersects to polygon - line is On edge's continuation");
 
 		// **** Group: Ray does not intersect the plane
 
@@ -147,7 +153,7 @@ class PolygonTests {
 				"Does not return null- when ray included in the plane");
 
 		// TC22: The ray is parallel and not included in the plane
-		assertNull(polygon.findIntersections(new Ray(new Point(1,0,5), V001)),
+		assertNull(polygon.findIntersections(new Ray(new Point(1, 0, 5), V001)),
 				"Does not return null- when ray not included in the plane");
 
 		// TC23: Ray is orthogonal and on the plane
@@ -155,7 +161,7 @@ class PolygonTests {
 				"Does not return null- when ray is orthogonal to the plane, on the plane");
 
 		// TC24: Ray is orthogonal and after the plane
-		assertNull(polygon.findIntersections(new Ray(new Point(-1,0,5), VM100)),
+		assertNull(polygon.findIntersections(new Ray(new Point(-1, 0, 5), VM100)),
 				"Does not return null- when ray is orthogonal to the plane, after the plane");
 		// TC25: Ray begins at the plane
 		assertNull(polygon.findIntersections(new Ray(P005, V1M11)),

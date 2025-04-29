@@ -32,7 +32,7 @@ class CylinderTests {
 	void testGetNormal() {
 		// Cylinder on Z axis
 		Point head = new Point(0, 0, 0);
-		Vector direction = new Vector(0, 0, 1);
+		Vector direction = V001;
 		Cylinder cylinder = new Cylinder(1, new Ray(head, direction), 2);
 
 		// ============ Equivalence Partitions Tests ==============
@@ -53,7 +53,7 @@ class CylinderTests {
 		// generate the test result
 		normal = cylinder.getNormal(onSurface2);
 		// correction of normal
-		assertEquals(new Vector(0, 0, -1), normal, "Cylinder normal wrong value");
+		assertEquals(V00M1, normal, "Cylinder normal wrong value");
 
 		// TC03: A point on top base
 		Point onSurface3 = new Point(0.5, 0, 2);
@@ -62,7 +62,7 @@ class CylinderTests {
 		// generate the test result
 		normal = cylinder.getNormal(onSurface3);
 		// correction of normal
-		assertEquals(new Vector(0, 0, 1), normal, "Cylinder normal wrong value");
+		assertEquals(V001, normal, "Cylinder normal wrong value");
 
 		// =============== Boundary Values Tests ==================
 
@@ -73,7 +73,7 @@ class CylinderTests {
 		// generate the test result
 		normal = cylinder.getNormal(onSurface4);
 		// correction of normal
-		assertEquals(new Vector(0, 0, -1), normal, "Cylinder normal wrong value");
+		assertEquals(V00M1, normal, "Cylinder normal wrong value");
 
 		// TC11: A point on the center of the top base
 		Point onSurface5 = new Point(0, 0, 2);
@@ -82,7 +82,7 @@ class CylinderTests {
 		// generate the test result
 		normal = cylinder.getNormal(onSurface5);
 		// correction of normal
-		assertEquals(new Vector(0, 0, 1), normal, "Cylinder normal wrong value");
+		assertEquals(V001, normal, "Cylinder normal wrong value");
 
 		// TC12: A point on the edge of the bottom base
 		Point onSurface6 = new Point(1, 0, 0);
@@ -91,7 +91,7 @@ class CylinderTests {
 		// generate the test result
 		normal = cylinder.getNormal(onSurface6);
 		// correction of normal
-		assertEquals(new Vector(0, 0, -1), normal, "Cylinder normal wrong value");
+		assertEquals(V00M1, normal, "Cylinder normal wrong value");
 
 		// TC13: A point on the edge of the top base
 		Point onSurface7 = new Point(1, 0, 2);
@@ -100,9 +100,20 @@ class CylinderTests {
 		// generate the test result
 		normal = cylinder.getNormal(onSurface7);
 		// correction of normal
-		assertEquals(new Vector(0, 0, 1), normal, "Cylinder normal wrong value");
+		assertEquals(V001, normal, "Cylinder normal wrong value");
 
 	}
+
+	/** A point used in some tests */
+	private static final Point P402 = new Point(4, 0, 2);
+	/** A vector used in some tests */
+	private static final Vector V001 = new Vector(0, 0, 1);
+	/** A vector used in some tests */
+	private static final Vector V00M1 = new Vector(0, 0, -1);
+	/** A vector used in some tests */
+	private static final Vector V100 = new Vector(1, 0, 0);
+	/** A vector used in some tests */
+	private static final Vector VM10M01 = new Vector(-1, 0, -0.1);
 
 	/**
 	 * Test method for
@@ -110,58 +121,116 @@ class CylinderTests {
 	 */
 	@Test
 	void testFindIntersections() {
-		Cylinder cylinder2 = new Cylinder(2, new Ray(new Point(0, 0, 0), new Vector(0, 0, 1)), 2);
+		Cylinder cylinder = new Cylinder(2, new Ray(new Point(0, 0, 1), V001), 2);
 
 		// ============ Equivalence Partitions Tests ==============
+
+		// **** Group: Intersect the side of the cylinder
+
 		// TC01: Ray's line is outside the cylinder (0 points)
-		assertNull(cylinder2.findIntersections(new Ray(new Point(0, 0, 2), new Vector(0, 0, 1))),
-				"Ray's line out of cylinder");
+		assertNull(cylinder.findIntersections(new Ray(P402, new Vector(1, 0, 1))), "Ray's line out of cylinder");
 
 		// TC02: Ray starts before and crosses the cylinder (2 points)
-		List<Point> result = cylinder2.findIntersections(new Ray(new Point(0, 0, -1), new Vector(0, 0, 1)));
-		assertEquals(2, result.size(), "Wrong number of points");
+		Point p1 = new Point(2, 0, 1.8);
+		Point p2 = new Point(-2, 0, 1.4);
+		assertEquals(List.of(p1, p2), cylinder.findIntersections(new Ray(P402, VM10M01)), "Wrong intersections");
 
 		// TC03: Ray starts inside the cylinder (1 point)
-		result = cylinder2.findIntersections(new Ray(new Point(0, 0, 1), new Vector(0, 0, 1)));
-		assertEquals(1, result.size(), "Wrong number of points");
+		assertEquals(p2, cylinder.findIntersections(new Ray(new Point(1, 0, 1.7), VM10M01)).get(0),
+				"Wrong intersections");
 
-		// TC04: Ray starts after the cylinder (0 points)
-		assertNull(cylinder2.findIntersections(new Ray(new Point(0, 0, 3), new Vector(0, 0, 1))),
-				"Ray's line out of cylinder");
+		// **** Group: Intersect the bases of the cylinder
 
-		// TC05: Ray starts at the cylinder and goes outside (0 points)
-		assertNull(cylinder2.findIntersections(new Ray(new Point(0, 0, 0), new Vector(0, 0, -1))),
-				"Ray's line out of cylinder");
+		// TC11: Intersect the top (1 point)
+		assertEquals(new Point(0, 0, 3),
+				cylinder.findIntersections(new Ray(new Point(1, 1, 2), new Vector(-1, -1, 1))).get(0),
+				"Wrong intersections");
 
-		// TC06: Ray starts at the cylinder and goes inside (1 point)
-		result = cylinder2.findIntersections(new Ray(new Point(0, 0, 0), new Vector(0, 0, 1)));
-		assertEquals(1, result.size(), "Wrong number of points");
+		// TC12: Intersect the bottom (1 point)
+		assertEquals(new Point(0, 0, 1),
+				cylinder.findIntersections(new Ray(new Point(1, 1, 2), new Vector(-1, -1, -1))).get(0),
+				"Wrong intersections");
 
-		// TC07: Ray intersects the cylinder's top surface (1 point)
-		result = cylinder2.findIntersections(new Ray(new Point(0, 0, 3), new Vector(0, 0, -1)));
-		assertEquals(2, result.size(), "Wrong number of points");
+		// TC13: Intersect both of the bases (2 point)
+		Point p3 = new Point(0.75, 0.75, 1);
+		Point p4 = new Point(-0.25, -0.25, 3);
+		assertEquals(List.of(p3, p4), cylinder.findIntersections(new Ray(new Point(1, 1, 0.5), new Vector(-1, -1, 2))),
+				"Wrong intersections");
 
 		// =============== Boundary Values Tests ==================
 
-		// TC10: Ray starts at the cylinder's top surface and goes inside (1 point)
-		result = cylinder2.findIntersections(new Ray(new Point(0, 0, 2), new Vector(0, 0, 1)));
-		assertNull(result, "Wrong number of points");
+		// **** Group: Ray is parallel to the axis ray
 
-		// TC11: Ray intersects the tube but not the cylinder (0 points)
-		assertNull(cylinder2.findIntersections(new Ray(new Point(0, 0, 3), new Vector(0, 1, 0))),
+		// TC10: Ray is outside and does not intersect
+		assertNull(cylinder.findIntersections(new Ray(P402, V001)), "Ray's line out of cylinder");
+
+		// TC11: Ray is outside and intersects (2 points)
+		Point p5 = new Point(1, 0, 3);
+		Point p6 = new Point(1, 0, 1);
+		assertEquals(List.of(p5, p6), cylinder.findIntersections(new Ray(new Point(1, 0, 4), V00M1)),
+				"Wrong intersections");
+
+		// TC12: Ray is inside (1 point)
+		assertEquals(new Point(1, 0, 3), cylinder.findIntersections(new Ray(new Point(1, 0, 2), V001)).get(0),
+				"Wrong intersections");
+
+		// TC13: The Ray lay on the cylinder
+		assertNull(cylinder.findIntersections(new Ray(new Point(0, 2, 0), V001)), "Ray's line out of cylinder");
+
+		// **** Group: Ray is tangent
+
+		// TC21: The side surface in 1 point
+		assertNull(cylinder.findIntersections(new Ray(new Point(-3, 2, 2), V100)), "Ray's line out of cylinder");
+
+		// TC22: The top
+		assertNull(cylinder.findIntersections(new Ray(new Point(-3, 0, 3), V100)), "Ray's line out of cylinder");
+
+		// TC23: The bottom
+		assertNull(cylinder.findIntersections(new Ray(new Point(-3, 0, 1), V100)), "Ray's line out of cylinder");
+
+		// TC24: A vertex
+		assertNull(cylinder.findIntersections(new Ray(new Point(-3, 2, 3), V100)), "Ray's line out of cylinder");
+
+		// **** Group: Ray begin on the surface
+
+		// TC31: On the side and go inside (1 point)
+		assertEquals(new Point(0, -2, 2),
+				cylinder.findIntersections(new Ray(new Point(0, 2, 2), new Vector(0, -1, 0))).get(0),
+				"Wrong intersections");
+
+		// TC32: On the side and go outside
+		assertNull(cylinder.findIntersections(new Ray(new Point(0, 2, 2), new Vector(0, 1, 0))),
 				"Ray's line out of cylinder");
 
-		// TC12: Ray tangent to the cylinder's top surface (0 points)
-		assertNull(cylinder2.findIntersections(new Ray(new Point(0, 0, 2), new Vector(0, 1, 0))),
-				"Ray's line out of cylinder");
+		// TC33: On the top and go inside (1 point)
+		assertEquals(new Point(1, 1, 1), cylinder.findIntersections(new Ray(new Point(1, 1, 3), V00M1)).get(0),
+				"Wrong intersections");
 
-		// TC13: Ray tangent to the cylinder's bottom surface (0 points)
-		assertNull(cylinder2.findIntersections(new Ray(new Point(0, 0, 0), new Vector(0, 1, 0))),
-				"Ray's line out of cylinder");
+		// TC34: On the top and go outside
+		assertNull(cylinder.findIntersections(new Ray(new Point(1, 1, 3), V001)), "Ray's line out of cylinder");
 
-		// TC14: Ray tangent to the cylinder's side surface (0 points)
-		assertNull(cylinder2.findIntersections(new Ray(new Point(0, 2, -1), new Vector(0, 0, 1))),
-				"Ray's line out of cylinder");
+		// TC35: On the bottom and go inside (1 point)
+		assertEquals(new Point(1, 1, 3), cylinder.findIntersections(new Ray(new Point(1, 1, 1), V001)).get(0),
+				"Wrong intersections");
+
+		// TC36: On the bottom and go outside
+		assertNull(cylinder.findIntersections(new Ray(new Point(1, 1, 1), V00M1)), "Ray's line out of cylinder");
+
+		// **** Group: Interact a Vertex (The transition between the side and the base)
+
+		// TC41: intersect from inside (1 point)
+		Point p7 = new Point(0, 2, 3);
+		assertEquals(p7, cylinder.findIntersections(new Ray(new Point(0, 0, 2), new Vector(0, 2, 1))).get(0),
+				"Wrong intersections");
+
+		// TC42: intersect from outside (2 point)
+		Point p8 = new Point(0, -2, 2);
+		assertEquals(List.of(p7, p8), cylinder.findIntersections(new Ray(new Point(0, 6, 4), new Vector(0, -4, -1))),
+				"Wrong intersections");
+
+		// TC43: tangent
+		assertNull(cylinder.findIntersections(new Ray(new Point(-3, 2, 3), V100)), "Ray's line out of cylinder");
+
 	}
 
 }

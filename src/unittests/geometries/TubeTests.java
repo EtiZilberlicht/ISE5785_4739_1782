@@ -67,229 +67,221 @@ class TubeTests {
 
 	}
 
+	/** A point used in some tests */
+	private static final Point P020 = new Point(0, 2, 0);
+	/** A point used in some tests */
+	private static final Point P021 = new Point(0, 2, 1);
+	/** A vector used in some tests */
+	private static final Vector V100 = new Vector(1, 0, 0);
+	/** A vector used in some tests */
+	private static final Vector VM100 = new Vector(-1, 0, 0);
+	/** A vector used in some tests */
+	private static final Vector V001 = new Vector(0, 0, 1);
+	/** A vector used in some tests */
+	private static final Vector V1540 = new Vector(1.5, 4, 0);
+	/** A vector used in some tests */
+	private static final Vector V13M3 = new Vector(1, 3, -3);
+	/** A vector used in some tests */
+	private static final Vector V1251 = new Vector(1, 2.5, 1);
+
 	/**
 	 * Test method for {@link geometries.Tube#findIntersections(primitives.Ray)}.
 	 */
 	@Test
 	public void testFindIntersections() {
-		Tube tube1 = new Tube(new Ray(new Point(0, -1, 0), new Vector(2, 2, 0)), 1);
-		Tube tube = new Tube(new Ray(new Point(0, 2, 0), new Vector(1, 0, 0)), 1);
+		Tube tube = new Tube(new Ray(P020, V100), 1);
+
 		// ============ Equivalence Partitions Tests ==============
+
 		// TC01: the ray starts from inside, intersects with the tube (1 point)
-		List<Point> result123 = tube.findIntersections(new Ray(new Point(2, 1.5, 0.5), new Vector(2, -1.5, 0.5)));
-		// assertEquals(1, result1.size(), "Wrong number of points");
-		assertEquals(new Point(2.4, 1.2, 0.6), result123.get(0), "Ray crosses tube from inside incorrectly.");
+		assertEquals(new Point(2.4, 1.2, 0.6),
+				tube.findIntersections(new Ray(new Point(2, 1.5, 0.5), new Vector(2, -1.5, 0.5))).get(0),
+				"Ray crosses tube from inside incorrectly.");
 
 		// TC02: the ray starts from outside, intersects with the tube (2 point)
-		Point p2 = new Point(1.4409964637611044, 1.10249115940276, 0.440996463761104);
-		Point p3 = new Point(1.938313881066482, 2.345784702666205, 0.938313881066482);
-		List<Point> result2 = tube.findIntersections(new Ray(new Point(1, 0, 0), new Vector(1, 2.5, 1)));
-		assertEquals(2, result2.size(), "Wrong number of points");
-		if (result2.get(0).getX() > result2.get(1).getX())
-			result2 = List.of(result2.get(1), result2.get(0));
-		assertEquals(List.of(p2, p3), result2, "Ray crosses tube from inside incorrectly.");
+		Point p1 = new Point(1.4409964637611044, 1.10249115940276, 0.440996463761104);
+		Point p2 = new Point(1.938313881066482, 2.345784702666205, 0.938313881066482);
+		assertEquals(List.of(p1, p2), tube.findIntersections(new Ray(new Point(1, 0, 0), V1251)),
+				"Ray crosses tube from inside incorrectly.");
 
 		// TC03: the ray starts from outside, doesn't intersect with the tube (0 points)
-		assertNull(tube1.findIntersections(new Ray(new Point(-1, 1, 1), new Vector(2, 0, 1))), "Ray out of tube");
-
-		// TC04: the ray starts from outside, doesn't intersect with the tube (0 points)
-		assertNull(tube.findIntersections(new Ray(new Point(2, 2.5, 1), new Vector(1, 2.5, 1))), "Ray out of tube");
+		assertNull(tube.findIntersections(new Ray(new Point(2, 2.5, 1), V1251)), "Ray out of tube");
 
 		// =============== Boundary Values Tests ==================
-		// *************parallel******************
+
+		// **** Group: Ray is parallel to the axis ray at the same direction
+
 		// TC11: the ray is parallel to the tube from the outside
-		assertNull(tube1.findIntersections(new Ray(new Point(1, 0, 2), new Vector(1, 1, 0))), "Ray's parallel to tube");
+		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 2), V100)), "Ray's parallel to tube");
 
 		// TC12: the ray is on top of the tube's surface and is parallel to the tube
 		// axis ray
-		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 1), new Vector(2, 0, 0))),
+		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 1), new Vector(1, 0, 0))),
 				"Ray's parallel to tube and on top of its surface");
 
 		// TC13: the ray is inside and is parallel to the tube
 		// axis ray
-		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 0.5), new Vector(2, 0, 0))),
+		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 0.5), V100)),
 				"Ray's parallel to tube and on top of its surface");
 
-		// **Group: merges with tube axis ray**//
 		// TC14: the ray merges after axis ray point
-		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 0), new Vector(1, 0, 0))),
+		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 0), V100)),
 				"Ray's parallel to tube and on top of its surface");
 
 		// TC15: the ray merges before axis ray point
-		assertNull(tube.findIntersections(new Ray(new Point(-1, 2, 0), new Vector(1, 0, 0))),
+		assertNull(tube.findIntersections(new Ray(new Point(-1, 2, 0), V100)),
 				"Ray's parallel to tube and on top of its surface");
 
 		// TC16: the ray merges with axis ray (point and ray)
-		assertNull(tube.findIntersections(new Ray(new Point(0, 2, 0), new Vector(1, 0, 0))),
-				"Ray's parallel to tube and on top of its surface");
+		assertNull(tube.findIntersections(new Ray(P020, V100)), "Ray's parallel to tube and on top of its surface");
 
-		/////// parallel going in opposite directions
-		// TC17: the ray is parallel to the tube from the outside
-		assertNull(tube1.findIntersections(new Ray(new Point(1, 0, 2), new Vector(-1, -1, 0))),
-				"Ray's parallel to tube");
+		// **** Group: Ray is parallel to the axis ray at the opposite direction
 
-		// TC18: the ray is on top of the tube's surface and is parallel to the tube
+		// TC21: the ray is parallel to the tube from the outside
+		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 2), VM100)), "Ray's parallel to tube");
+
+		// TC22: the ray is on top of the tube's surface and is parallel to the tube
 		// axis ray
-		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 1), new Vector(-2, 0, 0))),
+		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 1), VM100)),
 				"Ray's parallel to tube and on top of its surface");
 
-		// TC19: the ray is inside and is parallel to the tube
+		// TC23: the ray is inside and is parallel to the tube
 		// axis ray
-		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 0.5), new Vector(-2, 0, 0))),
+		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 0.5), VM100)),
 				"Ray's parallel to tube and on top of its surface");
 
-		// **Group: merges with tube axis ray**//
-		// TC110: the ray merges after axis ray point
-		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 0), new Vector(-1, 0, 0))),
+		// TC24: the ray merges after axis ray point
+		assertNull(tube.findIntersections(new Ray(new Point(1, 2, 0), VM100)),
 				"Ray's parallel to tube and on top of its surface");
 
-		// TC111: the ray merges before axis ray point
-		assertNull(tube.findIntersections(new Ray(new Point(-1, 2, 0), new Vector(-1, 0, 0))),
+		// TC25: the ray merges before axis ray point
+		assertNull(tube.findIntersections(new Ray(new Point(-1, 2, 0), VM100)),
 				"Ray's parallel to tube and on top of its surface");
 
-		// TC112: the ray merges with axis ray (point and ray)
-		assertNull(tube.findIntersections(new Ray(new Point(0, 2, 0), new Vector(-1, 0, 0))),
-				"Ray's parallel to tube and on top of its surface");
+		// TC26: same point, opposite direction
+		assertNull(tube.findIntersections(new Ray(P020, VM100)), "Ray's parallel to tube and on top of its surface");
 
-		// *************orthogonal and perpendicular******************
-		////// going through tube's axis ray point
-		// TC21: the ray is perpendicular to the tube from the outside (0 points)
-		assertNull(tube.findIntersections(new Ray(new Point(0, 2, 2), new Vector(0, 0, 1))),
-				"Ray's perpendicular to tube");
-		// TC22: the ray is orthogonal to the tube (0 points)
-		assertNull(tube.findIntersections(new Ray(new Point(0, 2, 1), new Vector(0, 0, 1))),
-				"Ray's orthogonal to tube");
+		// **** Group: Ray is orthogonal and perpendicular
 
-		// TC23: the ray is perpendicular to the tube from the inside (1 points)
-		Point p4 = new Point(0, 2, 1);
-		List<Point> result3 = tube.findIntersections(new Ray(new Point(0, 2, 0.5), new Vector(0, 0, 1)));
-		assertEquals(1, result3.size(), "Wrong number of points");
-		assertEquals(p4, result3.get(0), "Ray crosses tube from inside incorrectly.");
+		// TC31: the ray is perpendicular to the tube from the outside (0 points)
+		assertNull(tube.findIntersections(new Ray(new Point(0, 2, 2), V001)), "Ray's perpendicular to tube");
 
-		// TC24: the ray is orthogonal from the tube's axis ray point (1 points)
-		List<Point> result4 = tube.findIntersections(new Ray(new Point(0, 2, 0), new Vector(0, 0, 1)));
-		assertEquals(1, result4.size(), "Wrong number of points");
-		assertEquals(p4, result4.get(0), "Ray crosses tube from inside incorrectly.");
+		// TC32: the ray is orthogonal to the tube (0 points)
+		assertNull(tube.findIntersections(new Ray(P021, V001)), "Ray's orthogonal to tube");
 
-		// TC25: the ray is perpendicular to the tube from the inside before axis ray
+		// TC33: the ray is perpendicular to the tube from the inside (1 points)
+		assertEquals(P021, tube.findIntersections(new Ray(new Point(0, 2, 0.5), V001)).get(0),
+				"Ray crosses tube from inside incorrectly.");
+
+		// TC34: the ray is orthogonal from the tube's axis ray point (1 points)
+		assertEquals(P021, tube.findIntersections(new Ray(P020, V001)).get(0),
+				"Ray crosses tube from inside incorrectly.");
+
+		// TC35: the ray is perpendicular to the tube from the inside before axis ray
 		// point (1 points)
-		List<Point> result5 = tube.findIntersections(new Ray(new Point(0, 2, -0.5), new Vector(0, 0, 1)));
-		assertEquals(1, result5.size(), "Wrong number of points");
-		assertEquals(p4, result5.get(0), "Ray crosses tube from inside incorrectly.");
+		assertEquals(P021, tube.findIntersections(new Ray(new Point(0, 2, -0.5), V001)).get(0),
+				"Ray crosses tube from inside incorrectly.");
 
-		// TC26: the ray is orthogonal to the tube (1 point)
-		List<Point> result55 = tube.findIntersections(new Ray(new Point(0, 2, -1), new Vector(0, 0, 1)));
-		assertEquals(1, result55.size(), "Wrong number of points");
-		assertEquals(p4, result55.get(0), "Ray crosses tube from inside incorrectly.");
+		// TC36: the ray is orthogonal to the tube (1 point)
+		assertEquals(P021, tube.findIntersections(new Ray(new Point(0, 2, -1), V001)).get(0),
+				"Ray crosses tube from inside incorrectly.");
 
-		// TC27: the ray is perpendicular to the tube from the inside before axis ray
+		// TC37: the ray is perpendicular to the tube from the inside before axis ray
 		// point (2 points)
-		Point p5 = new Point(0, 2, -1);
-		List<Point> result6 = tube.findIntersections(new Ray(new Point(0, 2, -2), new Vector(0, 0, 1)));
-		assertEquals(2, result6.size(), "Wrong number of points");
-		if (result6.get(0).getZ() > result6.get(1).getZ())
-			result6 = List.of(result6.get(1), result6.get(0));
-		assertEquals(List.of(p5, p4), result6, "Ray crosses through the tube incorrectly.");
+		assertEquals(List.of(new Point(0, 2, -1), P021), tube.findIntersections(new Ray(new Point(0, 2, -2), V001)),
+				"Ray crosses through the tube incorrectly.");
 
-		// *******tangent to tube*********
-		// TC31: before tangent point (0 points)
-		assertNull(tube.findIntersections(new Ray(new Point(1.5, 0, 1), new Vector(1.5, 4, 0))),
+		// **** Group: Ray is tangent to tube
+
+		// TC41: before tangent point (0 points)
+		assertNull(tube.findIntersections(new Ray(new Point(1.5, 0, 1), V1540)),
 				"Ray's tangent to tube, before tangent point");
 
-		// TC32: at tangent point (0 points)
-		assertNull(tube.findIntersections(new Ray(new Point(2.25, 2, 1), new Vector(1.5, 4, 0))),
+		// TC42: at tangent point (0 points)
+		assertNull(tube.findIntersections(new Ray(new Point(2.25, 2, 1), V1540)),
 				"Ray's tangent to tube, at tangent point");
 
-		// TC33: after tangent point (0 points)
-		assertNull(tube.findIntersections(new Ray(new Point(3, 4, 1), new Vector(1.5, 4, 0))),
+		// TC43: after tangent point (0 points)
+		assertNull(tube.findIntersections(new Ray(new Point(3, 4, 1), V1540)),
 				"Ray's tangent to tube, after tangent point");
 
-		// *******through axis ray*******
-		// TC41: outside of tube, facing the tube (2 points)
-		Point p6 = new Point(1.097631072937818, 1.292893218813453, 0.707106781186547);
-		Point p7 = new Point(1.569035593728849, 2.707106781186548, -0.707106781186548);
-		List<Point> result7 = tube.findIntersections(new Ray(new Point(1, 1, 1), new Vector(1, 3, -3)));
-		assertEquals(2, result7.size(), "Wrong number of points");
-		assertEquals(List.of(p6, p7), result7, "Ray crosses through the tube incorrectly.");
+		// **** Group: Ray go through axis ray
 
-		// TC42: on tube surface, facing the tube (1 point)
-		List<Point> result8 = tube.findIntersections(new Ray(p6, new Vector(1, 3, -3)));
-		assertEquals(1, result8.size(), "Wrong number of points");
-		assertEquals(p7, result8.get(0), "Ray crosses through the tube incorrectly.");
-
-		// TC43: inside tube, before tube axis ray (1 point)
-		List<Point> result9 = tube.findIntersections(
-				new Ray(new Point(1.238240344551198, 1.714721033653591, 0.285278966346409), new Vector(1, 3, -3)));
-		assertEquals(1, result9.size(), "Wrong number of points");
-		assertEquals(p7, result9.get(0), "Ray crosses through the tube incorrectly.");
-
-		// TC44: on tube axis ray (1 point)
-		List<Point> result10 = tube
-				.findIntersections(new Ray(new Point(1.333333333333334, 2, 0), new Vector(1, 3, -3)));
-		assertEquals(1, result10.size(), "Wrong number of points");
-		assertEquals(p7, result10.get(0), "Ray crosses through the tube incorrectly.");
-
-		// TC45: inside tube after axis ray (1 point)
-		List<Point> result11 = tube.findIntersections(
-				new Ray(new Point(1.465399710013591, 2.396199130040771, -0.396199130040771), new Vector(1, 3, -3)));
-		assertEquals(1, result11.size(), "Wrong number of points");
-		assertEquals(p7, result11.get(0), "Ray crosses through the tube incorrectly.");
-
-		// TC46: on tube surface, facing the outside (0 points)
-		assertNull(tube.findIntersections(new Ray(p7, new Vector(1, 3, -3))), "Ray's point on tube surface");
-
-		// TC47: outside the tube, facing the outside (0 points)
-		assertNull(tube.findIntersections(new Ray(new Point(2, 4, -2), new Vector(1, 3, -3))),
-				"Ray's point outside the tube");
-
-		// *******through axis ray and point*******
 		// TC51: outside of tube, facing the tube (2 points)
-		Point p9 = new Point(-0.235702260395515, 1.292893218813453, 0.707106781186547);
-		Point p10 = new Point(0.235702260395516, 2.707106781186548, -0.707106781186548);
-		List<Point> result12 = tube
-				.findIntersections(new Ray(new Point(-0.33333333333333, 1, 1), new Vector(1, 3, -3)));
-		assertEquals(2, result12.size(), "Wrong number of points");
-		assertEquals(List.of(p9, p10), result12, "Ray crosses through the tube incorrectly.");
+		Point p3 = new Point(1.097631072937818, 1.292893218813453, 0.707106781186547);
+		Point p4 = new Point(1.569035593728849, 2.707106781186548, -0.707106781186548);
+		assertEquals(List.of(p3, p4), tube.findIntersections(new Ray(new Point(1, 1, 1), V13M3)),
+				"Ray crosses through the tube incorrectly.");
 
 		// TC52: on tube surface, facing the tube (1 point)
-		List<Point> result13 = tube.findIntersections(new Ray(p9, new Vector(1, 3, -3)));
-		assertEquals(1, result13.size(), "Wrong number of points");
-		assertEquals(p10, result13.get(0), "Ray crosses through the tube incorrectly.");
+		assertEquals(p4, tube.findIntersections(new Ray(p3, V13M3)).get(0),
+				"Ray crosses through the tube incorrectly.");
 
 		// TC53: inside tube, before tube axis ray (1 point)
-		List<Point> result14 = tube.findIntersections(
-				new Ray(new Point(-0.095092988781802, 1.714721033653591, 0.285278966346409), new Vector(1, 3, -3)));
-		assertEquals(1, result14.size(), "Wrong number of points");
-		assertEquals(p10, result14.get(0), "Ray crosses through the tube incorrectly.");
+		Point p5 = new Point(1.238240344551198, 1.714721033653591, 0.285278966346409);
+		assertEquals(p4, tube.findIntersections(new Ray(p5, V13M3)).get(0),
+				"Ray crosses through the tube incorrectly.");
 
 		// TC54: on tube axis ray (1 point)
-		List<Point> result15 = tube.findIntersections(new Ray(new Point(0, 2, 0), new Vector(1, 3, -3)));
-		assertEquals(1, result15.size(), "Wrong number of points");
-		assertEquals(p10, result15.get(0), "Ray crosses through the tube incorrectly.");
+		Point p6 = new Point(1.333333333333334, 2, 0);
+		assertEquals(p4, tube.findIntersections(new Ray(p6, V13M3)).get(0),
+				"Ray crosses through the tube incorrectly.");
 
-		// TC54: inside tube after axis ray (1 point)
-		List<Point> result16 = tube.findIntersections(
-				new Ray(new Point(0.132066376680591, 2.396199130040771, -0.396199130040771), new Vector(1, 3, -3)));
-		assertEquals(1, result16.size(), "Wrong number of points");
-		assertEquals(p10, result16.get(0), "Ray crosses through the tube incorrectly.");
+		// TC55: inside tube after axis ray (1 point)
+		Point p7 = new Point(1.465399710013591, 2.396199130040771, -0.396199130040771);
+		assertEquals(p4, tube.findIntersections(new Ray(p7, V13M3)).get(0),
+				"Ray crosses through the tube incorrectly.");
 
-		// TC55: on tube surface, facing the outside (0 points)
-		assertNull(tube.findIntersections(new Ray(p10, new Vector(1, 3, -3))), "Ray's point on tube surface");
+		// TC56: on tube surface, facing the outside (0 points)
+		assertNull(tube.findIntersections(new Ray(p4, V13M3)), "Ray's point on tube surface");
 
-		// TC56: outside the tube, facing the outside (0 points)
-		assertNull(tube.findIntersections(new Ray(new Point(0.66666666667, 4, -2), new Vector(1, 3, -3))),
-				"Ray's point outside the tube");
+		// TC57: outside the tube, facing the outside (0 points)
+		assertNull(tube.findIntersections(new Ray(new Point(2, 4, -2), V13M3)), "Ray's point outside the tube");
 
-		// *********surface general bva**********
-		// TC61: the ray starts from tube surface, intersects with the tube (1 point)
-		// using p2 and p3
-		List<Point> result20 = tube.findIntersections(new Ray(p2, new Vector(1, 2.5, 1)));
-		assertEquals(1, result20.size(), "Wrong number of points");
-		assertEquals(p3, result20.get(0), "Ray crosses tube from inside incorrectly.");
+		// **** Group: Ray go through axis ray and point
 
-		// TC62: the ray starts from tube surface, doesn't intersect with the tube (0
+		// TC61: outside of tube, facing the tube (2 points)
+		Point p8 = new Point(-0.33333333333333, 1, 1);
+		Point p9 = new Point(-0.235702260395515, 1.292893218813453, 0.707106781186547);
+		Point p10 = new Point(0.235702260395516, 2.707106781186548, -0.707106781186548);
+		assertEquals(List.of(p9, p10), tube.findIntersections(new Ray(p8, V13M3)),
+				"Ray crosses through the tube incorrectly.");
+
+		// TC62: on tube surface, facing the tube (1 point)
+		assertEquals(p10, tube.findIntersections(new Ray(p9, V13M3)).get(0),
+				"Ray crosses through the tube incorrectly.");
+
+		// TC63: inside tube, before tube axis ray (1 point)
+		Point p11 = new Point(-0.095092988781802, 1.714721033653591, 0.285278966346409);
+		assertEquals(p10, tube.findIntersections(new Ray(p11, V13M3)).get(0),
+				"Ray crosses through the tube incorrectly.");
+
+		// TC64: on tube axis ray (1 point)
+		assertEquals(p10, tube.findIntersections(new Ray(P020, V13M3)).get(0),
+				"Ray crosses through the tube incorrectly.");
+
+		// TC65: inside tube after axis ray (1 point)
+		Point p12 = new Point(0.132066376680591, 2.396199130040771, -0.396199130040771);
+		assertEquals(p10, tube.findIntersections(new Ray(p12, V13M3)).get(0),
+				"Ray crosses through the tube incorrectly.");
+
+		// TC66: on tube surface, facing the outside (0 points)
+		assertNull(tube.findIntersections(new Ray(p10, V13M3)), "Ray's point on tube surface");
+
+		// TC67: outside the tube, facing the outside (0 points)
+		Point p13 = new Point(0.66666666667, 4, -2);
+		assertNull(tube.findIntersections(new Ray(p13, V13M3)), "Ray's point outside the tube");
+
+		// **** Group: Surface general bva
+
+		// TC71: the ray starts from tube surface, intersects with the tube (1 point)
+		// using p1 and p2
+		assertEquals(p2, tube.findIntersections(new Ray(p1, V1251)).get(0),
+				"Ray crosses tube from inside incorrectly.");
+
+		// TC72: the ray starts from tube surface, doesn't intersect with the tube (0
 		// point)
-		assertNull(tube.findIntersections(new Ray(p3, new Vector(1, 2.5, 1))), "Ray's point outside the tube");
+		assertNull(tube.findIntersections(new Ray(p2, V1251)), "Ray's point outside the tube");
 
 	}
 }

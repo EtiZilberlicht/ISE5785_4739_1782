@@ -3,6 +3,7 @@ package geometries;
 import primitives.*;
 import static primitives.Util.isZero;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -84,7 +85,7 @@ public class Cylinder extends Tube {
 		// Find intersections with the bottom base
 		List<Point> bottomIntersections = bottom.findIntersections(ray);
 		if (bottomIntersections != null) {
-			Point intersection = bottomIntersections.getFirst();
+			Point intersection = bottomIntersections.get(0);
 			if (axis.getPoint(0d).distanceSquared(intersection) <= squaredRadius) {
 				intersections.add(intersection);
 			}
@@ -108,12 +109,8 @@ public class Cylinder extends Tube {
 		}
 
 		// Return null if no valid intersections found
-		List<Point> geoPoints = new LinkedList<>();
-		for (Point p : intersections) {
-			geoPoints.add(p);
-		}
-
-		return geoPoints.isEmpty() ? null : geoPoints;
+		intersections.sort(Comparator.comparingDouble(p -> p.distance(ray.getHead())));
+		return intersections.isEmpty() ? null : new LinkedList<>(intersections);
 	}
 
 }

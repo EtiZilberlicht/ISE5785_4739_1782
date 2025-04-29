@@ -47,30 +47,32 @@ public class Triangle extends Polygon {
 		}
 
 		double f = 1.0 / a;
-		Vector s = ray.getHead().subtract(p1);
+		Vector s;
+		Vector q;
+		try {
+			s = ray.getHead().subtract(p1);
+			q = s.crossProduct(edge1);
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
 		double u = alignZero(f * s.dotProduct(h));
 
-		if (u <= 0 || u >= 1) {
+		if (alignZero(u) <= 0 || alignZero(u - 1) >= 0) {
 			return null; // Point is outside or on edge
 		}
 
-		Vector q = s.crossProduct(edge1);
 		double v = alignZero(f * ray.getDirection().dotProduct(q));
 
-		if (v <= 0 || v >= 1) {
+		if (alignZero(v) <= 0 || alignZero(v - 1) >= 0) {
 			return null; // Point is outside or on edge
 		}
 
-		if (u + v >= 1) {
+		if (alignZero(u + v - 1) >= 0) {
 			return null; // Point is on or outside the third edge
 		}
 
 		double t = alignZero(f * edge2.dotProduct(q));
-		if (t > 0) {
-			Point intersection = ray.getPoint(t);
-			return List.of(intersection);
-		}
-
-		return null; // No intersection
+		Point intersection = ray.getPoint(t);
+		return (t > 0) ? List.of(intersection) : null;
 	}
 }

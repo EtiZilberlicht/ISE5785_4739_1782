@@ -101,15 +101,15 @@ class PlaneTests {
 	}
 
 	/** A point used in some tests */
-	private final Point p122 = new Point(1, 2, 2);
+	private static final Point P122 = new Point(1, 2, 2);
 	/** A point used in some tests */
-	private final Point p121 = new Point(1, 2, 1);
+	private static final Point P121 = new Point(1, 2, 1);
 	/** A vector used in some tests */
-	private final Vector v001 = new Vector(0, 0, 1);
+	private static final Vector V001 = new Vector(0, 0, 1);
 	/** A vector used in some tests */
-	private final Vector v100 = new Vector(1, 0, 0);
+	private static final Vector V100 = new Vector(1, 0, 0);
 	/** A vector used in some tests */
-	private final Vector v235 = new Vector(2, 3, 5);
+	private static final Vector V235 = new Vector(2, 3, 5);
 
 	/**
 	 * Test method for {@link geometries.Sphere#findIntersections(primitives.Ray)}.
@@ -130,34 +130,34 @@ class PlaneTests {
 		// ====================== Boundary Values Tests =======================//
 		// **** Group: Ray is parallel to the plane
 		// TC10: The ray included in the plane
-		assertNull(plane.findIntersections(new Ray(p121, v100)),
+		assertNull(plane.findIntersections(new Ray(P121, V100)),
 				"Does not return null- when ray included in the plane");
 
 		// TC11: The ray not included in the plane
-		assertNull(plane.findIntersections(new Ray(p122, v100)),
+		assertNull(plane.findIntersections(new Ray(P122, V100)),
 				"Does not return null- when ray not included in the plane");
 
 		// **** Group: Ray is orthogonal to the plane
 		// TC12: before the plane (1 point)
-		assertEquals(List.of(new Point(1, 1, 1)), plane.findIntersections(new Ray(new Point(1, 1, 0), v001)),
+		assertEquals(List.of(new Point(1, 1, 1)), plane.findIntersections(new Ray(new Point(1, 1, 0), V001)),
 				"Ray is orthogonal to the plane, before the plane");
 
 		// TC13: on the plane
-		assertNull(plane.findIntersections(new Ray(p121, v001)),
+		assertNull(plane.findIntersections(new Ray(P121, V001)),
 				"Does not return null- when ray is orthogonal to the plane, on the plane");
 
 		// TC14: after the plane
-		assertNull(plane.findIntersections(new Ray(p122, v001)),
+		assertNull(plane.findIntersections(new Ray(P122, V001)),
 				"Does not return null- when ray is orthogonal to the plane, after the plane");
 
 		// **** Group: Ray is neither orthogonal nor parallel to
 		// TC15: Ray begins at the plane
-		assertNull(plane.findIntersections(new Ray(new Point(2, 4, 1), v235)),
+		assertNull(plane.findIntersections(new Ray(new Point(2, 4, 1), V235)),
 				"Does not return null- when ray is neither orthogonal nor parallel to ray and begin at the plane");
 
 		// TC16: Ray begins in the same point which appears as reference point in the
 		// plane
-		assertNull(plane.findIntersections(new Ray(new Point(1, 0, 1), v235)),
+		assertNull(plane.findIntersections(new Ray(new Point(1, 0, 1), V235)),
 				"Does not return null- when ray begins in the same point which appears as reference point in the plane");
 
 	}

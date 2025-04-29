@@ -86,7 +86,6 @@ public class Polygon extends Geometry {
 	@Override
 	public List<Point> findIntersections(Ray ray) {
 		// Step 1: Find intersection with the polygon's plane
-		Plane plane = new Plane(vertices.get(0), vertices.get(1), vertices.get(2));
 		List<Point> planeIntersections = plane.findIntersections(ray);
 		if (planeIntersections == null) {
 			return null;
@@ -102,11 +101,9 @@ public class Polygon extends Geometry {
 			Point v1 = vertices.get(i);
 			Point v2 = vertices.get((i + 1) % size);
 
-			Vector edge;
+			Vector edge = v2.subtract(v1);
 			Vector vp;
-
 			try {
-				edge = v2.subtract(v1);
 				vp = p.subtract(v1);
 			} catch (IllegalArgumentException e) {
 				// p == v1 or v2 ⇒ point is on vertex ⇒ exclude

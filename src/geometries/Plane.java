@@ -63,7 +63,7 @@ public class Plane extends Geometry {
 			return null;
 		double numerator = this.normal.dotProduct(this.point.subtract(head));
 		double denominator = this.normal.dotProduct(ray.getDirection());
-		if (isZero(numerator) || isZero(denominator))
+		if (isZero(denominator))
 			return null;
 		double t = alignZero(numerator / denominator);
 		return t <= 0 ? null : List.of(ray.getPoint(t));

@@ -42,21 +42,18 @@ public class Sphere extends RadialGeometry {
 		Vector u = center.subtract(point);
 		double tm = ray.getDirection().dotProduct(u);
 		double dSquared = u.lengthSquared() - tm * tm;
+
 		double thSquared = squaredRadius - dSquared;
 		if (alignZero(thSquared) <= 0)
 			return null;
 		double th = Math.sqrt(thSquared); // always positive
-		double t1 = alignZero(tm - th);
-		double t2 = alignZero(tm + th); // always greater than t1
-		if (t1 > 0 && t2 > 0) {
-			return List.of(ray.getPoint(t1), ray.getPoint(t2));
-		} else if (t1 > 0) {
-			return List.of(ray.getPoint(t1));
-		} else if (t2 > 0) {
-			return List.of(ray.getPoint(t2));
-		}
-		return null;
 
+		double t2 = alignZero(tm + th); // always greater than t1
+		if (t2 <= 0)
+			return null;
+
+		double t1 = alignZero(tm - th);
+		return t1 <= 0 ? List.of(ray.getPoint(t2)) : List.of(ray.getPoint(t1), ray.getPoint(t2));
 	}
 
 }

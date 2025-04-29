@@ -30,7 +30,7 @@ public class Tube extends RadialGeometry {
 		Point head = axis.getHead();
 		Vector direction = axis.getDirection();
 		double t = direction.dotProduct(point.subtract(head));
-		Point o = isZero(t) ? head : head.add(direction.scale(t));
+		Point o = isZero(t) ? head : axis.getPoint(t);
 		return point.subtract(o).normalize();
 	}
 
@@ -69,7 +69,7 @@ public class Tube extends RadialGeometry {
 			// The closest point on (A + t1a)
 			double t1 = (-ab * bc + ac * bb) / (aa * bb - ab * ab);
 			try {
-				d = pointA.add(vectorA.scale(t1));
+				d = ray.getPoint(t1);
 			} catch (IllegalArgumentException ex) {
 				d = pointA;
 			}
@@ -78,7 +78,7 @@ public class Tube extends RadialGeometry {
 			double t2 = (ab * ac - bc * aa) / (/* aa * bb */ 1 - ab * ab);
 			Point e;
 			try {
-				e = pointB.add(vectorB.scale(t2));
+				e = axis.getPoint(t2);
 			} catch (IllegalArgumentException ex) {
 				e = pointB;
 			}
@@ -88,7 +88,7 @@ public class Tube extends RadialGeometry {
 
 		} catch (IllegalArgumentException ex) {
 			// If A and B are the same
-			d = ray.getHead();
+			d = pointA;
 			dis = 0;
 		}
 
@@ -117,7 +117,7 @@ public class Tube extends RadialGeometry {
 		double k = width / radius;
 		// y is d for our ray x^2/k^2 + k^2 = radius^2 => x^2/k^2 = radius^2 -d^2 =>
 		// x^2 = (radius^2 -d^2)*k^2 => x = sqrt(radius^2 -d^2)*k
-		double th = Math.sqrt(radius * radius - dis * dis) * k;
+		double th = Math.sqrt(squaredRadius - dis * dis) * k;
 
 		// the two points
 		Point p1 = d.subtract(vectorA.scale(th));

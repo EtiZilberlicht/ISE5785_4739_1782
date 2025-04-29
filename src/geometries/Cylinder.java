@@ -14,6 +14,8 @@ public class Cylinder extends Tube {
 
 	/** The height of the cylinder. */
 	private final double height;
+	private final Plane bottom;
+	private final Plane top;
 
 	/**
 	 * Constructs a cylinder with the given radius, axis, and height.
@@ -25,6 +27,9 @@ public class Cylinder extends Tube {
 	public Cylinder(double radius, Ray axis, double height) {
 		super(axis, radius);
 		this.height = height;
+		bottom = new Plane(axis.getPoint(0d), axis.getDirection());
+		top = new Plane(axis.getPoint(height), axis.getDirection());
+
 	}
 
 	@Override
@@ -44,7 +49,7 @@ public class Cylinder extends Tube {
 		if (isZero(t - height)) // If the projection results in the cylinder's height, the point is on the top
 								// base
 			return direction;
-		Point o = head.add(direction.scale(t));
+		Point o = axis.getPoint(t);
 		return point.subtract(o).normalize();
 	}
 
@@ -70,10 +75,6 @@ public class Cylinder extends Tube {
 			return t <= 0d || t >= height;
 		});
 
-		// Define planes for the bottom and top bases
-		Plane bottomBase = new Plane(axis.getPoint(0d), axis.getDirection());
-		Plane topBase = new Plane(axis.getPoint(height), axis.getDirection());
-
 		// Return intersections if there are exactly 2 (so they are on the sides of the
 		// cylinder)
 		if (intersections.size() == 2) {
@@ -81,26 +82,26 @@ public class Cylinder extends Tube {
 		}
 
 		// Find intersections with the bottom base
-		List<Point> bottomBaseIntersections = bottomBase.findIntersections(ray);
-		if (bottomBaseIntersections != null) {
-			Point intersection = bottomBaseIntersections.getFirst();
-			if (axis.getPoint(0d).distanceSquared(intersection) <= radius * radius) {
+		List<Point> bottomIntersections = bottom.findIntersections(ray);
+		if (bottomIntersections != null) {
+			Point intersection = bottomIntersections.getFirst();
+			if (axis.getPoint(0d).distanceSquared(intersection) <= squaredRadius) {
 				intersections.add(intersection);
 			}
 		}
 
 		// Find intersections with the top base
-		List<Point> topBaseIntersections = topBase.findIntersections(ray);
-		if (topBaseIntersections != null) {
-			Point intersection = topBaseIntersections.getFirst();
-			if (axis.getPoint(height).distanceSquared(intersection) <= radius * radius) {
+		List<Point> topIntersections = top.findIntersections(ray);
+		if (topIntersections != null) {
+			Point intersection = topIntersections.getFirst();
+			if (axis.getPoint(height).distanceSquared(intersection) <= squaredRadius) {
 				intersections.add(intersection);
 			}
 		}
 
 		// if the ray is tangent to the cylinder
-		if (intersections.size() == 2 && axis.getHead().distanceSquared(intersections.get(0)) == radius * radius
-				&& axis.getPoint(height).distanceSquared(intersections.get(1)) == radius * radius) {
+		if (intersections.size() == 2 && axis.getHead().distanceSquared(intersections.get(0)) == squaredRadius
+				&& axis.getPoint(height).distanceSquared(intersections.get(1)) == squaredRadius) {
 			Vector v = intersections.get(1).subtract(intersections.get(0));
 			if (v.normalize().equals(axis.getDirection()) || v.normalize().equals(axis.getDirection().scale(-1d)))
 				return null;

@@ -5,6 +5,12 @@ package primitives;
  * magnitude and is defined by its endpoint.
  */
 public class Vector extends Point {
+	/** A constant representing the axis x */
+	public static final Vector AXIS_X = new Vector(1, 0, 0);
+	/** A constant representing the axis y */
+	public static final Vector AXIS_Y = new Vector(0, 1, 0);
+	/** A constant representing the axis z */
+	public static final Vector AXIS_Z = new Vector(0, 0, 1);
 
 	/**
 	 * Constructor that initializes a vector with given x, y, and z coordinates.

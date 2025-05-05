@@ -8,7 +8,7 @@ import primitives.*;
 import org.junit.jupiter.api.Test;
 
 /**
- * 
+ * Unit tests for primitives.Ray class
  */
 class RayTests {
 	/**

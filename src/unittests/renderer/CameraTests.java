@@ -14,6 +14,13 @@ import renderer.Camera;
  * @author Dan
  */
 class CameraTest {
+
+	/**
+	 * default constructor
+	 */
+	public CameraTest() {
+	}
+
 	/** Camera builder for the tests */
 	private final Camera.Builder cameraBuilder = Camera.getBuilder().setLocation(Point.ZERO).setVpDistance(10);
 	/** Assert failure message for a bad ray */
@@ -53,6 +60,9 @@ class CameraTest {
 
 	}
 
+	/**
+	 * The tests for the camera's builder
+	 */
 	@Test
 	void testBuilder() {
 		cameraBuilder.setVpSize(4, 4).setResolution(2, 2);

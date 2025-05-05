@@ -15,7 +15,9 @@ public class Cylinder extends Tube {
 
 	/** The height of the cylinder. */
 	private final double height;
+	/** The plain of the bottom. */
 	private final Plane bottom;
+	/** The plain of the top. */
 	private final Plane top;
 
 	/**

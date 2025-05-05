@@ -68,20 +68,12 @@ public class Tube extends RadialGeometry {
 
 			// The closest point on (A + t1a)
 			double t1 = (-ab * bc + ac * bb) / (aa * bb - ab * ab);
-			try {
-				d = ray.getPoint(t1);
-			} catch (IllegalArgumentException ex) {
-				d = pointA;
-			}
+			d = ray.getPoint(t1);
 
 			// The closest point on (B + t2b)
 			double t2 = (ab * ac - bc * aa) / (/* aa * bb */ 1 - ab * ab);
 			Point e;
-			try {
-				e = axis.getPoint(t2);
-			} catch (IllegalArgumentException ex) {
-				e = pointB;
-			}
+			e = axis.getPoint(t2);
 
 			// distance between two rays
 			dis = d.distance(e);
@@ -92,9 +84,8 @@ public class Tube extends RadialGeometry {
 			dis = 0;
 		}
 
-		double diff = alignZero(dis - radius);
 		// The ray doesn't touch the Tube or it is tangent to the Tube
-		if (diff >= 0.0)
+		if (alignZero(dis - radius) >= 0d)
 			return null;
 
 		/*
@@ -123,11 +114,10 @@ public class Tube extends RadialGeometry {
 		Point p1 = d.subtract(vectorA.scale(th));
 		Point p2 = d.add(vectorA.scale(th));
 
-		// Check if the points are in range and return them
-
 		try {
 			// the ray starts before point 1
-			if (!(alignZero(p1.subtract(pointA).dotProduct(vectorA)) < 0.0))
+			if (!(alignZero(p1.subtract(pointA).dotProduct(vectorA)) < 0d)
+					&& !(p2.subtract(pointA).dotProduct(vectorA) < 0d))
 				return List.of(p1, p2);
 		} catch (IllegalArgumentException ignore) {
 			// the ray starts at point1
@@ -135,7 +125,7 @@ public class Tube extends RadialGeometry {
 
 		try {
 			// the ray starts before point 1
-			if (!(p1.subtract(pointA).dotProduct(vectorA) < 0.0))
+			if (!(p1.subtract(pointA).dotProduct(vectorA) < 0d))
 				return List.of(p1);
 		} catch (IllegalArgumentException ignore) {
 			// the ray starts at point1
@@ -143,7 +133,7 @@ public class Tube extends RadialGeometry {
 
 		try {
 			// the ray starts before point 2
-			if (!(p2.subtract(pointA).dotProduct(vectorA) < 0.0))
+			if (!(p2.subtract(pointA).dotProduct(vectorA) < 0d))
 				return List.of(p2);
 		} catch (IllegalArgumentException ignore) {
 			// the ray starts at point2

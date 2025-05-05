@@ -72,7 +72,7 @@ public class Cylinder extends Tube {
 		}
 
 		intersections.removeIf(intersection -> {
-			double t = axis.getDirection().dotProduct(intersection.subtract(axis.getPoint(0d)));
+			double t = axis.getDirection().dotProduct(intersection.subtract(axis.getHead()));
 			return t <= 0d || t >= height;
 		});
 
@@ -86,7 +86,7 @@ public class Cylinder extends Tube {
 		List<Point> bottomIntersections = bottom.findIntersections(ray);
 		if (bottomIntersections != null) {
 			Point intersection = bottomIntersections.get(0);
-			if (axis.getPoint(0d).distanceSquared(intersection) <= squaredRadius) {
+			if (axis.getHead().distanceSquared(intersection) <= squaredRadius) {
 				intersections.add(intersection);
 			}
 		}

@@ -12,6 +12,8 @@ public class Camera implements Cloneable {
 	private double height = 0d, width = 0d, distance = 0d;
 	// View plane center point to save CPU time – it’s always the same
 	private Point viewPlanePC;
+	private double rotationAngleDegrees = 0d;
+	private Vector translation;
 
 	private Camera() {
 	};
@@ -90,6 +92,16 @@ public class Camera implements Cloneable {
 			return this;
 		}
 
+		public Builder setRotation(double angleDegrees) {
+			camera.rotationAngleDegrees = angleDegrees;
+			return this;
+		}
+
+		public Builder setTranslation(Vector move) {
+			camera.translation = move;
+			return this;
+		}
+
 		public Camera build() {
 			final String className = "Camera";
 			final String description = "Missing data";
@@ -121,8 +133,17 @@ public class Camera implements Cloneable {
 			// Ensure normalized vectors
 			camera.vTo = camera.vTo.normalize();
 			camera.vUp = camera.vUp.normalize();
-			camera.vRight = camera.vTo.crossProduct(camera.vUp).normalize();
 
+			if (!isZero(camera.rotationAngleDegrees)) {
+				double angleRad = Math.toRadians(camera.rotationAngleDegrees);
+				Vector vUpRotated = camera.vUp.scale(Math.cos(angleRad)).add(camera.vRight.scale(Math.sin(angleRad)));
+				camera.vUp = vUpRotated.normalize();
+			}
+
+			if (camera.translation != null)
+				camera.cameraPoint = camera.cameraPoint.add(camera.translation);
+
+			camera.vRight = camera.vTo.crossProduct(camera.vUp).normalize();
 			camera.viewPlanePC = camera.cameraPoint.add(camera.vTo.scale(camera.distance));
 
 			try {

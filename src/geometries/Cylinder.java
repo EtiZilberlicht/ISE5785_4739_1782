@@ -4,7 +4,7 @@ import primitives.*;
 import static primitives.Util.isZero;
 
 import java.util.Collections;
-import java.util.Comparator;
+//import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 

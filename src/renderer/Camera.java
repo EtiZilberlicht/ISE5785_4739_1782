@@ -170,6 +170,7 @@ public class Camera implements Cloneable {
 			camera.vTo = to;
 			camera.vUp = up;
 			camera.vRight = right;
+			camera.viewPlanePC = purpose;
 			return this;
 		}
 

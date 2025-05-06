@@ -3,6 +3,7 @@ package geometries;
 import primitives.*;
 import static primitives.Util.isZero;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -109,9 +110,15 @@ public class Cylinder extends Tube {
 			if (v.normalize().equals(axis.getDirection()) || v.normalize().equals(axis.getDirection().scale(-1d)))
 				return null;
 		}
+		// two options for swap
+		// intersections.sort(Comparator.comparingDouble(p ->
+		// p.distance(ray.getHead())));
+
+		if (intersections.size() == 2
+				&& intersections.get(0).distance(ray.getHead()) > intersections.get(1).distance(ray.getHead()))
+			Collections.swap(intersections, 0, 1);
 
 		// Return null if no valid intersections found
-		intersections.sort(Comparator.comparingDouble(p -> p.distance(ray.getHead())));
 		return intersections.isEmpty() ? null : new LinkedList<>(intersections);
 	}
 

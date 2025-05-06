@@ -291,6 +291,7 @@ public class Camera implements Cloneable {
 
 			if (!isZero(camera.rotationAngleDegrees)) {
 				double angleRad = Math.toRadians(camera.rotationAngleDegrees);
+				// need to calculate vRight here too?
 				Vector vUpRotated = camera.vUp.scale(Math.cos(angleRad)).add(camera.vRight.scale(Math.sin(angleRad)));
 				camera.vUp = vUpRotated.normalize();
 			}

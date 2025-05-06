@@ -37,8 +37,8 @@ class RayTests {
 
 		// =============== Boundary Values Tests ==================
 
-		// TC11: Negative distance
-		assertEquals(p100, ray.getPoint(0), "Negative distance does not work correctly");
+		// TC11: distance 0
+		assertEquals(p100, ray.getPoint(0), "0 distance does not work correctly");
 
 	}
 

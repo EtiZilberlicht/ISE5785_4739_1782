@@ -30,8 +30,8 @@ class CameraIntersectionsIntegrationTests {
 	}
 
 	/** Builder used to initialize camera objects with common parameters. */
-	private final Camera.Builder cameraBuilder = Camera.getBuilder().setVpDistance(1).setDirection(new Vector(0, 0, -1))
-			.setVpSize(3, 3);
+	private final Camera.Builder cameraBuilder = Camera.getBuilder().setVpDistance(1)
+			.setDirection(new Vector(0, 0, -1), Vector.AXIS_Y).setVpSize(3, 3);
 
 	/** Camera located at the origin (0,0,0). */
 	private final Camera camera1 = cameraBuilder.setLocation(Point.ZERO).build();

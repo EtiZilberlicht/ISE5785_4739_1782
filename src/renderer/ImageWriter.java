@@ -91,5 +91,4 @@ final class ImageWriter {
 	void writePixel(int xIndex, int yIndex, Color color) {
 		image.setRGB(xIndex, yIndex, color.getColor().getRGB());
 	}
-
 }

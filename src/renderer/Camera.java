@@ -1,10 +1,13 @@
 package renderer;
 
-import primitives.*;
-import static primitives.Util.isZero;
 import static primitives.Util.alignZero;
+import static primitives.Util.isZero;
 
 import java.util.MissingResourceException;
+
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
  * The {@code Camera} class represents a virtual camera in a 3D rendering
@@ -195,7 +198,7 @@ public class Camera implements Cloneable {
 		 * @throws IllegalArgumentException if width or height are not positive
 		 */
 		public Builder setVpSize(double width, double height) {
-			if (width <= 0 || height <= 0) {
+			if (alignZero(width) <= 0 || alignZero(height) <= 0) {
 				throw new IllegalArgumentException("width and height must be positive");
 			}
 			camera.width = width;
@@ -211,9 +214,9 @@ public class Camera implements Cloneable {
 		 * @throws IllegalArgumentException if distance is not positive
 		 */
 		public Builder setVpDistance(double distance) {
-			if (distance <= 0) {
+			if (alignZero(distance) <= 0)
 				throw new IllegalArgumentException("distance from camera to view must be positive");
-			}
+
 			camera.distance = distance;
 			return this;
 		}

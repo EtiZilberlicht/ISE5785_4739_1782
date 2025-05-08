@@ -3,14 +3,19 @@
  */
 package unittests.renderer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import geometries.*;
-import primitives.*;
+import geometries.Geometry;
+import geometries.Plane;
+import geometries.Sphere;
+import geometries.Triangle;
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 import renderer.Camera;
 
 /**
@@ -63,7 +68,7 @@ class CameraIntersectionsIntegrationTests {
 
 	/**
 	 * Tests intersections between camera rays and spheres with different positions
-	 * and radii. Uses various test cases to validate expected behavior.
+	 * and radius. Uses various test cases to validate expected behavior.
 	 */
 	@Test
 	void testConstructRaySphere() {

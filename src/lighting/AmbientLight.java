@@ -4,7 +4,7 @@ import primitives.Color;
 
 public class AmbientLight {
 
-	final Color intensity;
+	private final Color intensity;
 	public static final AmbientLight NONE = new AmbientLight(Color.BLACK);
 
 	public AmbientLight(Color intensity) {

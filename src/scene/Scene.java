@@ -1,14 +1,13 @@
 package scene;
 
-import java.awt.Color;
-
 import geometries.Geometries;
 import lighting.AmbientLight;
+import primitives.Color;
 
 public class Scene {
 
 	public String name;
-	public Color background = Color.black;
+	public Color background = Color.BLACK;
 	public AmbientLight ambientLight = AmbientLight.NONE;
 	public Geometries geometries = new Geometries();
 

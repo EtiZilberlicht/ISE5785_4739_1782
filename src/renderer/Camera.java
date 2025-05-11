@@ -5,9 +5,11 @@ import static primitives.Util.isZero;
 
 import java.util.MissingResourceException;
 
+import primitives.Color;
 import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
+import scene.Scene;
 
 /**
  * The {@code Camera} class represents a virtual camera in a 3D rendering
@@ -72,6 +74,14 @@ public class Camera implements Cloneable {
 	 */
 	private Vector translation;
 
+	private ImageWriter imageWriter;
+
+	private RayTracerBase rayTracer;
+
+	private int nX = 1;
+
+	private int nY = 1;
+
 	/**
 	 * Private constructor to enforce use of the builder.
 	 */
@@ -109,6 +119,32 @@ public class Camera implements Cloneable {
 			pIJ = pIJ.add(vUp.scale(yI));
 		Vector vIJ = pIJ.subtract(cameraPoint);
 		return new Ray(cameraPoint, vIJ);
+	}
+
+	public Camera renderImage() {
+		for (int i = 0; i < nX; i++)
+			for (int j = 0; j < nY; j++)
+				castRay(nX, nY, i, j);
+		return this;
+	}
+
+	public Camera printGrid(int interval, Color color) {
+		for (int i = 0; i < nX; i++)
+			for (int j = 0; j < nY; j++)
+				if (i % interval == 0 || j % interval == 0)
+					imageWriter.writePixel(i, j, color);
+		return this;
+	}
+
+	public Camera writeToImage(String imageName) {
+		imageWriter.writeToImage(imageName);
+		return this;
+	}
+
+	private void castRay(int nX, int nY, int column, int row) {
+		Ray ray = constructRay(nX, nY, column, row);
+		Color color = rayTracer.traceRay(ray);
+		imageWriter.writePixel(column, row, color);
 	}
 
 	/**
@@ -229,6 +265,8 @@ public class Camera implements Cloneable {
 		 * @return this builder instance
 		 */
 		public Builder setResolution(int nX, int nY) {
+			camera.nX = nX;
+			camera.nY = nY;
 			return this;
 		}
 
@@ -251,6 +289,20 @@ public class Camera implements Cloneable {
 		 */
 		public Builder setTranslation(Vector move) {
 			camera.translation = move;
+			return this;
+		}
+
+		public Builder setRayTracer(Scene scene, RayTracerType type) {
+			switch (type) {
+			case RayTracerType.SIMPLE:
+				camera.rayTracer = new SimpleRayTracer(scene);
+				break;
+			case RayTracerType.GRID:
+				camera.rayTracer = null;
+				break;
+			default:
+				break;
+			}
 			return this;
 		}
 
@@ -289,9 +341,17 @@ public class Camera implements Cloneable {
 				throw new IllegalArgumentException("height " + positiveMessage);
 			if (alignZero(camera.distance) <= 0)
 				throw new IllegalArgumentException("distance " + positiveMessage);
+			if (alignZero(camera.nX) <= 0)
+				throw new IllegalArgumentException("nX " + positiveMessage);
+			if (alignZero(camera.nY) <= 0)
+				throw new IllegalArgumentException("nY " + positiveMessage);
 
 			camera.vTo = camera.vTo.normalize();
 			camera.vUp = camera.vUp.normalize();
+			camera.imageWriter = new ImageWriter(camera.nX, camera.nY);
+
+			if (camera.rayTracer == null)
+				camera.rayTracer = new SimpleRayTracer(null);
 
 			if (!isZero(camera.rotationAngleDegrees)) {
 				double angleRad = Math.toRadians(camera.rotationAngleDegrees);

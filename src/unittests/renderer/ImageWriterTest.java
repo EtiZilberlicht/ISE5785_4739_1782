@@ -1,8 +1,9 @@
-package renderer;
+package unittests.renderer;
 
 import org.junit.jupiter.api.Test;
 
 import primitives.Color;
+import renderer.ImageWriter;
 
 class ImageWriterTest {
 	@Test
@@ -19,5 +20,4 @@ class ImageWriterTest {
 				imageWriter.writePixel(x, y, x % interval == 0 || y % interval == 0 ? net : backgroundColor);
 		imageWriter.writeToImage("image1");
 	}
-
 }

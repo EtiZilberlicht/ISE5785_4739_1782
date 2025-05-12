@@ -36,8 +36,8 @@ public class RenderTests {
 	 */
 	@Test
 	public void renderTwoColorTest() {
-		Scene scene = new Scene("Two color").setBackground(new Color(75, 127, 90))
-				.setAmbientLight(new AmbientLight(new Color(255, 191, 191)));
+		Scene scene = new Scene("Two color").setBackground(new Color(157, 195, 223))
+				.setAmbientLight(new AmbientLight(new Color(48, 118, 163)));
 		scene.geometries //
 				.add(// center
 						new Sphere(50d, new Point(0, 0, -100)),
@@ -53,7 +53,7 @@ public class RenderTests {
 				.setResolution(1000, 1000) //
 				.build() //
 				.renderImage() //
-				.printGrid(100, new Color(YELLOW)) //
+				.printGrid(100, new Color(224, 238, 255)) //
 				.writeToImage("Two color render test");
 	}
 
@@ -94,7 +94,7 @@ public class RenderTests {
 				.setResolution(1000, 1000) //
 				.build() //
 				.renderImage() //
-				.printGrid(100, new Color(YELLOW)) //
+				.printGrid(100, new Color(82, 0, 163)) //
 				.writeToImage("xml render test");
 	}
 

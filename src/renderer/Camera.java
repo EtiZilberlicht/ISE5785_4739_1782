@@ -74,12 +74,24 @@ public class Camera implements Cloneable {
 	 */
 	private Vector translation;
 
+	/**
+	 * The image writer used to write pixel colors to an image file.
+	 */
 	private ImageWriter imageWriter;
 
+	/**
+	 * The ray tracer used to determine the color seen through each ray.
+	 */
 	private RayTracerBase rayTracer;
 
+	/**
+	 * The number of horizontal pixels in the image.
+	 */
 	private int nX = 1;
 
+	/**
+	 * The number of vertical pixels in the image.
+	 */
 	private int nY = 1;
 
 	/**
@@ -121,6 +133,11 @@ public class Camera implements Cloneable {
 		return new Ray(cameraPoint, vIJ);
 	}
 
+	/**
+	 * Renders the image by casting rays through all pixels on the view plane.
+	 *
+	 * @return this camera instance for method chaining
+	 */
 	public Camera renderImage() {
 		for (int i = 0; i < nX; i++)
 			for (int j = 0; j < nY; j++)
@@ -128,6 +145,13 @@ public class Camera implements Cloneable {
 		return this;
 	}
 
+	/**
+	 * Draws a grid on the image with the specified interval and color.
+	 *
+	 * @param interval spacing between grid lines (in pixels)
+	 * @param color    the color of the grid lines
+	 * @return this camera instance for method chaining
+	 */
 	public Camera printGrid(int interval, Color color) {
 		for (int i = 0; i < nX; i++)
 			for (int j = 0; j < nY; j++)
@@ -136,11 +160,25 @@ public class Camera implements Cloneable {
 		return this;
 	}
 
+	/**
+	 * Writes the image to disk with the specified name.
+	 *
+	 * @param imageName name of the output image file
+	 * @return this camera instance for method chaining
+	 */
 	public Camera writeToImage(String imageName) {
 		imageWriter.writeToImage(imageName);
 		return this;
 	}
 
+	/**
+	 * Casts a single ray through the specified pixel and writes its color.
+	 *
+	 * @param nX     number of columns
+	 * @param nY     number of rows
+	 * @param column the pixel's column index
+	 * @param row    the pixel's row index
+	 */
 	private void castRay(int nX, int nY, int column, int row) {
 		Ray ray = constructRay(nX, nY, column, row);
 		Color color = rayTracer.traceRay(ray);
@@ -292,6 +330,13 @@ public class Camera implements Cloneable {
 			return this;
 		}
 
+		/**
+		 * Sets the ray tracer used by the camera.
+		 *
+		 * @param scene the scene to trace rays through
+		 * @param type  the type of ray tracer (e.g., SIMPLE or GRID)
+		 * @return this builder instance
+		 */
 		public Builder setRayTracer(Scene scene, RayTracerType type) {
 			switch (type) {
 			case RayTracerType.SIMPLE:

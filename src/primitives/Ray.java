@@ -71,6 +71,13 @@ public class Ray {
 		}
 	}
 
+	/**
+	 * Finds the closest point to the ray's origin (head) from a list of points.
+	 *
+	 * @param lst the list of points to search through; may be {@code null}
+	 * @return the point in the list that is closest to the ray's head, or
+	 *         {@code null} if the list is {@code null} or empty
+	 */
 	public Point findClosestPoint(List<Point> lst) {
 		if (lst == null)
 			return null;

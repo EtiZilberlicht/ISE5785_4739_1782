@@ -50,7 +50,7 @@ class RayTests {
 	}
 
 	/**
-	 * Test method for {@link primitives.Ray#findClosesetPoint(List<Point>)}.
+	 * Test method for {@link primitives.Ray#findClosestPoint(List<Point>)}.
 	 */
 	@Test
 	void testFindClosestPoint() {

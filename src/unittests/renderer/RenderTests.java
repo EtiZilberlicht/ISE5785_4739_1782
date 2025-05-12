@@ -82,6 +82,7 @@ public class RenderTests {
 	@Test
 	public void basicRenderXml() {
 		Scene scene = new Scene("Using XML");
+		scene.updateXML("renderTestTwoColors");
 		// enter XML file name and parse from XML file into scene object instead of the
 		// new Scene above,
 		// Use the code you added in appropriate packages

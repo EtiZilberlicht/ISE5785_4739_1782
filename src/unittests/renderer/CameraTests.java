@@ -29,7 +29,7 @@ class CameraTest {
 	private static final String BAD_RAY = "Bad ray";
 
 	/**
-	 * Test method for {@link renderer.Camera#constructRay(int, int, int, int)}.
+	 * Test method for {@link renderer.Camera#constructRay(int, int)}.
 	 */
 	@Test
 	void testConstructRay() {

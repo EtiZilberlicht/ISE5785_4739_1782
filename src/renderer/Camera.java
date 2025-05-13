@@ -18,7 +18,7 @@ import scene.Scene;
  * <p>
  * This camera uses a builder design pattern to construct valid configurations.
  * Rays can be constructed through pixels on the view plane using
- * {@link #constructRay(int, int, int, int)}.
+ * {@link #constructRay(int, int)}.
  * </p>
  */
 public class Camera implements Cloneable {
@@ -95,6 +95,16 @@ public class Camera implements Cloneable {
 	private int nY = 1;
 
 	/**
+	 * The width of a single pixel
+	 */
+	private double rX;
+
+	/**
+	 * The height of a single pixel
+	 */
+	private double rY;
+
+	/**
 	 * Private constructor to enforce use of the builder.
 	 */
 	private Camera() {
@@ -113,15 +123,11 @@ public class Camera implements Cloneable {
 	 * Constructs a {@link Ray} from the camera through a specific pixel on the view
 	 * plane.
 	 *
-	 * @param nX number of horizontal pixels (columns)
-	 * @param nY number of vertical pixels (rows)
-	 * @param j  column index (0-based)
-	 * @param i  row index (0-based)
+	 * @param j column index (0-based)
+	 * @param i row index (0-based)
 	 * @return the constructed {@link Ray} through the specified pixel
 	 */
 	public Ray constructRay(int j, int i) {
-		double rY = height / nY;
-		double rX = width / nX;
 		double yI = -(i - (nY - 1d) / 2d) * rY;
 		double xJ = (j - (nX - 1d) / 2d) * rX;
 		Point pIJ = viewPlanePC;
@@ -174,8 +180,6 @@ public class Camera implements Cloneable {
 	/**
 	 * Casts a single ray through the specified pixel and writes its color.
 	 *
-	 * @param nX     number of columns
-	 * @param nY     number of rows
 	 * @param column the pixel's column index
 	 * @param row    the pixel's row index
 	 */
@@ -370,30 +374,29 @@ public class Camera implements Cloneable {
 				throw new MissingResourceException(description, className, "vUp");
 			if (camera.vTo == null)
 				throw new MissingResourceException(description, className, "vTo");
-			if (camera.width == 0d)
-				throw new MissingResourceException(description, className, "width");
-			if (camera.height == 0d)
-				throw new MissingResourceException(description, className, "height");
-			if (camera.distance == 0d)
-				throw new MissingResourceException(description, className, "distance");
-
 			if (!isZero(camera.vTo.dotProduct(camera.vUp)))
 				throw new IllegalArgumentException("vTo and vUp must be orthogonal");
+			camera.vTo = camera.vTo.normalize();
+			camera.vUp = camera.vUp.normalize();
+			camera.vRight = camera.vTo.crossProduct(camera.vUp).normalize();
+
+			if (alignZero(camera.distance) <= 0)
+				throw new IllegalArgumentException("distance " + positiveMessage);
+			camera.viewPlanePC = camera.cameraPoint.add(camera.vTo.scale(camera.distance));
+
+			if (alignZero(camera.nX) <= 0)
+				throw new IllegalArgumentException("nX " + positiveMessage);
+			if (alignZero(camera.nY) <= 0)
+				throw new IllegalArgumentException("nY " + positiveMessage);
+			camera.imageWriter = new ImageWriter(camera.nX, camera.nY);
 
 			if (alignZero(camera.width) <= 0)
 				throw new IllegalArgumentException("width " + positiveMessage);
 			if (alignZero(camera.height) <= 0)
 				throw new IllegalArgumentException("height " + positiveMessage);
-			if (alignZero(camera.distance) <= 0)
-				throw new IllegalArgumentException("distance " + positiveMessage);
-			if (alignZero(camera.nX) <= 0)
-				throw new IllegalArgumentException("nX " + positiveMessage);
-			if (alignZero(camera.nY) <= 0)
-				throw new IllegalArgumentException("nY " + positiveMessage);
 
-			camera.vTo = camera.vTo.normalize();
-			camera.vUp = camera.vUp.normalize();
-			camera.imageWriter = new ImageWriter(camera.nX, camera.nY);
+			camera.rY = camera.height / camera.nY;
+			camera.rX = camera.width / camera.nX;
 
 			if (camera.rayTracer == null)
 				camera.rayTracer = new SimpleRayTracer(null);
@@ -407,9 +410,6 @@ public class Camera implements Cloneable {
 
 			if (camera.translation != null)
 				camera.cameraPoint = camera.cameraPoint.add(camera.translation);
-
-			camera.vRight = camera.vTo.crossProduct(camera.vUp).normalize();
-			camera.viewPlanePC = camera.cameraPoint.add(camera.vTo.scale(camera.distance));
 
 			try {
 				return (Camera) camera.clone();

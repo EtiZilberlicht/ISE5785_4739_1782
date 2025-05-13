@@ -13,7 +13,7 @@ import primitives.Color;
 public class Scene {
 
 	/** The name of the scene */
-	public String name;
+	public final String name;
 
 	/** Background color of the scene (default is black) */
 	public Color background = Color.BLACK;
@@ -37,14 +37,23 @@ public class Scene {
 	}
 
 	/**
-	 * Updates the scene using data from an XML file.
+	 * Updates the current scene by importing data from an XML file.
+	 * <p>
+	 * This method loads scene information from the specified XML file and updates
+	 * the current {@code Scene} instance accordingly.
+	 * </p>
 	 *
-	 * @param fileName the name of the XML file (without ".xml" extension)
-	 * @throws RuntimeException if there is an error during XML import
+	 * @param fileName the name of the XML file to import, without the ".xml"
+	 *                 extension. The file is expected to be located in the
+	 *                 {@code FOLDER_PATH} directory.
+	 * @return the updated {@code Scene} instance (i.e., {@code this}).
+	 * @throws RuntimeException if an error occurs while importing the XML file.
 	 */
-	public void updateXML(String fileName) {
+
+	public Scene updateXML(String fileName) {
 		try {
 			importScene(FOLDER_PATH + '/' + fileName + ".xml", this);
+			return this;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

@@ -69,7 +69,7 @@ class RayTests {
 
 		// TC11: Empty list
 
-		assertNull(ray.findClosestPoint(List.of()), "Empty list");
+		assertNull(ray.findClosestPoint(null), "Empty list");
 
 		// TC12: The closet point is in the beginning of the list
 

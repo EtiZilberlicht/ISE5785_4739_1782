@@ -39,10 +39,10 @@ class CameraIntersectionsIntegrationTests {
 			.setDirection(new Vector(0, 0, -1), Vector.AXIS_Y).setVpSize(3, 3);
 
 	/** Camera located at the origin (0,0,0). */
-	private final Camera camera1 = cameraBuilder.setLocation(Point.ZERO).build();
+	private final Camera camera1 = cameraBuilder.setLocation(Point.ZERO).setResolution(3, 3).build();
 
 	/** Camera slightly closer to the view plane, located at (0,0,0.5). */
-	private final Camera camera2 = cameraBuilder.setLocation(new Point(0, 0, 0.5)).build();
+	private final Camera camera2 = cameraBuilder.setLocation(new Point(0, 0, 0.5)).setResolution(3, 3).build();
 
 	/**
 	 * Helper method to test the number of intersection points between a camera's
@@ -58,7 +58,7 @@ class CameraIntersectionsIntegrationTests {
 		int countIntersections = 0;
 		for (int j = 0; j < 3; j++) {
 			for (int i = 0; i < 3; i++) {
-				Ray ray = camera.constructRay(3, 3, j, i);
+				Ray ray = camera.constructRay(j, i);
 				List<Point> intersections = geometry.findIntersections(ray);
 				countIntersections += intersections != null ? intersections.size() : 0;
 			}

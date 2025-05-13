@@ -1,6 +1,8 @@
 package scene;
 
 import java.io.File;
+import java.util.List;
+import java.util.stream.IntStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -75,11 +77,10 @@ public class XmlScene {
 	private static Geometries parseGeometries(Element geometriesElem) {
 		Geometries geometries = new Geometries();
 		NodeList geometryNodes = geometriesElem.getChildNodes();
-		for (int i = 0; i < geometryNodes.getLength(); i++) {
-			if (!(geometryNodes.item(i) instanceof Element))
-				continue;
-			Element geomElem = (Element) geometryNodes.item(i);
-			Geometry g;
+		List<Element> elements = IntStream.range(0, geometryNodes.getLength()).mapToObj(i -> geometryNodes.item(i))
+				.filter(n -> n instanceof Element).map(n -> (Element) n).toList();
+		Geometry g;
+		for (Element geomElem : elements) {
 			switch (geomElem.getTagName()) {
 			case "sphere":
 				Point center = parsePoint(geomElem.getAttribute("center"));

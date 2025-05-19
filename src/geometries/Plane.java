@@ -1,10 +1,13 @@
 package geometries;
 
-import java.util.List;
-import static primitives.Util.isZero;
 import static primitives.Util.alignZero;
+import static primitives.Util.isZero;
 
-import primitives.*;
+import java.util.List;
+
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
  * The {@code Plane} class represents a two-dimensional plane in
@@ -57,7 +60,7 @@ public class Plane extends Geometry {
 	}
 
 	@Override
-	public List<Point> findIntersections(Ray ray) {
+	protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
 		Point head = ray.getHead();
 		if (head.equals(this.point))
 			return null;
@@ -66,7 +69,7 @@ public class Plane extends Geometry {
 		if (isZero(denominator))
 			return null;
 		double t = alignZero(numerator / denominator);
-		return t <= 0 ? null : List.of(ray.getPoint(t));
+		return t <= 0 ? null : List.of(new Intersection(this, ray.getPoint(t)));
 	}
 
 }

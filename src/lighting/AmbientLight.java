@@ -8,12 +8,7 @@ import primitives.Color;
  * their position or orientation. It is commonly used to simulate a base level
  * of illumination in the scene.
  */
-public class AmbientLight {
-
-	/**
-	 * The intensity (color) of the ambient light.
-	 */
-	private final Color intensity;
+public class AmbientLight extends Light {
 
 	/**
 	 * A predefined instance of {@code AmbientLight} with no intensity (black). Can
@@ -27,15 +22,7 @@ public class AmbientLight {
 	 * @param intensity the color and brightness of the ambient light
 	 */
 	public AmbientLight(Color intensity) {
-		this.intensity = intensity;
+		super(intensity);
 	}
 
-	/**
-	 * Returns the intensity (color) of the ambient light.
-	 *
-	 * @return the {@link Color} representing the ambient light's intensity
-	 */
-	public Color getIntensity() {
-		return intensity;
-	}
 }

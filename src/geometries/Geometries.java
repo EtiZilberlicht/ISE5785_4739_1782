@@ -1,8 +1,8 @@
 package geometries;
 
-import java.util.List;
 import java.util.LinkedList;
-import primitives.Point;
+import java.util.List;
+
 import primitives.Ray;
 
 /**
@@ -11,7 +11,7 @@ import primitives.Ray;
  * {@link Intersectable} interface, and provides a unified way to operate on all
  * of them.
  */
-public class Geometries implements Intersectable {
+public class Geometries extends Intersectable {
 
 	/**
 	 * The internal list holding all the geometric objects in this group.
@@ -44,17 +44,19 @@ public class Geometries implements Intersectable {
 	}
 
 	@Override
-	public List<Point> findIntersections(Ray ray) {
-		List<Point> totalList = null;
+	protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
+
+		List<Intersection> intersections = null;
+
 		for (Intersectable geometry : geometries) {
-			var list = geometry.findIntersections(ray);
-			if (list != null)
-				if (totalList == null)
-					totalList = new LinkedList<>(list);
+			var geometryIntersections = geometry.calculateIntersections(ray);
+			if (geometryIntersections != null)
+				if (intersections == null)
+					intersections = new LinkedList<>(geometryIntersections);
 				else
-					totalList.addAll(list);
+					intersections.addAll(geometryIntersections);
 		}
-		return totalList;
+		return intersections;
 	}
 
 }

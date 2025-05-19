@@ -1,8 +1,13 @@
 package geometries;
 
-import primitives.*;
-import static primitives.Util.*;
+import static primitives.Util.alignZero;
+import static primitives.Util.isZero;
+
 import java.util.List;
+
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
  * The {@code Tube} class represents an infinite cylindrical tube in 3D space.
@@ -40,7 +45,7 @@ public class Tube extends RadialGeometry {
 	}
 
 	@Override
-	public List<Point> findIntersections(Ray ray) {
+	protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
 		// Given ray (A + ta) and this Tube ray (B + tb)
 		Point pointA = ray.getHead();
 		Point pointB = axis.getHead();
@@ -118,7 +123,7 @@ public class Tube extends RadialGeometry {
 			// the ray starts before point 1
 			if (!(alignZero(p1.subtract(pointA).dotProduct(vectorA)) < 0d)
 					&& !(p2.subtract(pointA).dotProduct(vectorA) < 0d))
-				return List.of(p1, p2);
+				return List.of(new Intersection(this, p1), new Intersection(this, p2));
 		} catch (IllegalArgumentException ignore) {
 			// the ray starts at point1
 		}
@@ -126,7 +131,7 @@ public class Tube extends RadialGeometry {
 		try {
 			// the ray starts before point 1
 			if (!(p1.subtract(pointA).dotProduct(vectorA) < 0d))
-				return List.of(p1);
+				return List.of(new Intersection(this, p1));
 		} catch (IllegalArgumentException ignore) {
 			// the ray starts at point1
 		}
@@ -134,7 +139,7 @@ public class Tube extends RadialGeometry {
 		try {
 			// the ray starts before point 2
 			if (!(p2.subtract(pointA).dotProduct(vectorA) < 0d))
-				return List.of(p2);
+				return List.of(new Intersection(this, p2));
 		} catch (IllegalArgumentException ignore) {
 			// the ray starts at point2
 		}

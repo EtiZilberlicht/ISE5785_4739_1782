@@ -1,8 +1,13 @@
 package geometries;
 
+import static primitives.Util.alignZero;
+import static primitives.Util.isZero;
+
 import java.util.List;
-import static primitives.Util.*;
-import primitives.*;
+
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
  * Polygon class represents two-dimensional polygon in 3D Cartesian coordinate
@@ -84,7 +89,7 @@ public class Polygon extends Geometry {
 	}
 
 	@Override
-	public List<Point> findIntersections(Ray ray) {
+	protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
 		// Step 1: Find intersection with the polygon's plane
 		List<Point> planeIntersections = plane.findIntersections(ray);
 		if (planeIntersections == null) {
@@ -124,6 +129,6 @@ public class Polygon extends Geometry {
 			}
 		}
 
-		return List.of(p); // Point is strictly inside the polygon
+		return List.of(new Intersection(this, p)); // Point is strictly inside the polygon
 	}
 }

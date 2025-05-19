@@ -2,33 +2,52 @@ package scene;
 
 import static scene.XmlScene.importScene;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import geometries.Geometries;
 import lighting.AmbientLight;
+import lighting.LightSource;
 import primitives.Color;
 
 /**
- * Represents a 3D scene including background color, ambient lighting, and
- * geometries.
+ * Represents a 3D scene including background color, ambient lighting,
+ * geometries, and light sources.
  */
 public class Scene {
 
-	/** The name of the scene */
+	/**
+	 * The name of the scene.
+	 */
 	public final String name;
 
-	/** Background color of the scene (default is black) */
+	/**
+	 * Background color of the scene (default is black).
+	 */
 	public Color background = Color.BLACK;
 
-	/** Ambient lighting in the scene (default is none) */
+	/**
+	 * Ambient lighting in the scene (default is none).
+	 */
 	public AmbientLight ambientLight = AmbientLight.NONE;
 
-	/** Geometries in the scene */
+	/**
+	 * Geometries included in the scene.
+	 */
 	public Geometries geometries = new Geometries();
 
-	/** Folder path for loading XML scene files */
+	/**
+	 * List of light sources in the scene.
+	 */
+	public List<LightSource> lights = new LinkedList<>();
+
+	/**
+	 * Folder path for loading XML scene files.
+	 */
 	private static final String FOLDER_PATH = System.getProperty("user.dir") + "/xml";
 
 	/**
-	 * Constructs a new Scene with the given name.
+	 * Constructs a new Scene with the specified name.
 	 *
 	 * @param name the name of the scene
 	 */
@@ -39,17 +58,14 @@ public class Scene {
 	/**
 	 * Updates the current scene by importing data from an XML file.
 	 * <p>
-	 * This method loads scene information from the specified XML file and updates
-	 * the current {@code Scene} instance accordingly.
+	 * Loads scene information from the specified XML file located in the
+	 * {@code FOLDER_PATH} directory and updates this Scene instance.
 	 * </p>
 	 *
-	 * @param fileName the name of the XML file to import, without the ".xml"
-	 *                 extension. The file is expected to be located in the
-	 *                 {@code FOLDER_PATH} directory.
-	 * @return the updated {@code Scene} instance (i.e., {@code this}).
-	 * @throws RuntimeException if an error occurs while importing the XML file.
+	 * @param fileName the name of the XML file (without the ".xml" extension)
+	 * @return this Scene instance for method chaining
+	 * @throws RuntimeException if an error occurs during XML import
 	 */
-
 	public Scene updateXML(String fileName) {
 		try {
 			importScene(FOLDER_PATH + '/' + fileName + ".xml", this);
@@ -62,8 +78,8 @@ public class Scene {
 	/**
 	 * Sets the background color of the scene.
 	 *
-	 * @param background the background color
-	 * @return this Scene object for method chaining
+	 * @param background the background color to set
+	 * @return this Scene instance for method chaining
 	 */
 	public Scene setBackground(Color background) {
 		this.background = background;
@@ -73,8 +89,8 @@ public class Scene {
 	/**
 	 * Sets the ambient light of the scene.
 	 *
-	 * @param ambientLight the ambient light
-	 * @return this Scene object for method chaining
+	 * @param ambientLight the ambient light to set
+	 * @return this Scene instance for method chaining
 	 */
 	public Scene setAmbientLight(AmbientLight ambientLight) {
 		this.ambientLight = ambientLight;
@@ -85,10 +101,21 @@ public class Scene {
 	 * Sets the geometries of the scene.
 	 *
 	 * @param geometries the geometries to set
-	 * @return this Scene object for method chaining
+	 * @return this Scene instance for method chaining
 	 */
 	public Scene setGeometries(Geometries geometries) {
 		this.geometries = geometries;
+		return this;
+	}
+
+	/**
+	 * Sets the list of light sources in the scene.
+	 *
+	 * @param lights the list of light sources to set
+	 * @return this Scene instance for method chaining
+	 */
+	public Scene setLights(List<LightSource> lights) {
+		this.lights = lights;
 		return this;
 	}
 }

@@ -1,12 +1,15 @@
 package geometries;
 
-import primitives.*;
 import static primitives.Util.isZero;
 
 import java.util.Collections;
 //import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
  * The {@code Cylinder} class represents a three-dimensional cylinder that
@@ -63,7 +66,7 @@ public class Cylinder extends Tube {
 	}
 
 	@Override
-	public List<Point> findIntersections(Ray ray) {
+	protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
 		// Initialize intersections list
 		List<Point> intersections = new LinkedList<>();
 
@@ -82,7 +85,7 @@ public class Cylinder extends Tube {
 		// Return intersections if there are exactly 2 (so they are on the sides of the
 		// cylinder)
 		if (intersections.size() == 2) {
-			return List.of(intersections.get(0), intersections.get(1));
+			return List.of(new Intersection(this, intersections.get(0)), new Intersection(this, intersections.get(1)));
 		}
 
 		// Find intersections with the bottom base
@@ -119,7 +122,12 @@ public class Cylinder extends Tube {
 			Collections.swap(intersections, 0, 1);
 
 		// Return null if no valid intersections found
-		return intersections.isEmpty() ? null : new LinkedList<>(intersections);
+		List<Intersection> geoPoints = new LinkedList<>();
+		for (Point p : intersections) {
+			geoPoints.add(new Intersection(this, p));
+		}
+
+		return geoPoints.isEmpty() ? null : geoPoints;
 	}
 
 }

@@ -1,10 +1,13 @@
 package geometries;
 
+import static primitives.Util.alignZero;
+import static primitives.Util.isZero;
+
 import java.util.List;
 
-import primitives.*;
-import static primitives.Util.isZero;
-import static primitives.Util.alignZero;
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
  * The {@code Triangle} class represents a triangle in 3D space. It extends the
@@ -32,7 +35,7 @@ public class Triangle extends Polygon {
 	}
 
 	@Override
-	public List<Point> findIntersections(Ray ray) {
+	protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
 		Point p1 = vertices.get(0);
 		Point p2 = vertices.get(1);
 		Point p3 = vertices.get(2);
@@ -73,6 +76,6 @@ public class Triangle extends Polygon {
 
 		double t = alignZero(f * edge2.dotProduct(q));
 		Point intersection = ray.getPoint(t);
-		return (t > 0) ? List.of(intersection) : null;
+		return (t > 0) ? List.of(new Intersection(this, intersection)) : null;
 	}
 }

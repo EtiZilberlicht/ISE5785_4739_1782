@@ -1,25 +1,81 @@
 package geometries;
 
-import primitives.*;
+import primitives.Color;
+import primitives.Material;
+import primitives.Point;
+import primitives.Vector;
 
 /**
- * The {@code Geometry} class is an abstract class that represents a geometric
- * shape in 3D space. Any geometric shape that extends this class must implement
- * a method to calculate the normal vector at a given point.
+ * The {@code Geometry} class is an abstract base class representing geometric
+ * shapes in 3D space. It extends {@link Intersectable} and provides common
+ * properties such as emission color and material. Subclasses must implement the
+ * method {@link #getNormal(Point)} to return the normal vector at a given point
+ * on the surface of the geometry.
  */
-public abstract class Geometry implements Intersectable {
+public abstract class Geometry extends Intersectable {
+
 	/**
-	 * default constructor
+	 * The emission color of the geometry (its inherent light emission).
+	 */
+	protected Color emission = Color.BLACK;
+
+	/**
+	 * The material properties of the geometry.
+	 */
+	private Material material = new Material();
+
+	/**
+	 * Default constructor for Geometry.
 	 */
 	public Geometry() {
 	}
 
 	/**
-	 * Returns the normal vector to the geometric body at a given point on its
-	 * surface.
+	 * Gets the emission color of the geometry.
 	 *
-	 * @param point The point on the geometric body.
-	 * @return The normal vector at the given point.
+	 * @return the emission {@link Color} of the geometry.
 	 */
-	public abstract Vector getNormal(Point point); // also can return null for now
+	public Color getEmission() {
+		return emission;
+	}
+
+	/**
+	 * Gets the material properties of the geometry.
+	 *
+	 * @return the {@link Material} of the geometry.
+	 */
+	public Material getMaterial() {
+		return material;
+	}
+
+	/**
+	 * Sets the material properties of the geometry.
+	 *
+	 * @param material the {@link Material} to set.
+	 * @return the current {@code Geometry} instance (for method chaining).
+	 */
+	public Geometry setMaterial(Material material) {
+		this.material = material;
+		return this;
+	}
+
+	/**
+	 * Sets the emission color of the geometry.
+	 *
+	 * @param emission the {@link Color} to set as emission.
+	 * @return the current {@code Geometry} instance (for method chaining).
+	 */
+	public Geometry setEmission(Color emission) {
+		this.emission = emission;
+		return this;
+	}
+
+	/**
+	 * Returns the normal vector to the geometry's surface at a specified point.
+	 * This method must be implemented by any subclass.
+	 *
+	 * @param point the {@link Point} on the geometry's surface.
+	 * @return the normal {@link Vector} at the specified point.
+	 */
+	public abstract Vector getNormal(Point point);
 }

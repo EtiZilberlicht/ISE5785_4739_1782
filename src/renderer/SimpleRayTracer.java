@@ -56,7 +56,7 @@ public class SimpleRayTracer extends RayTracerBase {
 	private Color calcColor(Intersection intersection, Ray ray) {
 		if (!preprocessIntersection(intersection, ray.getDirection()))
 			return Color.BLACK;
-		return scene.ambientLight.getIntensity().scale(intersection.geometry.getMaterial().kA)
+		return scene.ambientLight.getIntensity().scale(intersection.material.kA)
 				.add(calcColorLocalEffects(intersection));
 	}
 

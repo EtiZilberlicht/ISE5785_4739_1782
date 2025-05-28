@@ -45,7 +45,7 @@ public class Tube extends RadialGeometry {
 	}
 
 	@Override
-	protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
+	protected List<Intersection> calculateIntersectionsHelper(Ray ray, double maxDistance) {
 		// Given ray (A + ta) and this Tube ray (B + tb)
 		Point pointA = ray.getHead();
 		Point pointB = axis.getHead();
@@ -119,10 +119,14 @@ public class Tube extends RadialGeometry {
 		Point p1 = d.subtract(vectorA.scale(th));
 		Point p2 = d.add(vectorA.scale(th));
 
+		double t1 = alignZero(p1.distance(pointA));
+		double t2 = alignZero(p2.distance(pointA));
+
 		try {
 			// the ray starts before point 1
 			if (!(alignZero(p1.subtract(pointA).dotProduct(vectorA)) < 0d)
-					&& !(p2.subtract(pointA).dotProduct(vectorA) < 0d))
+					&& !(p2.subtract(pointA).dotProduct(vectorA) < 0d) && alignZero(t1 - maxDistance) <= 0
+					&& alignZero(t2 - maxDistance) <= 0)
 				return List.of(new Intersection(this, p1), new Intersection(this, p2));
 		} catch (IllegalArgumentException ignore) {
 			// the ray starts at point1
@@ -130,7 +134,7 @@ public class Tube extends RadialGeometry {
 
 		try {
 			// the ray starts before point 1
-			if (!(p1.subtract(pointA).dotProduct(vectorA) < 0d))
+			if (!(p1.subtract(pointA).dotProduct(vectorA) < 0d) && alignZero(t1 - maxDistance) <= 0)
 				return List.of(new Intersection(this, p1));
 		} catch (IllegalArgumentException ignore) {
 			// the ray starts at point1
@@ -138,7 +142,7 @@ public class Tube extends RadialGeometry {
 
 		try {
 			// the ray starts before point 2
-			if (!(p2.subtract(pointA).dotProduct(vectorA) < 0d))
+			if (!(p2.subtract(pointA).dotProduct(vectorA) < 0d) && alignZero(t2 - maxDistance) <= 0)
 				return List.of(new Intersection(this, p2));
 		} catch (IllegalArgumentException ignore) {
 			// the ray starts at point2

@@ -3,13 +3,19 @@
  */
 package unittests.geometries;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import primitives.*;
-import java.util.List;
 import geometries.Triangle;
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
  * Unit tests for geometries.Triangle class
@@ -119,6 +125,38 @@ class TriangleTests {
 		// plane
 		assertNull(triangle.findIntersections(new Ray(P010, V111)), "The point is not in the triangle");
 
+	}
+
+	/**
+	 * Test method for {@link Triangle#calculateIntersections(Ray, double)}.
+	 */
+	@Test
+	void testCalculateIntersections() {
+
+		// A vector used in some test cases to (1,0,0)
+		Vector v001 = new Vector(0, 0, 1);
+		// A triangle for test
+		final Triangle triangle = new Triangle(new Point(1, 0, 3), new Point(-1, 2, 3), new Point(-1, -2, 3));
+
+		// ============ Equivalence Partitions Tests ==============
+		// TC01: Ray "stops" before the triangle
+		assertNull(triangle.calculateIntersections(new Ray(new Point(0, 0, 2), v001), 0.5),
+				"ray stops before the triangle");
+
+		// TC02: Ray starts before the triangle and "stops" after it
+		assertEquals(1, triangle.calculateIntersections(new Ray(new Point(0, 0, 2), v001), 3).size(),
+				"Wrong number of points");
+
+		// TC03: Ray starts after the triangle
+		assertNull(triangle.calculateIntersections(new Ray(new Point(0, 0, 4), v001), 3.5),
+				"ray starts after the triangle");
+
+		// =============== Boundary Values Tests ==================
+
+		// TC11: Ray starts before the triangle and "stops" at the first intersection
+		// point
+		assertEquals(1, triangle.calculateIntersections(new Ray(new Point(0, 0, 2), v001), 1).size(),
+				"Wrong number of points");
 	}
 
 }

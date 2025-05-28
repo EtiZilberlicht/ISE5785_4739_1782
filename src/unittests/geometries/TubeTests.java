@@ -3,12 +3,18 @@
  */
 package unittests.geometries;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import java.util.List;
+
 import geometries.Tube;
-import primitives.*;
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
  * Unit tests for geometries.Tube class
@@ -282,6 +288,57 @@ class TubeTests {
 		// TC72: the ray starts from tube surface, doesn't intersect with the tube (0
 		// point)
 		assertNull(tube.findIntersections(new Ray(p2, V1251)), "Ray's point outside the tube");
+
+	}
+
+	/**
+	 * Test method for {@link Tube#calculateIntersections(Ray, double)}.
+	 */
+	@Test
+	void testCalculateIntersections() {
+		// A tube for test
+		final Tube tube = new Tube(new Ray(Point.ZERO, new Vector(0, 0, 1)), 3);
+		// A vector used in some test cases to (1,0,0)
+		Vector v100 = new Vector(1, 0, 0);
+
+		// ============ Equivalence Partitions Tests ==============
+		// TC01: Ray "stops" before the tube
+		assertNull(tube.calculateIntersections(new Ray(new Point(-6, 2.5, 0), v100), 3.5), "ray stops before the tube");
+
+		// TC02: Ray starts before the tube and "stops" inside it
+		assertEquals(1, tube.calculateIntersections(new Ray(new Point(-4, 1.5, 0), v100), 3.5).size(),
+				"Wrong number of points");
+
+		// TC03: Ray starts and "stops" inside the tube
+		assertNull(tube.calculateIntersections(new Ray(new Point(-2, 0.5, 0), v100), 3.5),
+				"ray starts and stops inside the sphere");
+
+		// TC04: Ray starts inside the tube and "stops" after it
+		assertEquals(1, tube.calculateIntersections(new Ray(new Point(2, -1.5, 0), v100), 3.5).size(),
+				"Wrong number of points");
+
+		// TC05: Ray starts after the tube
+		assertNull(tube.calculateIntersections(new Ray(new Point(4, -2.5, 0), v100), 3.5),
+				"ray starts after the sphere");
+
+		// TC06: Ray crosses the tube, starts before it and "stops" after it
+		assertEquals(2, tube.calculateIntersections(new Ray(new Point(-4, 1.5, 0), v100), 7).size(),
+				"Wrong number of points");
+
+		// =============== Boundary Values Tests ==================
+		// TC11: Ray starts before the tube and "stops" at the first intersection
+		// point
+		assertEquals(1, tube.calculateIntersections(new Ray(new Point(-4, 0, 0), v100), 1).size(),
+				"Wrong number of points");
+
+		// TC11: Ray starts before the tube and "stops" at the second intersection
+		// point
+		assertEquals(2, tube.calculateIntersections(new Ray(new Point(-4, 0, 0), v100), 7).size(),
+				"Wrong number of points");
+
+		// TC11: Ray starts inside the tube and "stops" at the intersection point
+		assertEquals(1, tube.calculateIntersections(new Ray(new Point(-2, 0, 0), v100), 5).size(),
+				"Wrong number of points");
 
 	}
 }

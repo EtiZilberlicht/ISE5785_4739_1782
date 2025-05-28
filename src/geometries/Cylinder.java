@@ -1,5 +1,6 @@
 package geometries;
 
+import static primitives.Util.alignZero;
 import static primitives.Util.isZero;
 
 import java.util.Collections;
@@ -66,20 +67,21 @@ public class Cylinder extends Tube {
 	}
 
 	@Override
-	protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
+	protected List<Intersection> calculateIntersectionsHelper(Ray ray, double maxDistance) {
 		// Initialize intersections list
 		List<Point> intersections = new LinkedList<>();
 
 		// Find intersections with the infinite cylinder
 		Tube tube = new Tube(axis, radius);
 		List<Point> infiniteCylinderIntersections = tube.findIntersections(ray);
+
 		if (infiniteCylinderIntersections != null) {
 			intersections.addAll(infiniteCylinderIntersections);
 		}
 
 		intersections.removeIf(intersection -> {
 			double t = axis.getDirection().dotProduct(intersection.subtract(axis.getHead()));
-			return t <= 0d || t >= height;
+			return t <= 0d || t >= height || alignZero(intersection.distance(ray.getHead()) - maxDistance) > 0d;
 		});
 
 		// Return intersections if there are exactly 2 (so they are on the sides of the
@@ -90,7 +92,8 @@ public class Cylinder extends Tube {
 
 		// Find intersections with the bottom base
 		List<Point> bottomIntersections = bottom.findIntersections(ray);
-		if (bottomIntersections != null) {
+		if (bottomIntersections != null
+				&& alignZero(bottomIntersections.getFirst().distance(ray.getHead()) - maxDistance) <= 0d) {
 			Point intersection = bottomIntersections.get(0);
 			if (axis.getHead().distanceSquared(intersection) <= squaredRadius) {
 				intersections.add(intersection);
@@ -99,7 +102,8 @@ public class Cylinder extends Tube {
 
 		// Find intersections with the top base
 		List<Point> topIntersections = top.findIntersections(ray);
-		if (topIntersections != null) {
+		if (topIntersections != null
+				&& alignZero(topIntersections.getFirst().distance(ray.getHead()) - maxDistance) <= 0d) {
 			Point intersection = topIntersections.getFirst();
 			if (axis.getPoint(height).distanceSquared(intersection) <= squaredRadius) {
 				intersections.add(intersection);
@@ -107,9 +111,9 @@ public class Cylinder extends Tube {
 		}
 
 		// if the ray is tangent to the cylinder
-		if (intersections.size() == 2 && axis.getHead().distanceSquared(intersections.get(0)) == squaredRadius
+		if (intersections.size() == 2 && axis.getHead().distanceSquared(intersections.getFirst()) == squaredRadius
 				&& axis.getPoint(height).distanceSquared(intersections.get(1)) == squaredRadius) {
-			Vector v = intersections.get(1).subtract(intersections.get(0));
+			Vector v = intersections.get(1).subtract(intersections.getFirst());
 			if (v.normalize().equals(axis.getDirection()) || v.normalize().equals(axis.getDirection().scale(-1d)))
 				return null;
 		}
@@ -118,7 +122,7 @@ public class Cylinder extends Tube {
 		// p.distance(ray.getHead())));
 
 		if (intersections.size() == 2
-				&& intersections.get(0).distance(ray.getHead()) > intersections.get(1).distance(ray.getHead()))
+				&& intersections.getFirst().distance(ray.getHead()) > intersections.get(1).distance(ray.getHead()))
 			Collections.swap(intersections, 0, 1);
 
 		// Return null if no valid intersections found

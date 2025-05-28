@@ -35,7 +35,7 @@ public class Triangle extends Polygon {
 	}
 
 	@Override
-	protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
+	protected List<Intersection> calculateIntersectionsHelper(Ray ray, double maxDistance) {
 		Point p1 = vertices.get(0);
 		Point p2 = vertices.get(1);
 		Point p3 = vertices.get(2);
@@ -76,6 +76,6 @@ public class Triangle extends Polygon {
 
 		double t = alignZero(f * edge2.dotProduct(q));
 		Point intersection = ray.getPoint(t);
-		return (t > 0) ? List.of(new Intersection(this, intersection)) : null;
+		return t > 0 && alignZero(t - maxDistance) <= 0 ? List.of(new Intersection(this, intersection)) : null;
 	}
 }

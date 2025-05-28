@@ -26,4 +26,7 @@ public interface LightSource {
 	 * @return the normalized {@link Vector} from the light to point {@code p}
 	 */
 	public Vector getL(Point p);
+
+	public double getDistance(Point point);
+
 }

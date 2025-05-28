@@ -41,7 +41,11 @@ public abstract class Intersectable {
 	 * @return a list of {@link Intersection} objects, or {@code null} if none found
 	 */
 	public final List<Intersection> calculateIntersections(Ray ray) {
-		return calculateIntersectionsHelper(ray);
+		return calculateIntersections(ray, Double.POSITIVE_INFINITY);
+	}
+
+	public final List<Intersection> calculateIntersections(Ray ray, double maxDistance) {
+		return calculateIntersectionsHelper(ray, maxDistance);
 	}
 
 	/**
@@ -51,7 +55,7 @@ public abstract class Intersectable {
 	 * @param ray the {@link Ray} to test against the geometry
 	 * @return a list of {@link Intersection} records, or {@code null} if none
 	 */
-	protected abstract List<Intersection> calculateIntersectionsHelper(Ray ray);
+	protected abstract List<Intersection> calculateIntersectionsHelper(Ray ray, double maxDistance);
 
 	/**
 	 * Class representing a full intersection record between a ray and a geometry.

@@ -21,6 +21,8 @@ import scene.Scene;
  */
 public class SimpleRayTracer extends RayTracerBase {
 
+	private static final double DELTA = 0.1;
+
 	/**
 	 * Constructs a SimpleRayTracer for the specified scene.
 	 *
@@ -101,7 +103,7 @@ public class SimpleRayTracer extends RayTracerBase {
 	Color calcColorLocalEffects(Intersection intersection) {
 		Color color = intersection.geometry.getEmission();
 		for (LightSource lightSource : scene.lights) {
-			if (setLightSource(intersection, lightSource)) {
+			if (setLightSource(intersection, lightSource) && unshaded(intersection)) {
 				Color iL = lightSource.getIntensity(intersection.point);
 				color = color.add(iL.scale(calcDiffusive(intersection).add(calcSpecular(intersection))));
 			}
@@ -131,4 +133,15 @@ public class SimpleRayTracer extends RayTracerBase {
 		double nl = intersection.lNormal;
 		return intersection.material.kD.scale(nl < 0 ? -nl : nl);
 	}
+
+	boolean unshaded(Intersection intersection) {
+		Vector pointToLight = intersection.l.scale(-1);
+		Vector delta = intersection.normal.scale(intersection.lNormal < 0 ? DELTA : -DELTA);
+		Ray shadowRay = new Ray(intersection.point.add(delta), pointToLight);
+		var intersections = scene.geometries.calculateIntersections(shadowRay,
+				intersection.light.getDistance(intersection.point));
+		return intersections == null;
+
+	}
+
 }

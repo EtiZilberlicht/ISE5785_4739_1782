@@ -39,10 +39,12 @@ public class Sphere extends RadialGeometry {
 	}
 
 	@Override
-	protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
+	protected List<Intersection> calculateIntersectionsHelper(Ray ray, double maxDistance) {
 		Point point = ray.getHead();
+
 		if (center.equals(point))
-			return List.of(new Intersection(this, ray.getPoint(radius)));
+			return alignZero(radius) > maxDistance ? null : List.of(new Intersection(this, ray.getPoint(radius)));
+
 		Vector u = center.subtract(point);
 		double tm = ray.getDirection().dotProduct(u);
 		double dSquared = u.lengthSquared() - tm * tm;
@@ -52,11 +54,15 @@ public class Sphere extends RadialGeometry {
 			return null;
 		double th = Math.sqrt(thSquared); // always positive
 
+		double t1 = alignZero(tm - th);
 		double t2 = alignZero(tm + th); // always greater than t1
-		if (t2 <= 0)
+
+		if (t2 <= 0 || alignZero(t1 - maxDistance) > 0)
 			return null;
 
-		double t1 = alignZero(tm - th);
+		if (alignZero(t2 - maxDistance) > 0)
+			return t1 <= 0 ? null : List.of(new Intersection(this, ray.getPoint(t1)));
+
 		return t1 <= 0 ? List.of(new Intersection(this, ray.getPoint(t2)))
 				: List.of(new Intersection(this, ray.getPoint(t1)), new Intersection(this, ray.getPoint(t2)));
 	}

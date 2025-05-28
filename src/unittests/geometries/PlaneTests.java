@@ -3,13 +3,20 @@
  */
 package unittests.geometries;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 import geometries.Plane;
-import primitives.*;
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
  * Unit tests for geometries.Plane class
@@ -160,5 +167,35 @@ class PlaneTests {
 		assertNull(plane.findIntersections(new Ray(new Point(1, 0, 1), V235)),
 				"Does not return null- when ray begins in the same point which appears as reference point in the plane");
 
+	}
+
+	/**
+	 * Test method for {@link Plane#calculateIntersections(Ray, double)}.
+	 */
+	@Test
+	void testCalculateIntersections() {
+
+		// A vector used in some test cases to (1,0,0)
+		Vector v001 = new Vector(0, 0, 1);
+		// A plane for test
+		final Plane plane = new Plane(new Point(0, 0, 3), v001);
+
+		// ============ Equivalence Partitions Tests ==============
+		// TC01: Ray "stops" before the plane
+		assertNull(plane.calculateIntersections(new Ray(new Point(0, 0, 2), v001), 0.5), "ray stops before the plane");
+
+		// TC02: Ray starts before the plane and "stops" after it
+		assertEquals(1, plane.calculateIntersections(new Ray(new Point(0, 0, 2), v001), 3).size(),
+				"Wrong number of points");
+
+		// TC03: Ray starts after the plane
+		assertNull(plane.calculateIntersections(new Ray(new Point(0, 0, 4), v001), 3.5), "ray starts after the plane");
+
+		// =============== Boundary Values Tests ==================
+
+		// TC11: Ray starts before the plane and "stops" at the first intersection
+		// point
+		assertEquals(1, plane.calculateIntersections(new Ray(new Point(0, 0, 2), v001), 1).size(),
+				"Wrong number of points");
 	}
 }

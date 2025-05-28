@@ -3,14 +3,19 @@
  */
 package unittests.geometries;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import geometries.Cylinder;
-import primitives.*;
+import geometries.Tube;
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
  * Unit tests for geometries.Cylinder class
@@ -230,6 +235,58 @@ class CylinderTests {
 
 		// TC43: tangent
 		assertNull(cylinder.findIntersections(new Ray(new Point(-3, 2, 3), V100)), "Ray's line out of cylinder");
+
+	}
+
+	/**
+	 * Test method for {@link Cylinder#calculateIntersections(Ray, double)}.
+	 */
+	@Test
+	void testCalculateIntersections() {
+		// A cylinder for test
+		final Tube cylinder = new Cylinder(3, new Ray(new Point(-3, 0, 0), new Vector(1, 0, 0)), 6);
+		// A vector used in some test cases to (1,0,0)
+		Vector v100 = new Vector(1, 0, 0);
+
+		// ============ Equivalence Partitions Tests ==============
+		// TC01: Ray "stops" before the cylinder
+		assertNull(cylinder.calculateIntersections(new Ray(new Point(-6, 2.5, 0), v100), 2),
+				"ray stops before the cylinder");
+
+		// TC02: Ray starts before the cylinder and "stops" inside it
+		assertEquals(1, cylinder.calculateIntersections(new Ray(new Point(-4, 1.5, 0), v100), 3.5).size(),
+				"Wrong number of points");
+
+		// TC03: Ray starts and "stops" inside the cylinder
+		assertNull(cylinder.calculateIntersections(new Ray(new Point(-2, 0.5, 0), v100), 3.5),
+				"ray starts and stops inside the sphere");
+
+		// TC04: Ray starts inside the cylinder and "stops" after it
+		assertEquals(1, cylinder.calculateIntersections(new Ray(new Point(2, -1.5, 0), v100), 3.5).size(),
+				"Wrong number of points");
+
+		// TC05: Ray starts after the cylinder
+		assertNull(cylinder.calculateIntersections(new Ray(new Point(4, -2.5, 0), v100), 3.5),
+				"ray starts after the cylinder");
+
+		// TC06: Ray crosses the cylinder, starts before it and "stops" after it
+		assertEquals(2, cylinder.calculateIntersections(new Ray(new Point(-4, 1.5, 0), v100), 7).size(),
+				"Wrong number of points");
+
+		// =============== Boundary Values Tests ==================
+		// TC11: Ray starts before the cylinder and "stops" at the first intersection
+		// point
+		assertEquals(1, cylinder.calculateIntersections(new Ray(new Point(-4, 0, 0), v100), 1).size(),
+				"Wrong number of points");
+
+		// TC11: Ray starts before the cylinder and "stops" at the second intersection
+		// point
+		assertEquals(2, cylinder.calculateIntersections(new Ray(new Point(-4, 0, 0), v100), 7).size(),
+				"Wrong number of points");
+
+		// TC11: Ray starts inside the cylinder and "stops" at the intersection point
+		assertEquals(1, cylinder.calculateIntersections(new Ray(new Point(-2, 0, 0), v100), 5).size(),
+				"Wrong number of points");
 
 	}
 

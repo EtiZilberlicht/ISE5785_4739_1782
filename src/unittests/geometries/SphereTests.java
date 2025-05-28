@@ -3,14 +3,19 @@
  */
 package unittests.geometries;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import geometries.Sphere;
-import primitives.*;
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
  * Unit tests for geometries.Sphere class
@@ -159,6 +164,57 @@ class SphereTests {
 		final var exp8 = List.of(new Point(0.5, 0.0, 0.8660254037844386));
 		final var result8 = sphere.findIntersections(new Ray(new Point(0.5, 0, 0), v001));
 		assertEquals(exp8, result8, "Ray crosses sphere");
+	}
+
+	/**
+	 * Test method for {@link Sphere#calculateIntersections(Ray, double)}.
+	 */
+	@Test
+	void testCalculateIntersections() {
+		// A sphere for test
+		final Sphere sphere = new Sphere(3, Point.ZERO);
+		// A vector used in some test cases to (1,0,0)
+		Vector v100 = new Vector(1, 0, 0);
+
+		// ============ Equivalence Partitions Tests ==============
+		// TC01: Ray "stops" before the sphere
+		assertNull(sphere.calculateIntersections(new Ray(new Point(-6, 2.5, 0), v100), 3.5),
+				"ray stops before the sphere");
+
+		// TC02: Ray starts before the sphere and "stops" inside it
+		assertEquals(1, sphere.calculateIntersections(new Ray(new Point(-4, 1.5, 0), v100), 3.5).size(),
+				"Wrong number of points");
+
+		// TC03: Ray starts and "stops" inside the sphere
+		assertNull(sphere.calculateIntersections(new Ray(new Point(-2, 0.5, 0), v100), 3.5),
+				"ray starts and stops inside the sphere");
+
+		// TC04: Ray starts inside the sphere and "stops" after it
+		assertEquals(1, sphere.calculateIntersections(new Ray(new Point(2, -1.5, 0), v100), 3.5).size(),
+				"Wrong number of points");
+
+		// TC05: Ray starts after the sphere
+		assertNull(sphere.calculateIntersections(new Ray(new Point(4, -2.5, 0), v100), 3.5),
+				"ray starts after the sphere");
+
+		// TC06: Ray crosses the sphere, starts before it and "stops" after it
+		assertEquals(2, sphere.calculateIntersections(new Ray(new Point(-4, 1.5, 0), v100), 7).size(),
+				"Wrong number of points");
+
+		// =============== Boundary Values Tests ==================
+		// TC11: Ray starts before the sphere and "stops" at the first intersection
+		// point
+		assertEquals(1, sphere.calculateIntersections(new Ray(new Point(-4, 0, 0), v100), 1).size(),
+				"Wrong number of points");
+
+		// TC11: Ray starts before the sphere and "stops" at the second intersection
+		// point
+		assertEquals(2, sphere.calculateIntersections(new Ray(new Point(-4, 0, 0), v100), 7).size(),
+				"Wrong number of points");
+
+		// TC11: Ray starts inside the sphere and "stops" at the intersection point
+		assertEquals(1, sphere.calculateIntersections(new Ray(new Point(-2, 0, 0), v100), 5).size(),
+				"Wrong number of points");
 	}
 
 }

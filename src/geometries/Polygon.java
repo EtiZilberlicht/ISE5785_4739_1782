@@ -89,14 +89,14 @@ public class Polygon extends Geometry {
 	}
 
 	@Override
-	protected List<Intersection> calculateIntersectionsHelper(Ray ray) {
+	protected List<Intersection> calculateIntersectionsHelper(Ray ray, double maxDistance) {
 		// Step 1: Find intersection with the polygon's plane
-		List<Point> planeIntersections = plane.findIntersections(ray);
+		var planeIntersections = plane.calculateIntersections(ray, maxDistance);
 		if (planeIntersections == null) {
 			return null;
 		}
 
-		Point p = planeIntersections.getFirst(); // Only one intersection point with a plane
+		Point p = planeIntersections.getFirst().point; // Only one intersection point with a plane
 		Vector n = plane.getNormal(p); // Normal to the polygon's plane
 
 		// Step 2: Check if point is strictly inside the polygon (assuming convex

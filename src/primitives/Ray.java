@@ -1,5 +1,7 @@
 package primitives;
 
+import static primitives.Util.alignZero;
+
 import java.util.List;
 
 import geometries.Intersectable.Intersection;
@@ -19,6 +21,8 @@ public class Ray {
 	 */
 	private final Vector direction;
 
+	private static final double DELTA = 0.1;
+
 	/**
 	 * Constructs a ray with the specified head point and direction vector. The
 	 * direction vector is normalized upon construction.
@@ -29,6 +33,12 @@ public class Ray {
 	public Ray(Point head, Vector direction) {
 		this.head = head;
 		this.direction = direction.normalize();
+	}
+
+	public Ray(Point head, Vector direction, Vector n) {
+		double dotP = alignZero(n.dotProduct(direction));
+		this.head = dotP == 0 ? head : head.add(n.scale((dotP) > 0 ? DELTA : -DELTA));
+		this.direction = direction;
 	}
 
 	/**
@@ -115,4 +125,5 @@ public class Ray {
 		}
 		return closestIntersection;
 	}
+
 }

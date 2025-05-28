@@ -30,6 +30,10 @@ public class Material {
 	 */
 	public int nSH = 0;
 
+	public Double3 kT = Double3.ZERO;
+
+	public Double3 kR = Double3.ZERO;
+
 	/**
 	 * Default constructor that initializes material with default values.
 	 */
@@ -110,6 +114,26 @@ public class Material {
 	 */
 	public Material setShininess(int nSH) {
 		this.nSH = nSH;
+		return this;
+	}
+
+	public Material setKT(Double3 kT) {
+		this.kT = kT;
+		return this;
+	}
+
+	public Material setKT(double kT) {
+		this.kT = new Double3(kT);
+		return this;
+	}
+
+	public Material setKR(Double3 kR) {
+		this.kR = kR;
+		return this;
+	}
+
+	public Material setKR(double kR) {
+		this.kR = new Double3(kR);
 		return this;
 	}
 }

@@ -1,6 +1,7 @@
 package scene;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -16,8 +17,13 @@ import geometries.Geometry;
 import geometries.Sphere;
 import geometries.Triangle;
 import lighting.AmbientLight;
+import lighting.DirectionalLight;
+import lighting.LightSource;
+import lighting.PointLight;
+import lighting.SpotLight;
 import primitives.Color;
 import primitives.Point;
+import primitives.Vector;
 
 /**
  * The {@code XmlScene} class provides functionality to load a 3D scene
@@ -65,6 +71,11 @@ public class XmlScene {
 			Element geometriesElem = (Element) sceneElem.getElementsByTagName("geometries").item(0);
 			scene.setGeometries(parseGeometries(geometriesElem));
 		}
+
+		if (sceneElem.getElementsByTagName("lights").getLength() > 0) {
+			Element lightsElem = (Element) sceneElem.getElementsByTagName("lights").item(0);
+			scene.setLights(parseLights(lightsElem));
+		}
 	}
 
 	/**
@@ -101,6 +112,37 @@ public class XmlScene {
 		return geometries;
 	}
 
+	private static List<LightSource> parseLights(Element lightsElem) {
+		List<LightSource> lightSources = new LinkedList<>();
+		NodeList lightNodes = lightsElem.getChildNodes();
+		List<Element> elements = IntStream.range(0, lightNodes.getLength()).mapToObj(i -> lightNodes.item(i))
+				.filter(n -> n instanceof Element).map(n -> (Element) n).toList();
+		LightSource l;
+		for (Element lightElem : elements) {
+			switch (lightElem.getTagName()) {
+			case "directional":
+				Color intensityDirect = parseColor(lightElem.getAttribute("intensity"));
+				Vector directionDirect = parseVector(lightElem.getAttribute("direction"));
+				l = new DirectionalLight(intensityDirect, directionDirect);
+				break;
+			case "point":
+				Color intensityPoint = parseColor(lightElem.getAttribute("intensity"));
+				Point positionPoint = parsePoint(lightElem.getAttribute("position"));
+				l = new PointLight(intensityPoint, positionPoint);
+				break;
+			case "spot":
+				Color intensitySpot = parseColor(lightElem.getAttribute("intensity"));
+				Point positionSpot = parsePoint(lightElem.getAttribute("position"));
+				Vector directionSpot = parseVector(lightElem.getAttribute("direction"));
+				l = new SpotLight(intensitySpot, positionSpot, directionSpot);
+			default:
+				throw new IllegalArgumentException("Unknown geometry: " + lightElem.getTagName());
+			}
+			lightSources.add(l);
+		}
+		return lightSources;
+	}
+
 	/**
 	 * Parses a color string in the format "R G B" into a {@link Color} object.
 	 *
@@ -121,6 +163,11 @@ public class XmlScene {
 	private static Point parsePoint(String s) {
 		double[] vals = parseDoubles(s);
 		return new Point(vals[0], vals[1], vals[2]);
+	}
+
+	private static Vector parseVector(String s) {
+		double[] vals = parseDoubles(s);
+		return new Vector(vals[0], vals[1], vals[2]);
 	}
 
 	/**

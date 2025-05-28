@@ -1,5 +1,6 @@
 package lighting;
 
+import static java.lang.Math.pow;
 import static primitives.Util.alignZero;
 
 import primitives.Color;
@@ -76,8 +77,7 @@ public class SpotLight extends PointLight {
 	@Override
 	public Color getIntensity(Point p) {
 		double dirL = alignZero(direction.dotProduct(getL(p)));
-		dirL = Math.pow(dirL, narrowBeam);
-		return dirL <= 0 ? Color.BLACK : super.getIntensity(p).scale(dirL);
+		return dirL <= 0 ? Color.BLACK : super.getIntensity(p).scale(pow(dirL, narrowBeam));
 	}
 
 	/**

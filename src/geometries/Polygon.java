@@ -96,8 +96,8 @@ public class Polygon extends Geometry {
 			return null;
 		}
 
-		Point p = planeIntersections.get(0); // Only one intersection point with a plane
-		Vector n = plane.getNormal(Point.ZERO); // Normal to the polygon's plane
+		Point p = planeIntersections.getFirst(); // Only one intersection point with a plane
+		Vector n = plane.getNormal(p); // Normal to the polygon's plane
 
 		// Step 2: Check if point is strictly inside the polygon (assuming convex
 		// polygon)

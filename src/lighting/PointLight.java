@@ -51,7 +51,7 @@ public class PointLight extends Light implements LightSource {
 	 * @param kC the constant attenuation value
 	 * @return this {@code PointLight} instance for method chaining
 	 */
-	public PointLight setkC(double kC) {
+	public PointLight setKC(double kC) {
 		this.kC = kC;
 		return this;
 	}

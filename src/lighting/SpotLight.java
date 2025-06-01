@@ -48,7 +48,7 @@ public class SpotLight extends PointLight {
 	 * @return this spotlight instance for method chaining
 	 */
 	public SpotLight setKC(double kC) {
-		super.setkC(kC);
+		super.setKC(kC);
 		return this;
 	}
 

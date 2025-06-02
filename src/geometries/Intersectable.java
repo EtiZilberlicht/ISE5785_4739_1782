@@ -44,16 +44,34 @@ public abstract class Intersectable {
 		return calculateIntersections(ray, Double.POSITIVE_INFINITY);
 	}
 
+	/**
+	 * Calculates the intersection points between the given {@link Ray} and the
+	 * geometry, up to a specified maximum distance from the ray's origin.
+	 * <p>
+	 * This method delegates the actual computation to
+	 * {@code calculateIntersectionsHelper}.
+	 *
+	 * @param ray         the ray to intersect with the geometry
+	 * @param maxDistance the maximum distance from the ray's origin to consider
+	 *                    intersections
+	 * @return a list of {@link Intersection} objects representing the intersection
+	 *         points, or {@code null} if there are no intersections within the
+	 *         given distance
+	 */
 	public final List<Intersection> calculateIntersections(Ray ray, double maxDistance) {
 		return calculateIntersectionsHelper(ray, maxDistance);
 	}
 
 	/**
-	 * Template method to be implemented by each specific geometry. Calculates full
-	 * intersection data including geometry, point, and material.
+	 * Calculates all intersection points between the given {@link Ray} and the
+	 * geometry, up to a specified maximum distance.
 	 *
-	 * @param ray the {@link Ray} to test against the geometry
-	 * @return a list of {@link Intersection} records, or {@code null} if none
+	 * @param ray         the ray to intersect with the geometry
+	 * @param maxDistance the maximum allowed distance for intersection points from
+	 *                    the ray origin
+	 * @return a list of {@link Intersection} objects representing the intersection
+	 *         points, or {@code null} if there are no intersections within the
+	 *         given distance
 	 */
 	protected abstract List<Intersection> calculateIntersectionsHelper(Ray ray, double maxDistance);
 

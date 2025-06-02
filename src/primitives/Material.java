@@ -30,8 +30,20 @@ public class Material {
 	 */
 	public int nSH = 0;
 
+	/**
+	 * Transparency coefficient.
+	 * <p>
+	 * Represents how much light passes through the material. A value of
+	 * {@link Double3#ZERO} means the material is fully opaque.
+	 */
 	public Double3 kT = Double3.ZERO;
 
+	/**
+	 * Reflection coefficient.
+	 * <p>
+	 * Represents how much light is reflected from the material surface. A value of
+	 * {@link Double3#ZERO} means no reflection.
+	 */
 	public Double3 kR = Double3.ZERO;
 
 	/**
@@ -117,23 +129,48 @@ public class Material {
 		return this;
 	}
 
+	/**
+	 * Sets the transparency coefficient.
+	 *
+	 * @param kT a {@link Double3} representing the transparency level
+	 * @return the current {@link Material} instance (for method chaining)
+	 */
 	public Material setKT(Double3 kT) {
 		this.kT = kT;
 		return this;
 	}
 
+	/**
+	 * Sets the transparency coefficient using a scalar value.
+	 *
+	 * @param kT a double value representing uniform transparency in all directions
+	 * @return the current {@link Material} instance (for method chaining)
+	 */
 	public Material setKT(double kT) {
 		this.kT = new Double3(kT);
 		return this;
 	}
 
+	/**
+	 * Sets the reflection coefficient.
+	 *
+	 * @param kR a {@link Double3} representing the reflection level
+	 * @return the current {@link Material} instance (for method chaining)
+	 */
 	public Material setKR(Double3 kR) {
 		this.kR = kR;
 		return this;
 	}
 
+	/**
+	 * Sets the reflection coefficient using a scalar value.
+	 *
+	 * @param kR a double value representing uniform reflection in all directions
+	 * @return the current {@link Material} instance (for method chaining)
+	 */
 	public Material setKR(double kR) {
 		this.kR = new Double3(kR);
 		return this;
 	}
+
 }

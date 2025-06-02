@@ -72,7 +72,7 @@ public class Camera implements Cloneable {
 	/**
 	 * Optional translation vector to move the camera from its original position.
 	 */
-	private Vector translation;
+	private Vector transition;
 
 	/**
 	 * The image writer used to write pixel colors to an image file.
@@ -117,6 +117,18 @@ public class Camera implements Cloneable {
 	 */
 	public static Builder getBuilder() {
 		return new Builder();
+	}
+
+	/**
+	 * Creates a new {@link Builder} instance based on the given existing
+	 * {@link Camera}.
+	 *
+	 * @param oldCamera the camera to copy from
+	 * @return a new {@code Builder} initialized with the parameters of
+	 *         {@code oldCamera}
+	 */
+	public static Builder getBuilder(Camera oldCamera) {
+		return new Builder(oldCamera);
 	}
 
 	/**
@@ -199,12 +211,22 @@ public class Camera implements Cloneable {
 		 * default constructor
 		 */
 		public Builder() {
+			this.camera = new Camera();
+		}
+
+		/**
+		 * Constructs a Builder instance initialized with an existing Camera object.
+		 *
+		 * @param oldCamera the Camera object to initialize the builder with
+		 */
+		public Builder(Camera oldCamera) {
+			this.camera = oldCamera;
 		}
 
 		/**
 		 * The camera being built.
 		 */
-		private final Camera camera = new Camera();
+		private final Camera camera;
 
 		/**
 		 * Sets the camera's location.
@@ -329,8 +351,8 @@ public class Camera implements Cloneable {
 		 * @param move the translation vector
 		 * @return this builder instance
 		 */
-		public Builder setTranslation(Vector move) {
-			camera.translation = move;
+		public Builder setTransition(Vector move) {
+			camera.transition = move;
 			return this;
 		}
 
@@ -402,14 +424,53 @@ public class Camera implements Cloneable {
 				camera.rayTracer = new SimpleRayTracer(null);
 
 			if (!isZero(camera.rotationAngleDegrees)) {
-				double angleRad = Math.toRadians(camera.rotationAngleDegrees);
-				// need to calculate vRight here too?
-				Vector vUpRotated = camera.vUp.scale(Math.cos(angleRad)).add(camera.vRight.scale(Math.sin(angleRad)));
-				camera.vUp = vUpRotated.normalize();
+				double angleDeg = camera.rotationAngleDegrees % 360;
+				if (angleDeg < 0)
+					angleDeg += 360;
+
+				// ודא ש-vRight קיים
+				if (camera.vRight == null || isZero(camera.vRight.lengthSquared())) {
+					camera.vRight = camera.vTo.crossProduct(camera.vUp).normalize();
+				}
+
+				Vector newUp, newRight;
+
+				if (isZero(angleDeg - 90)) {
+					newUp = camera.vRight;
+					newRight = camera.vUp.scale(-1);
+				} else if (isZero(angleDeg - 180)) {
+					newUp = camera.vUp.scale(-1);
+					newRight = camera.vRight.scale(-1);
+				} else if (isZero(angleDeg - 270)) {
+					newUp = camera.vRight.scale(-1);
+					newRight = camera.vUp;
+				} else {
+					double angleRad = Math.toRadians(angleDeg);
+					double cos = Math.cos(angleRad);
+					double sin = Math.sin(angleRad);
+
+					newUp = camera.vUp.scale(cos).add(camera.vRight.scale(sin));
+					newRight = camera.vRight.scale(cos).subtract(camera.vUp.scale(sin));
+
+					if (isZero(newUp.lengthSquared()) || isZero(newRight.lengthSquared()))
+						throw new IllegalStateException("Zero vector created in camera rotation");
+				}
+
+				camera.vUp = newUp.normalize();
+				camera.vRight = newRight.normalize();
 			}
 
-			if (camera.translation != null)
-				camera.cameraPoint = camera.cameraPoint.add(camera.translation);
+			if (camera.transition != null) {
+
+				camera.cameraPoint = camera.cameraPoint.add(camera.transition);
+				Vector to = camera.viewPlanePC.subtract(camera.cameraPoint).normalize();
+				Vector right = to.crossProduct(camera.vUp).normalize();
+				Vector up = right.crossProduct(to).normalize();
+				camera.vTo = to;
+				camera.vUp = up;
+				camera.vRight = right;
+				camera.distance = camera.cameraPoint.distance(camera.viewPlanePC);
+			}
 
 			try {
 				return (Camera) camera.clone();

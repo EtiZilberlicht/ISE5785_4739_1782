@@ -112,6 +112,27 @@ public class XmlScene {
 		return geometries;
 	}
 
+	/**
+	 * Parses the given XML element representing a list of lights and constructs a
+	 * list of corresponding LightSource objects.
+	 * <p>
+	 * Supports three types of lights identified by their XML tags:
+	 * <ul>
+	 * <li><b>directional</b> - requires "intensity" and "direction"
+	 * attributes.</li>
+	 * <li><b>point</b> - requires "intensity" and "position" attributes.</li>
+	 * <li><b>spot</b> - requires "intensity", "position", and "direction"
+	 * attributes.</li>
+	 * </ul>
+	 * Each light is created by parsing its attributes and instantiating the
+	 * corresponding LightSource subclass.
+	 * <p>
+	 * Throws IllegalArgumentException if an unknown light type is encountered.
+	 *
+	 * @param lightsElem the XML element containing light source child elements
+	 * @return a list of LightSource objects parsed from the XML element
+	 * @throws IllegalArgumentException if an unknown light type is specified
+	 */
 	private static List<LightSource> parseLights(Element lightsElem) {
 		List<LightSource> lightSources = new LinkedList<>();
 		NodeList lightNodes = lightsElem.getChildNodes();
@@ -165,6 +186,18 @@ public class XmlScene {
 		return new Point(vals[0], vals[1], vals[2]);
 	}
 
+	/**
+	 * Parses a string representing a 3D vector and returns the corresponding Vector
+	 * object.
+	 * <p>
+	 * The input string is expected to contain three double values separated by
+	 * commas or spaces, which represent the x, y, and z components of the vector.
+	 *
+	 * @param s the string containing the vector components
+	 * @return a Vector constructed from the parsed components
+	 * @throws IllegalArgumentException if the input string does not contain exactly
+	 *                                  three numeric values
+	 */
 	private static Vector parseVector(String s) {
 		double[] vals = parseDoubles(s);
 		return new Vector(vals[0], vals[1], vals[2]);

@@ -21,6 +21,16 @@ public class Ray {
 	 */
 	private final Vector direction;
 
+	/**
+	 * A small constant value used to slightly offset the ray's starting point in
+	 * the direction of the surface normal to prevent self-intersections caused by
+	 * floating-point precision errors.
+	 *
+	 * <p>
+	 * Commonly used in reflection and refraction rays to avoid "shadow acne" and
+	 * other rendering artifacts.
+	 * </p>
+	 */
 	private static final double DELTA = 0.1;
 
 	/**
@@ -35,6 +45,21 @@ public class Ray {
 		this.direction = direction.normalize();
 	}
 
+	/**
+	 * Constructs a ray with a slight offset from the original head point in the
+	 * direction of the normal vector {@code n}, to avoid self-intersection issues
+	 * (commonly used in reflection/refraction).
+	 *
+	 * <p>
+	 * If the dot product between {@code n} and {@code direction} is positive, the
+	 * ray is shifted slightly along {@code n}, otherwise it is shifted in the
+	 * opposite direction.
+	 * </p>
+	 *
+	 * @param head      the original head point of the ray
+	 * @param direction the direction vector of the ray
+	 * @param n         the normal vector used to offset the ray head
+	 */
 	public Ray(Point head, Vector direction, Vector n) {
 		double dotP = alignZero(n.dotProduct(direction));
 		this.head = dotP == 0 ? head : head.add(n.scale((dotP) > 0 ? DELTA : -DELTA));

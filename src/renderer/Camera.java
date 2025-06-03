@@ -428,11 +428,6 @@ public class Camera implements Cloneable {
 				if (angleDeg < 0)
 					angleDeg += 360;
 
-				// ודא ש-vRight קיים
-				if (camera.vRight == null || isZero(camera.vRight.lengthSquared())) {
-					camera.vRight = camera.vTo.crossProduct(camera.vUp).normalize();
-				}
-
 				Vector newUp, newRight;
 
 				if (isZero(angleDeg - 90)) {
@@ -451,9 +446,6 @@ public class Camera implements Cloneable {
 
 					newUp = camera.vUp.scale(cos).add(camera.vRight.scale(sin));
 					newRight = camera.vRight.scale(cos).subtract(camera.vUp.scale(sin));
-
-					if (isZero(newUp.lengthSquared()) || isZero(newRight.lengthSquared()))
-						throw new IllegalStateException("Zero vector created in camera rotation");
 				}
 
 				camera.vUp = newUp.normalize();

@@ -218,7 +218,7 @@ class ReflectionRefractionTests {
 		Material baseMaterial = new Material().setKD(0.4).setKS(0.2).setKT(0.3).setShininess(80);
 
 		// Decorative triangle material
-		Material triangleMaterial = new Material().setKD(0.4).setKD(0.2).setKS(0.7).setShininess(200).setKT(0.4) // Transparency
+		Material triangleMaterial = new Material().setKD(0.2).setKS(0.7).setShininess(200).setKT(0.4) // Transparency
 				.setKR(0.3);
 
 		// Cue stick material

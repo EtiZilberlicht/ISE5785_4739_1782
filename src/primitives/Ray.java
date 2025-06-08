@@ -57,7 +57,7 @@ public class Ray {
 	 * </p>
 	 *
 	 * @param head      the original head point of the ray
-	 * @param direction the direction vector of the ray
+	 * @param direction the direction vector of the ray - must be normalized ahead
 	 * @param n         the normal vector used to offset the ray head
 	 */
 	public Ray(Point head, Vector direction, Vector n) {

@@ -3,6 +3,9 @@ package lighting;
 import static java.lang.Math.pow;
 import static primitives.Util.alignZero;
 
+import java.util.List;
+
+import geometries.Plane;
 import primitives.Color;
 import primitives.Point;
 import primitives.Vector;
@@ -28,6 +31,8 @@ public class SpotLight extends PointLight {
 	 */
 	private double narrowBeam = 1;
 
+	private final Plane plane;
+
 	/**
 	 * Constructs a spotlight with specified intensity, position, and direction.
 	 *
@@ -39,6 +44,7 @@ public class SpotLight extends PointLight {
 	public SpotLight(Color intensity, Point position, Vector direction) {
 		super(intensity, position);
 		this.direction = direction.normalize();
+		this.plane = new Plane(position, direction);
 	}
 
 	/**
@@ -93,6 +99,10 @@ public class SpotLight extends PointLight {
 	public SpotLight setNarrowBeam(double narrowBeam) {
 		this.narrowBeam = narrowBeam;
 		return this;
+	}
+
+	public List<Vector> getLBeam(Point p) {
+		return blackboard.vectorBeam(this.position, p, this.plane);
 	}
 
 }

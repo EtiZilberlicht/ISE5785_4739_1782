@@ -1,5 +1,7 @@
 package lighting;
 
+import java.util.List;
+
 import primitives.Color;
 import primitives.Point;
 import primitives.Vector;
@@ -34,5 +36,7 @@ public interface LightSource {
 	 * @return the distance between the light source and the given point
 	 */
 	public double getDistance(Point point);
+
+	public List<Vector> getLBeam(Point p);
 
 }

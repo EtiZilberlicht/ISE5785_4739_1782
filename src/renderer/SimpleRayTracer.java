@@ -3,6 +3,8 @@ package renderer;
 import static primitives.Util.alignZero;
 import static primitives.Util.isZero;
 
+import java.util.List;
+
 import geometries.Intersectable.Intersection;
 import lighting.LightSource;
 import primitives.Color;
@@ -37,6 +39,13 @@ public class SimpleRayTracer extends RayTracerBase {
 	 * Initial attenuation factor for color calculations.
 	 */
 	private static final Double3 INITIAL_K = Double3.ONE;
+
+	private boolean useSoftShadow = false;
+
+	public SimpleRayTracer setUseSoftShadow(boolean useSoftShadow) {
+		this.useSoftShadow = useSoftShadow;
+		return this;
+	}
 
 	/**
 	 * Constructs a SimpleRayTracer for the given scene.
@@ -117,9 +126,9 @@ public class SimpleRayTracer extends RayTracerBase {
 	 * @return true if the light is on the same side as the viewing vector and
 	 *         contributes to lighting
 	 */
-	private boolean setLightSource(Intersection intersection, LightSource light) {
+	private boolean setLightSource(Intersection intersection, LightSource light, Vector l) {
 		intersection.light = light;
-		intersection.l = light.getL(intersection.point);
+		intersection.l = l;
 		intersection.lNormal = intersection.l.dotProduct(intersection.normal);
 		return alignZero(intersection.lNormal) * intersection.vNormal > 0;
 	}
@@ -135,14 +144,22 @@ public class SimpleRayTracer extends RayTracerBase {
 	 */
 	Color calcColorLocalEffects(Intersection intersection, Double3 k) {
 		Color color = intersection.geometry.getEmission();
+		Color tempColor = Color.BLACK;
 		for (LightSource lightSource : scene.lights) {
-			if (!setLightSource(intersection, lightSource))
-				continue;
-			Double3 ktr = transparency(intersection);
-			if (!ktr.product(k).lowerThan(MIN_CALC_COLOR_K)) {
-				Color iL = lightSource.getIntensity(intersection.point).scale(ktr);
-				color = color.add(iL.scale(calcDiffusive(intersection).add(calcSpecular(intersection))));
+			List<Vector> vectors = (!useSoftShadow) ? List.of(lightSource.getL(intersection.point))
+					: lightSource.getLBeam(intersection.point);
+			for (Vector l : vectors) {
+				if (!setLightSource(intersection, lightSource, l))
+					continue;
+				Double3 ktr = (transparency(intersection));
+
+				if (!ktr.product(k).lowerThan(MIN_CALC_COLOR_K)) {
+					Color iL = lightSource.getIntensity(intersection.point).scale(ktr);
+					tempColor = tempColor.add(iL.scale(calcDiffusive(intersection).add(calcSpecular(intersection))));
+				}
 			}
+			int reduceBy = vectors.size();
+			color = color.add((!useSoftShadow) ? tempColor : tempColor.reduce(reduceBy/* > 0 ? reduceBy : 1 */));
 		}
 		return color;
 	}
@@ -177,6 +194,7 @@ public class SimpleRayTracer extends RayTracerBase {
 	 * @param intersection the intersection to test for shading
 	 * @return true if no occluding geometry blocks the light, false otherwise
 	 */
+	@SuppressWarnings("unused")
 	boolean unshaded(Intersection intersection) {
 		Vector pointToLight = intersection.l.scale(-1);
 		Ray shadowRay = new Ray(intersection.point, pointToLight, intersection.normal);

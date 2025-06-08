@@ -377,6 +377,20 @@ public class Camera implements Cloneable {
 			return this;
 		}
 
+		public Builder setRayTracer(Scene scene, RayTracerType type, boolean useSoftShadow) {
+			switch (type) {
+			case RayTracerType.SIMPLE:
+				camera.rayTracer = new SimpleRayTracer(scene).setUseSoftShadow(useSoftShadow);
+				break;
+			case RayTracerType.GRID:
+				camera.rayTracer = null;
+				break;
+			default:
+				break;
+			}
+			return this;
+		}
+
 		/**
 		 * Validates and builds the {@link Camera} instance.
 		 *

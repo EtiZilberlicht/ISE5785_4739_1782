@@ -120,7 +120,7 @@ class ShadowTests {
 						.setKL(4E-4).setKQ(2E-5));
 
 		camera//
-				.setResolution(600, 600) //
+				.setResolution(600, 600)//
 				.build() //
 				.renderImage() //
 				.writeToImage("shadowTrianglesSphere");

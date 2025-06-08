@@ -1,8 +1,12 @@
 package lighting;
 
+import java.util.List;
+
+import geometries.Plane;
 import primitives.Color;
 import primitives.Point;
 import primitives.Vector;
+import renderer.Blackboard;
 
 /**
  * Represents a point light source that emits light from a specific position in
@@ -18,6 +22,8 @@ public class PointLight extends Light implements LightSource {
 	 * The position of the point light in 3D space.
 	 */
 	protected final Point position;
+
+	protected final Blackboard blackboard = new Blackboard();
 
 	/**
 	 * Constant attenuation factor.
@@ -98,4 +104,11 @@ public class PointLight extends Light implements LightSource {
 	public double getDistance(Point point) {
 		return point.distance(position);
 	}
+
+	@Override
+	public List<Vector> getLBeam(Point p) {
+		Plane plane = new Plane(position, getL(p));
+		return blackboard.vectorBeam(position, p, plane);
+	}
+
 }

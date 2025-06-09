@@ -95,7 +95,7 @@ public class Blackboard {
 		List<Vector> vectors = new ArrayList<>();
 		Vector v1 = plane.getV1();
 		Vector v2 = plane.getV2();
-		Point startPoint = position.add(v1.scale(-gridSize / 2.0)).add(v2.normalize().scale(-gridSize / 2.0));
+		Point startPoint = position.add(v1.scale(-gridSize / 2d)).add(v2.normalize().scale(-gridSize / 2d));
 		for (int i = 0; i < dividedRays; i++) {
 			for (int j = 0; j < dividedRays; j++) {
 

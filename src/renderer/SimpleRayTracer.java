@@ -139,27 +139,7 @@ public class SimpleRayTracer extends RayTracerBase {
 	 * @param k            attenuation factor to scale light intensity
 	 * @return the resulting color from local lighting effects
 	 */
-//	Color calcColorLocalEffects(Intersection intersection, Double3 k) {
-//		Color color = intersection.geometry.getEmission();
-//		Color tempColor = Color.BLACK;
-//		for (LightSource lightSource : scene.lights) {
-//			List<Vector> vectors = (!useSoftShadow) ? List.of(lightSource.getL(intersection.point))
-//					: lightSource.getLBeam(intersection.point);
-//			for (Vector l : vectors) {
-//				if (!setLightSource(intersection, lightSource, l))
-//					continue;
-//				Double3 ktr = (transparency(intersection));
-//
-//				if (!ktr.product(k).lowerThan(MIN_CALC_COLOR_K)) {
-//					Color iL = lightSource.getIntensity(intersection.point).scale(ktr);
-//					tempColor = tempColor.add(iL.scale(calcDiffusive(intersection).add(calcSpecular(intersection))));
-//				}
-//			}
-//			int reduceBy = vectors.size();
-//			color = color.add((!useSoftShadow) ? tempColor : tempColor.reduce(reduceBy > 0 ? reduceBy : 1));
-//		}
-//		return color;
-//	}
+
 	Color calcColorLocalEffects(Intersection intersection, Double3 k) {
 
 		Color color = intersection.geometry.getEmission();
@@ -167,7 +147,6 @@ public class SimpleRayTracer extends RayTracerBase {
 		for (LightSource lightSource : scene.lights) {
 			List<Vector> vectors = lightSource.getLBeam(intersection.point);
 			if (vectors.size() == 1) {
-				// מצב רגיל - קרן אחת
 				Vector l = vectors.getFirst();
 				if (!setLightSource(intersection, lightSource, l))
 					continue;
@@ -177,7 +156,6 @@ public class SimpleRayTracer extends RayTracerBase {
 					color = color.add(iL.scale(calcDiffusive(intersection).add(calcSpecular(intersection))));
 				}
 			} else {
-				// צל רך - ממוצע קרניים
 				Color tempColor = Color.BLACK;
 				for (Vector l : vectors) {
 					if (!setLightSource(intersection, lightSource, l))

@@ -22,8 +22,10 @@ public class Plane extends Geometry {
 	/** The normal vector to the plane. */
 	private final Vector normal;
 
+	/** First vector lying on the plane, orthogonal to the normal and to v2. */
 	private final Vector v1;
 
+	/** Second vector lying on the plane, orthogonal to the normal and to v1. */
 	private final Vector v2;
 
 	/**
@@ -64,14 +66,18 @@ public class Plane extends Geometry {
 	}
 
 	/**
-	 * @return the v1
+	 * Returns the first vector lying on the plane (orthogonal to normal and v2).
+	 *
+	 * @return the first in-plane {@link Vector}
 	 */
 	public Vector getV1() {
 		return v1;
 	}
 
 	/**
-	 * @return the v2
+	 * Returns the second vector lying on the plane (orthogonal to normal and v1).
+	 *
+	 * @return the second in-plane {@link Vector}
 	 */
 	public Vector getV2() {
 		return v2;
@@ -95,6 +101,14 @@ public class Plane extends Geometry {
 		return t <= 0 || alignZero(t - maxDistance) > 0 ? null : List.of(new Intersection(this, ray.getPoint(t)));
 	}
 
+	/**
+	 * Computes two orthonormal vectors that lie on the plane and are perpendicular
+	 * to the normal. These vectors can be used to span the plane or generate
+	 * coordinate systems.
+	 *
+	 * @return a {@link List} of two {@link Vector} instances (v1, v2) lying on the
+	 *         plane
+	 */
 	public List<Vector> getPlaneVectors() {
 		// Normalize the normal vector to ensure unit length
 		Vector n = normal.normalize();

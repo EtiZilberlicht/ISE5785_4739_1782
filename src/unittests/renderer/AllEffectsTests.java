@@ -7,7 +7,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import geometries.Cylinder;
-import geometries.Geometry;
 import geometries.Polygon;
 import geometries.Sphere;
 import geometries.Triangle;
@@ -23,6 +22,13 @@ import renderer.Camera;
 import renderer.RayTracerType;
 import scene.Scene;
 
+/**
+ * This class contains unit tests for rendering a billiards scene with all
+ * visual effects: lighting, materials, reflections, transparency, and geometric
+ * arrangements. It sets up a complete scene including billiard balls, a cue
+ * stick, a pool table, and lighting sources. The rendered scene demonstrates
+ * advanced rendering capabilities.
+ */
 public class AllEffectsTests {
 	/** Default constructor to satisfy JavaDoc generator */
 	AllEffectsTests() {
@@ -32,7 +38,7 @@ public class AllEffectsTests {
 	private final Scene scene = new Scene("Test scene");
 	/** Camera builder for the tests with triangles */
 	private final Camera.Builder cameraBuilder = Camera.getBuilder() //
-			.setRayTracer(scene, RayTracerType.SIMPLE, true);
+			.setRayTracer(scene, RayTracerType.SIMPLE).setMultithreading(5);
 
 	/**
 	 * An array holding the Sphere objects representing billiard balls. Each Sphere
@@ -251,7 +257,7 @@ public class AllEffectsTests {
 
 				new DirectionalLight(new Color(WHITE), new Vector(-50, 30, -20)),
 				new DirectionalLight(new Color(WHITE), new Vector(60, 30, -10)),
-				new PointLight(new Color(WHITE), new Point(30, 70, 0)).setKL(0.0001).setKQ(0.001),
+				new PointLight(new Color(WHITE), new Point(30, 70, 0)).setKL(0.0001).setKQ(0.0002),
 				new SpotLight(new Color(WHITE), new Point(25, 15, 10), new Vector(1, 1, -2)).setKL(0.0002)
 						.setKQ(0.0003),
 				new SpotLight(new Color(WHITE), new Point(0, 100, -100), new Vector(0, -1, 1)).setNarrowBeam(15)
@@ -264,107 +270,107 @@ public class AllEffectsTests {
 				.setResolution(2000, 2000).build().renderImage().writeToImage("Original image_billiards");
 
 		Camera.getBuilder(oldCamera) //
-				.setRayTracer(scene, RayTracerType.SIMPLE).setTransition(new Vector(400, 100, 100)).build()
-				.renderImage().writeToImage("Transition image_billiard");
+				.setTransition(new Vector(400, 100, 100)).build().renderImage()
+				.writeToImage("Transition image_billiard");
 
 		Camera.getBuilder(oldCamera) //
-				.setRayTracer(scene, RayTracerType.SIMPLE).setTransition(new Vector(-400, -100, -100)).setRotation(30)
-				.build().renderImage().writeToImage("Rotation image_billiard");
+				.setTransition(new Vector(-400, -100, -100)).setRotation(30).build().renderImage()
+				.writeToImage("Rotation image_billiard");
 
 		Camera.getBuilder(oldCamera) //
-				.setRayTracer(scene, RayTracerType.SIMPLE).setTransition(new Vector(100, 400, 200)).build()
-				.renderImage().writeToImage("Both Transition and Rotation image_billiard");
-
-	}
-
-	private Geometry rectangle(double i, double j, double len, double z, Color c) {
-		return new Polygon(new Point(i, j, z), new Point(i, j + 5, z), new Point(i + len, j + 5, z),
-				new Point(i + len, j, z)).setEmission(c).setMaterial(new Material().setKR(0.4));
-	}
-
-	private Geometry[] allFrame(Point[] points, double surface, double back, Color c) {
-		Geometry[] frame = new Geometry[17];
-		for (int i = 0; i < points.length - 1; i++)
-			frame[i] = thickness(points[i].getX(), points[i].getY(), points[i + 1].getX(), points[i + 1].getY(),
-					surface, back, c);
-		return frame;
-	}
-
-	private Geometry thickness(double ax, double ay, double bx, double by, double surface, double back, Color c) {
-		return new Polygon(new Point(ax, ay, surface), new Point(bx, by, surface), new Point(bx, by, back),
-				new Point(ax, ay, back)).setEmission(c);
-	}
-
-	@Test
-	void dino() {
-		double surface_z = -100;
-		Color surface = new Color(66, 95, 235);
-		double back_z = -120;
-		Color back = new Color(235, 0, 0);
-		Color frameColor = new Color(0, 255, 0);
-
-		scene.geometries.add(rectangle(5, 30, 40, surface_z, surface), rectangle(0, 25, 50, surface_z, surface),
-				rectangle(0, 20, 10, surface_z, surface), rectangle(15, 20, 35, surface_z, surface),
-				rectangle(0, 15, 50, surface_z, surface), rectangle(0, 10, 50, surface_z, surface),
-				rectangle(0, 5, 25, surface_z, surface), rectangle(0, 0, 40, surface_z, surface),
-				rectangle(-45, -5, 5, surface_z, surface), rectangle(-5, -5, 25, surface_z, surface),
-				rectangle(-45, -10, 5, surface_z, surface), rectangle(-10, -10, 30, surface_z, surface),
-				rectangle(-45, -15, 10, surface_z, surface), rectangle(-20, -15, 50, surface_z, surface),
-				rectangle(-45, -20, 15, surface_z, surface), rectangle(-25, -20, 45, surface_z, surface),
-				rectangle(25, -20, 5, surface_z, surface), rectangle(0, 15, 50, surface_z, surface),
-				rectangle(-45, -25, 65, surface_z, surface), rectangle(-45, -30, 65, surface_z, surface),
-				rectangle(-40, -35, 55, surface_z, surface), rectangle(-35, -40, 50, surface_z, surface),
-				rectangle(-30, -45, 40, surface_z, surface), rectangle(-25, -50, 15, surface_z, surface),
-				rectangle(-5, -50, 10, surface_z, surface), rectangle(-25, -55, 10, surface_z, surface),
-				rectangle(0, -55, 5, surface_z, surface), rectangle(-25, -60, 5, surface_z, surface),
-				rectangle(0, -60, 5, surface_z, surface), rectangle(-25, -65, 10, surface_z, surface),
-				rectangle(0, -65, 10, surface_z, surface));
-
-		scene.geometries.add(rectangle(5, 30, 40, back_z, back), rectangle(0, 25, 50, back_z, back),
-				rectangle(0, 20, 10, back_z, back), rectangle(15, 20, 35, back_z, back),
-				rectangle(0, 15, 50, back_z, back), rectangle(0, 10, 50, back_z, back),
-				rectangle(0, 5, 25, back_z, back), rectangle(0, 0, 40, back_z, back),
-				rectangle(-45, -5, 5, back_z, back), rectangle(-5, -5, 25, back_z, back),
-				rectangle(-45, -10, 5, back_z, back), rectangle(-10, -10, 30, back_z, back),
-				rectangle(-45, -15, 10, back_z, back), rectangle(-20, -15, 50, back_z, back),
-				rectangle(-45, -20, 15, back_z, back), rectangle(-25, -20, 45, back_z, back),
-				rectangle(25, -20, 5, back_z, back), rectangle(0, 15, 50, back_z, back),
-				rectangle(-45, -25, 65, back_z, back), rectangle(-45, -30, 65, back_z, back),
-				rectangle(-40, -35, 55, back_z, back), rectangle(-35, -40, 50, back_z, back),
-				rectangle(-30, -45, 40, back_z, back), rectangle(-25, -50, 15, back_z, back),
-				rectangle(-5, -50, 10, back_z, back), rectangle(-25, -55, 10, back_z, back),
-				rectangle(0, -55, 5, back_z, back), rectangle(-25, -60, 5, back_z, back),
-				rectangle(0, -60, 5, back_z, back), rectangle(-25, -65, 10, back_z, back),
-				rectangle(0, -65, 10, back_z, back));
-
-		Point[] frame = { new Point(0, 30, surface_z), new Point(5, 30, surface_z), new Point(5, 35, surface_z),
-				new Point(45, 35, surface_z), new Point(45, 30, surface_z), new Point(50, 30, surface_z),
-				new Point(50, 10, surface_z), new Point(25, 10, surface_z), new Point(25, 5, surface_z),
-				new Point(40, 5, surface_z), new Point(40, 0, surface_z), new Point(20, 0, surface_z),
-				new Point(20, -10, surface_z), new Point(30, -10, surface_z), new Point(30, -20, surface_z),
-				new Point(25, -20, surface_z), new Point(25, -15, surface_z), new Point(20, -15, surface_z)
-
-		};
-		scene.geometries.add(allFrame(frame, surface_z, back_z, frameColor));
-//		scene.geometries.add(thickness(0, 30, 5, 30, surface_z, back_z, frameColor),
-//				thickness(5, 30, 5, 35, surface_z, back_z, frameColor),
-//				thickness(5, 35, 45, 35, surface_z, back_z, frameColor),
-//				thickness(45, 35, 45, 30, surface_z, back_z, frameColor),
-//				thickness(45, 30, 50, 30, surface_z, back_z, frameColor),
-//				thickness(50, 30, 50, 10, surface_z, back_z, frameColor),
-//				thickness(50, 10, 25, 10, surface_z, back_z, frameColor),
-//				thickness(25, 10, 25, 5, surface_z, back_z, frameColor),
-//				thickness(25, 5, 40, 5, surface_z, back_z, frameColor),
-//				thickness(40, 5, 40, 0, surface_z, back_z, frameColor),
-//				thickness(40, 0, 20, 0, surface_z, back_z, frameColor),
-//				thickness(20, 0, 20, -10, surface_z, back_z, frameColor),
-//				thickness(20, -10, 30, -10, surface_z, back_z, frameColor),
-//				thickness(30, -10, 30, -20, surface_z, back_z, frameColor),
-//				thickness(30, -20, 25, -20, surface_z, back_z, frameColor));
-
-		cameraBuilder.setLocation(new Point(0, 0, 150)).setDirection(new Vector(0, 0, -1), new Vector(0, 1, 0))
-				.setVpDistance(300).setVpSize(500, 500).setResolution(500, 500).setTransition(new Vector(100, 0, 0))
-				.build().renderImage().writeToImage("dino");
+				.setTransition(new Vector(100, 400, 200)).build().renderImage()
+				.writeToImage("Both Transition and Rotation image_billiard");
 
 	}
 }
+//	private Geometry rectangle(double i, double j, double len, double z, Color c) {
+//		return new Polygon(new Point(i, j, z), new Point(i, j + 5, z), new Point(i + len, j + 5, z),
+//				new Point(i + len, j, z)).setEmission(c).setMaterial(new Material().setKR(0.4));
+//	}
+//
+//	private Geometry[] allFrame(Point[] points, double surface, double back, Color c) {
+//		Geometry[] frame = new Geometry[17];
+//		for (int i = 0; i < points.length - 1; i++)
+//			frame[i] = thickness(points[i].getX(), points[i].getY(), points[i + 1].getX(), points[i + 1].getY(),
+//					surface, back, c);
+//		return frame;
+//	}
+//
+//	private Geometry thickness(double ax, double ay, double bx, double by, double surface, double back, Color c) {
+//		return new Polygon(new Point(ax, ay, surface), new Point(bx, by, surface), new Point(bx, by, back),
+//				new Point(ax, ay, back)).setEmission(c);
+//	}
+
+//	@Test
+//	void dino() {
+//		double surface_z = -100;
+//		Color surface = new Color(66, 95, 235);
+//		double back_z = -120;
+//		Color back = new Color(235, 0, 0);
+//		Color frameColor = new Color(0, 255, 0);
+//
+//		scene.geometries.add(rectangle(5, 30, 40, surface_z, surface), rectangle(0, 25, 50, surface_z, surface),
+//				rectangle(0, 20, 10, surface_z, surface), rectangle(15, 20, 35, surface_z, surface),
+//				rectangle(0, 15, 50, surface_z, surface), rectangle(0, 10, 50, surface_z, surface),
+//				rectangle(0, 5, 25, surface_z, surface), rectangle(0, 0, 40, surface_z, surface),
+//				rectangle(-45, -5, 5, surface_z, surface), rectangle(-5, -5, 25, surface_z, surface),
+//				rectangle(-45, -10, 5, surface_z, surface), rectangle(-10, -10, 30, surface_z, surface),
+//				rectangle(-45, -15, 10, surface_z, surface), rectangle(-20, -15, 50, surface_z, surface),
+//				rectangle(-45, -20, 15, surface_z, surface), rectangle(-25, -20, 45, surface_z, surface),
+//				rectangle(25, -20, 5, surface_z, surface), rectangle(0, 15, 50, surface_z, surface),
+//				rectangle(-45, -25, 65, surface_z, surface), rectangle(-45, -30, 65, surface_z, surface),
+//				rectangle(-40, -35, 55, surface_z, surface), rectangle(-35, -40, 50, surface_z, surface),
+//				rectangle(-30, -45, 40, surface_z, surface), rectangle(-25, -50, 15, surface_z, surface),
+//				rectangle(-5, -50, 10, surface_z, surface), rectangle(-25, -55, 10, surface_z, surface),
+//				rectangle(0, -55, 5, surface_z, surface), rectangle(-25, -60, 5, surface_z, surface),
+//				rectangle(0, -60, 5, surface_z, surface), rectangle(-25, -65, 10, surface_z, surface),
+//				rectangle(0, -65, 10, surface_z, surface));
+//
+//		scene.geometries.add(rectangle(5, 30, 40, back_z, back), rectangle(0, 25, 50, back_z, back),
+//				rectangle(0, 20, 10, back_z, back), rectangle(15, 20, 35, back_z, back),
+//				rectangle(0, 15, 50, back_z, back), rectangle(0, 10, 50, back_z, back),
+//				rectangle(0, 5, 25, back_z, back), rectangle(0, 0, 40, back_z, back),
+//				rectangle(-45, -5, 5, back_z, back), rectangle(-5, -5, 25, back_z, back),
+//				rectangle(-45, -10, 5, back_z, back), rectangle(-10, -10, 30, back_z, back),
+//				rectangle(-45, -15, 10, back_z, back), rectangle(-20, -15, 50, back_z, back),
+//				rectangle(-45, -20, 15, back_z, back), rectangle(-25, -20, 45, back_z, back),
+//				rectangle(25, -20, 5, back_z, back), rectangle(0, 15, 50, back_z, back),
+//				rectangle(-45, -25, 65, back_z, back), rectangle(-45, -30, 65, back_z, back),
+//				rectangle(-40, -35, 55, back_z, back), rectangle(-35, -40, 50, back_z, back),
+//				rectangle(-30, -45, 40, back_z, back), rectangle(-25, -50, 15, back_z, back),
+//				rectangle(-5, -50, 10, back_z, back), rectangle(-25, -55, 10, back_z, back),
+//				rectangle(0, -55, 5, back_z, back), rectangle(-25, -60, 5, back_z, back),
+//				rectangle(0, -60, 5, back_z, back), rectangle(-25, -65, 10, back_z, back),
+//				rectangle(0, -65, 10, back_z, back));
+//
+//		Point[] frame = { new Point(0, 30, surface_z), new Point(5, 30, surface_z), new Point(5, 35, surface_z),
+//				new Point(45, 35, surface_z), new Point(45, 30, surface_z), new Point(50, 30, surface_z),
+//				new Point(50, 10, surface_z), new Point(25, 10, surface_z), new Point(25, 5, surface_z),
+//				new Point(40, 5, surface_z), new Point(40, 0, surface_z), new Point(20, 0, surface_z),
+//				new Point(20, -10, surface_z), new Point(30, -10, surface_z), new Point(30, -20, surface_z),
+//				new Point(25, -20, surface_z), new Point(25, -15, surface_z), new Point(20, -15, surface_z)
+//
+//		};
+//		scene.geometries.add(allFrame(frame, surface_z, back_z, frameColor));
+////		scene.geometries.add(thickness(0, 30, 5, 30, surface_z, back_z, frameColor),
+////				thickness(5, 30, 5, 35, surface_z, back_z, frameColor),
+////				thickness(5, 35, 45, 35, surface_z, back_z, frameColor),
+////				thickness(45, 35, 45, 30, surface_z, back_z, frameColor),
+////				thickness(45, 30, 50, 30, surface_z, back_z, frameColor),
+////				thickness(50, 30, 50, 10, surface_z, back_z, frameColor),
+////				thickness(50, 10, 25, 10, surface_z, back_z, frameColor),
+////				thickness(25, 10, 25, 5, surface_z, back_z, frameColor),
+////				thickness(25, 5, 40, 5, surface_z, back_z, frameColor),
+////				thickness(40, 5, 40, 0, surface_z, back_z, frameColor),
+////				thickness(40, 0, 20, 0, surface_z, back_z, frameColor),
+////				thickness(20, 0, 20, -10, surface_z, back_z, frameColor),
+////				thickness(20, -10, 30, -10, surface_z, back_z, frameColor),
+////				thickness(30, -10, 30, -20, surface_z, back_z, frameColor),
+////				thickness(30, -20, 25, -20, surface_z, back_z, frameColor));
+//
+//		cameraBuilder.setLocation(new Point(0, 0, 150)).setDirection(new Vector(0, 0, -1), new Vector(0, 1, 0))
+//				.setVpDistance(300).setVpSize(500, 500).setResolution(500, 500).setTransition(new Vector(100, 0, 0))
+//				.build().renderImage().writeToImage("dino");
+//
+//	}
+//}

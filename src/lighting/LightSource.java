@@ -37,6 +37,16 @@ public interface LightSource {
 	 */
 	public double getDistance(Point point);
 
+	/**
+	 * Returns a list of direction vectors from the light source to the given point,
+	 * used to simulate area light effects like soft shadows or blurry reflections.
+	 * Each vector represents a slightly different direction from a different point
+	 * on the light source surface.
+	 *
+	 * @param p the target point to which rays are directed
+	 * @return a list of normalized {@link Vector} instances representing beam
+	 *         directions
+	 */
 	public List<Vector> getLBeam(Point p);
 
 }

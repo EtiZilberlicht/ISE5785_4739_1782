@@ -2,6 +2,7 @@ package lighting;
 
 import static java.lang.Math.pow;
 import static primitives.Util.alignZero;
+import static primitives.Util.isZero;
 
 import java.util.List;
 
@@ -31,6 +32,15 @@ public class SpotLight extends PointLight {
 	 */
 	private double narrowBeam = 1;
 
+	/**
+	 * The plane orthogonal to the spotlight's direction, passing through its
+	 * position.
+	 * <p>
+	 * This plane is used as a reference to generate the beam of vectors for soft
+	 * shadow calculations and area lighting effects. By projecting points onto this
+	 * plane, the spotlight can simulate a spread-out light source instead of a
+	 * perfect point source.
+	 */
 	private final Plane plane;
 
 	/**
@@ -81,6 +91,13 @@ public class SpotLight extends PointLight {
 	}
 
 	@Override
+	public SpotLight setSize(int size) {
+		this.size = size;
+		this.blackboard.setGridSize(size);
+		return this;
+	}
+
+	@Override
 	public Color getIntensity(Point p) {
 		double dirL = alignZero(direction.dotProduct(getL(p)));
 		return dirL <= 0 ? Color.BLACK : super.getIntensity(p).scale(pow(dirL, narrowBeam));
@@ -102,7 +119,7 @@ public class SpotLight extends PointLight {
 	}
 
 	public List<Vector> getLBeam(Point p) {
-		return blackboard.vectorBeam(this.position, p, this.plane);
+		return isZero(size) ? List.of(getL(p)) : blackboard.vectorBeam(this.position, p, this.plane);
 	}
 
 }

@@ -1,5 +1,7 @@
 package lighting;
 
+import static primitives.Util.isZero;
+
 import java.util.List;
 
 import geometries.Plane;
@@ -23,6 +25,16 @@ public class PointLight extends Light implements LightSource {
 	 */
 	protected final Point position;
 
+	/**
+	 * The size representing the dimension or scale relevant to this geometry or
+	 * object. Initial value is 0.
+	 */
+	protected int size = 0;
+
+	/**
+	 * The blackboard instance used for managing ray grids and calculations, such as
+	 * beam generation for rendering effects.
+	 */
 	protected final Blackboard blackboard = new Blackboard();
 
 	/**
@@ -84,6 +96,27 @@ public class PointLight extends Light implements LightSource {
 		return this;
 	}
 
+	/**
+	 * Sets the size parameter and updates the blackboard's grid size accordingly.
+	 *
+	 * @param size the new size to set
+	 * @return this {@code PointLight} instance for method chaining
+	 */
+	public PointLight setSize(int size) {
+		this.size = size;
+		this.blackboard.setGridSize(size);
+		return this;
+	}
+
+	/**
+	 * Returns the size value.
+	 *
+	 * @return the size as an integer
+	 */
+	public int getSize() {
+		return size;
+	}
+
 	@Override
 	public Color getIntensity(Point p) {
 		double dSquared = p.distanceSquared(position);
@@ -108,7 +141,7 @@ public class PointLight extends Light implements LightSource {
 	@Override
 	public List<Vector> getLBeam(Point p) {
 		Plane plane = new Plane(position, getL(p));
-		return blackboard.vectorBeam(position, p, plane);
+		return isZero(size) ? List.of(getL(p)) : blackboard.vectorBeam(position, p, plane);
 	}
 
 }

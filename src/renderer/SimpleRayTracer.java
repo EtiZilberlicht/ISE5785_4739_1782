@@ -40,13 +40,6 @@ public class SimpleRayTracer extends RayTracerBase {
 	 */
 	private static final Double3 INITIAL_K = Double3.ONE;
 
-	private boolean useSoftShadow = false;
-
-	public SimpleRayTracer setUseSoftShadow(boolean useSoftShadow) {
-		this.useSoftShadow = useSoftShadow;
-		return this;
-	}
-
 	/**
 	 * Constructs a SimpleRayTracer for the given scene.
 	 *
@@ -117,14 +110,18 @@ public class SimpleRayTracer extends RayTracerBase {
 	}
 
 	/**
-	 * Sets up lighting vectors for a given light source at the intersection point
-	 * and determines if the light contributes to the illumination based on the
-	 * angle between the light and the surface normal.
+	 * Sets the light source and direction information on the given intersection,
+	 * and calculates the dot product between the light direction and the surface
+	 * normal.
 	 *
-	 * @param intersection the intersection to update
-	 * @param light        the light source affecting the intersection
-	 * @return true if the light is on the same side as the viewing vector and
-	 *         contributes to lighting
+	 * @param intersection the {@link Intersection} object to update
+	 * @param light        the {@link LightSource} illuminating the intersection
+	 * @param l            the direction {@link Vector} from the light source to the
+	 *                     intersection point
+	 * @return {@code true} if the dot product of the light direction and the
+	 *         surface normal has the same sign as the dot product of the view
+	 *         vector and the surface normal, indicating the light is on the visible
+	 *         side of the surface; {@code false} otherwise
 	 */
 	private boolean setLightSource(Intersection intersection, LightSource light, Vector l) {
 		intersection.light = light;
@@ -142,26 +139,62 @@ public class SimpleRayTracer extends RayTracerBase {
 	 * @param k            attenuation factor to scale light intensity
 	 * @return the resulting color from local lighting effects
 	 */
+//	Color calcColorLocalEffects(Intersection intersection, Double3 k) {
+//		Color color = intersection.geometry.getEmission();
+//		Color tempColor = Color.BLACK;
+//		for (LightSource lightSource : scene.lights) {
+//			List<Vector> vectors = (!useSoftShadow) ? List.of(lightSource.getL(intersection.point))
+//					: lightSource.getLBeam(intersection.point);
+//			for (Vector l : vectors) {
+//				if (!setLightSource(intersection, lightSource, l))
+//					continue;
+//				Double3 ktr = (transparency(intersection));
+//
+//				if (!ktr.product(k).lowerThan(MIN_CALC_COLOR_K)) {
+//					Color iL = lightSource.getIntensity(intersection.point).scale(ktr);
+//					tempColor = tempColor.add(iL.scale(calcDiffusive(intersection).add(calcSpecular(intersection))));
+//				}
+//			}
+//			int reduceBy = vectors.size();
+//			color = color.add((!useSoftShadow) ? tempColor : tempColor.reduce(reduceBy > 0 ? reduceBy : 1));
+//		}
+//		return color;
+//	}
 	Color calcColorLocalEffects(Intersection intersection, Double3 k) {
+
 		Color color = intersection.geometry.getEmission();
-		Color tempColor = Color.BLACK;
+
 		for (LightSource lightSource : scene.lights) {
-			List<Vector> vectors = (!useSoftShadow) ? List.of(lightSource.getL(intersection.point))
-					: lightSource.getLBeam(intersection.point);
-			for (Vector l : vectors) {
+			List<Vector> vectors = lightSource.getLBeam(intersection.point);
+			if (vectors.size() == 1) {
+				// מצב רגיל - קרן אחת
+				Vector l = vectors.getFirst();
 				if (!setLightSource(intersection, lightSource, l))
 					continue;
-				Double3 ktr = (transparency(intersection));
-
+				Double3 ktr = transparency(intersection);
 				if (!ktr.product(k).lowerThan(MIN_CALC_COLOR_K)) {
 					Color iL = lightSource.getIntensity(intersection.point).scale(ktr);
-					tempColor = tempColor.add(iL.scale(calcDiffusive(intersection).add(calcSpecular(intersection))));
+					color = color.add(iL.scale(calcDiffusive(intersection).add(calcSpecular(intersection))));
 				}
+			} else {
+				// צל רך - ממוצע קרניים
+				Color tempColor = Color.BLACK;
+				for (Vector l : vectors) {
+					if (!setLightSource(intersection, lightSource, l))
+						continue;
+					Double3 ktr = transparency(intersection);
+					if (!ktr.product(k).lowerThan(MIN_CALC_COLOR_K)) {
+						Color iL = lightSource.getIntensity(intersection.point).scale(ktr);
+						tempColor = tempColor
+								.add(iL.scale(calcDiffusive(intersection).add(calcSpecular(intersection))));
+					}
+				}
+				int reduceBy = vectors.size();
+				color = color.add(tempColor.reduce(reduceBy));
 			}
-			int reduceBy = vectors.size();
-			color = color.add((!useSoftShadow) ? tempColor : tempColor.reduce(reduceBy/* > 0 ? reduceBy : 1 */));
 		}
 		return color;
+
 	}
 
 	/**

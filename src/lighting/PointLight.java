@@ -4,7 +4,6 @@ import static primitives.Util.isZero;
 
 import java.util.List;
 
-import geometries.Plane;
 import primitives.Color;
 import primitives.Point;
 import primitives.Vector;
@@ -109,6 +108,30 @@ public class PointLight extends Light implements LightSource {
 	}
 
 	/**
+	 * Sets the number of rays to be used for soft shadow calculations by delegating
+	 * to the internal blackboard.
+	 *
+	 * @param numOfRays the number of rays to generate
+	 * @return this PointLight instance for method chaining
+	 */
+	public PointLight setNumOfRays(int numOfRays) {
+		this.blackboard.setNumOfRays(numOfRays);
+		return this;
+	}
+
+	/**
+	 * Sets the shape of the ray grid (e.g., "square" or "circle") for shadow
+	 * generation, by delegating to the internal blackboard.
+	 *
+	 * @param shape the desired shape of the ray grid
+	 * @return this PointLight instance for method chaining
+	 */
+	public PointLight setShape(String shape) {
+		this.blackboard.setShape(shape);
+		return this;
+	}
+
+	/**
 	 * Returns the size value.
 	 *
 	 * @return the size as an integer
@@ -140,8 +163,8 @@ public class PointLight extends Light implements LightSource {
 
 	@Override
 	public List<Vector> getLBeam(Point p) {
-		Plane plane = new Plane(position, getL(p));
-		return isZero(size) ? List.of(getL(p)) : blackboard.vectorBeam(position, p, plane);
+		var vectors = getL(p).getVectors();
+		return isZero(size) ? List.of(getL(p)) : blackboard.vectorBeam(position, p, vectors.getFirst(), vectors.get(1));
 	}
 
 }

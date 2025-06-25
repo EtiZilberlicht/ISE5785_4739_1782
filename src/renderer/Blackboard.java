@@ -1,11 +1,13 @@
 package renderer;
 
+import static java.lang.Math.PI;
+import static java.lang.Math.random;
+import static java.lang.Math.sqrt;
 import static primitives.Util.isZero;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
-import geometries.Plane;
 import primitives.Point;
 import primitives.Vector;
 
@@ -19,7 +21,7 @@ public class Blackboard {
 	/**
 	 * The size of the grid over the plane in world units.
 	 */
-	int gridSize = 81;
+	int gridSize = 0;
 
 	/**
 	 * The number of rays to be generated (typically a square number like 16, 25,
@@ -38,6 +40,11 @@ public class Blackboard {
 	double cellSize;
 
 	/**
+	 * The shape of the beam area: "square" (default) or "circle".
+	 */
+	String shape = "square";
+
+	/**
 	 * Default constructor. Initializes the internal grid parameters based on
 	 * default values.
 	 */
@@ -50,7 +57,7 @@ public class Blackboard {
 	 * gridSize and numOfRays.
 	 */
 	private void updateGrid() {
-		this.dividedRays = Math.sqrt(this.numOfRays);
+		this.dividedRays = sqrt(this.numOfRays);
 		this.cellSize = this.gridSize / this.dividedRays;
 	}
 
@@ -73,8 +80,32 @@ public class Blackboard {
 	 * @return this blackboard instance for method chaining
 	 */
 	public Blackboard setNumOfRays(int numOfRays) {
-		this.numOfRays = numOfRays;
+		if ("circle".equals(shape)) {
+			this.numOfRays = (int) (numOfRays * (PI / 4));
+		} else {
+			this.numOfRays = numOfRays;
+		}
 		updateGrid();
+		return this;
+	}
+
+	/**
+	 * Sets the shape of the grid area used for ray generation. Valid values are
+	 * "square" and "circle". If the shape is "circle", the number of rays is
+	 * adjusted by multiplying the current value by π/4 to compensate for the
+	 * reduced area. If an invalid value is provided, the shape defaults to
+	 * "square".
+	 *
+	 * @param shape the desired shape of the ray grid ("square" or "circle")
+	 * @return this blackboard instance for method chaining
+	 */
+	public Blackboard setShape(String shape) {
+		if ("circle".equals(shape) || "square".equals(shape)) {
+			this.shape = shape;
+			this.numOfRays = (int) (numOfRays * (PI / 4));
+		} else
+			this.shape = "square";
+
 		return this;
 	}
 
@@ -88,19 +119,28 @@ public class Blackboard {
 	 * 
 	 * @param position the center point of the grid on the plane
 	 * @param source   the origin of the rays
-	 * @param plane    the plane on which the grid is defined
+	 * @param v1       the vector on which the grid is defined
+	 * @param v2       the vector on which the grid is defined
 	 * @return list of normalized direction vectors representing the beam
 	 */
-	public List<Vector> vectorBeam(Point position, Point source, Plane plane) {
-		List<Vector> vectors = new ArrayList<>();
-		Vector v1 = plane.getV1();
-		Vector v2 = plane.getV2();
+	public List<Vector> vectorBeam(Point position, Point source, Vector v1, Vector v2) {
+		List<Vector> vectors = new LinkedList<>();
 		Point startPoint = position.add(v1.scale(-gridSize / 2d)).add(v2.normalize().scale(-gridSize / 2d));
+		double radius = gridSize / 2d;
+
 		for (int i = 0; i < dividedRays; i++) {
 			for (int j = 0; j < dividedRays; j++) {
+				double jitter1 = (i + random()) * cellSize;
+				double jitter2 = (j + random()) * cellSize;
 
-				double jitter1 = (i + Math.random()) * cellSize;
-				double jitter2 = (j + Math.random()) * cellSize;
+				double x = jitter1 - radius;
+				double y = jitter2 - radius;
+
+				// Circle filtering
+				if ("circle".equals(shape) && (x * x + y * y > radius * radius)) {
+					continue;
+				}
+
 				Point p = startPoint;
 				if (!isZero(jitter1))
 					p = p.add(v1.scale(jitter1));

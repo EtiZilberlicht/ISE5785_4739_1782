@@ -38,7 +38,7 @@ public class AllEffectsTests {
 	private final Scene scene = new Scene("Test scene");
 	/** Camera builder for the tests with triangles */
 	private final Camera.Builder cameraBuilder = Camera.getBuilder() //
-			.setRayTracer(scene, RayTracerType.SIMPLE).setMultithreading(5);
+			.setRayTracer(scene, RayTracerType.SIMPLE).setMultithreading(-1).setDebugPrint(1);
 
 	/**
 	 * An array holding the Sphere objects representing billiard balls. Each Sphere

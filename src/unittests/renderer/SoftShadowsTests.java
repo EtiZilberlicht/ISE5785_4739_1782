@@ -39,7 +39,7 @@ public class SoftShadowsTests {
 	/** Camera builder for the tests with triangles */
 
 	private final Camera.Builder cameraBuilder = Camera.getBuilder() //
-			.setRayTracer(scene, RayTracerType.SIMPLE).setMultithreading(3);
+			.setRayTracer(scene, RayTracerType.SIMPLE).setMultithreading(-1).setDebugPrint(0.1);
 
 	/**
 	 * Tests the rendering of soft shadows by constructing a scene with several
@@ -56,6 +56,7 @@ public class SoftShadowsTests {
 	 * resolution. The rendered image is saved as "softShadow.png".
 	 */
 	@Test
+//	@Disabled
 	void softShadow() {
 		Material planeMaterial = new Material().setKD(0.6) // פיזור אור
 				.setKS(0.2) // החזר מבריק קל
@@ -91,8 +92,9 @@ public class SoftShadowsTests {
 
 		scene.lights.addAll(List.of(
 				new SpotLight(new Color(800, 800, 800), new Point(110, 75, 50), new Vector(-1, -0.5, 0)).setKL(0.0004)
-						.setKQ(0.0002).setSize(81),
-				new PointLight(new Color(WHITE), new Point(0, 75, -200)).setKL(0.004).setKQ(0.0002).setSize(81)));
+						.setKQ(0.0002).setSize(81).setShape("circle"),
+				new PointLight(new Color(WHITE), new Point(0, 75, -200)).setKL(0.004).setKQ(0.0002).setSize(81)
+						.setShape("circle")));
 
 		cameraBuilder.setLocation(new Point(0, 0, 1000)) //
 				.setDirection(Point.ZERO, Vector.AXIS_Y) //

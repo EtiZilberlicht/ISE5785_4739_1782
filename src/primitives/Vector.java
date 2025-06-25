@@ -1,5 +1,7 @@
 package primitives;
 
+import java.util.List;
+
 /**
  * This class represents a vector in 3D space. A vector has direction and
  * magnitude and is defined by its endpoint.
@@ -124,5 +126,33 @@ public class Vector extends Point {
 		if (vectorLength == 1)
 			return this;
 		return new Vector(xyz.reduce(vectorLength));
+	}
+
+	/**
+	 * Computes two orthonormal vectors that lie on the plane and are perpendicular
+	 * to the normal. These vectors can be used to span the plane or generate
+	 * coordinate systems.
+	 *
+	 * @return a {@link List} of two {@link Vector} instances (v1, v2) lying on the
+	 *         plane
+	 */
+	public List<Vector> getVectors() {
+		// Normalize the normal vector to ensure unit length
+		Vector n = this.normalize();
+
+		// Choose a helper vector that is not parallel to the normal
+		// We select the axis where the normal has the smallest component
+		Vector helper = (Math.abs(n.getX()) < Math.abs(n.getY()) && Math.abs(n.getX()) < Math.abs(n.getZ()))
+				? new Vector(1, 0, 0) // x-axis
+				: (Math.abs(n.getY()) < Math.abs(n.getZ()) ? new Vector(0, 1, 0) : new Vector(0, 0, 1)); // y or z-axis
+
+		// First vector on the plane: perpendicular to both normal and helper
+		Vector v1 = n.crossProduct(helper).normalize();
+
+		// Second vector on the plane: perpendicular to both normal and v1
+		Vector v2 = n.crossProduct(v1).normalize();
+
+		// Return two orthonormal vectors that lie on the plane
+		return List.of(v1, v2);
 	}
 }

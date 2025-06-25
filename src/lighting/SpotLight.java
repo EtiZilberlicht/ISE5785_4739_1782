@@ -6,7 +6,6 @@ import static primitives.Util.isZero;
 
 import java.util.List;
 
-import geometries.Plane;
 import primitives.Color;
 import primitives.Point;
 import primitives.Vector;
@@ -33,15 +32,16 @@ public class SpotLight extends PointLight {
 	private double narrowBeam = 1;
 
 	/**
-	 * The plane orthogonal to the spotlight's direction, passing through its
-	 * position.
-	 * <p>
-	 * This plane is used as a reference to generate the beam of vectors for soft
-	 * shadow calculations and area lighting effects. By projecting points onto this
-	 * plane, the spotlight can simulate a spread-out light source instead of a
-	 * perfect point source.
+	 * A constant vector lying on the plane behind the spotlight direction. Used as
+	 * one axis of the sampling grid for soft shadow generation.
 	 */
-	private final Plane plane;
+	private Vector v1;
+
+	/**
+	 * A constant vector lying on the plane behind the spotlight direction,
+	 * orthogonal to {@code v1}, forming the second axis of the sampling grid.
+	 */
+	private Vector v2;
 
 	/**
 	 * Constructs a spotlight with specified intensity, position, and direction.
@@ -54,7 +54,9 @@ public class SpotLight extends PointLight {
 	public SpotLight(Color intensity, Point position, Vector direction) {
 		super(intensity, position);
 		this.direction = direction.normalize();
-		this.plane = new Plane(position, direction);
+		var vectors = direction.getVectors();
+		this.v1 = vectors.getFirst();
+		this.v2 = vectors.get(1);
 	}
 
 	/**
@@ -119,7 +121,7 @@ public class SpotLight extends PointLight {
 	}
 
 	public List<Vector> getLBeam(Point p) {
-		return isZero(size) ? List.of(getL(p)) : blackboard.vectorBeam(this.position, p, this.plane);
+		return isZero(size) ? List.of(getL(p)) : blackboard.vectorBeam(this.position, p, v1, v2);
 	}
 
 }

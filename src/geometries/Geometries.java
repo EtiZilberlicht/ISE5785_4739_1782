@@ -59,4 +59,31 @@ public class Geometries extends Intersectable {
 		return intersections;
 	}
 
+	@Override
+	protected AABB computeBoundingBox() {
+		if (geometries.isEmpty())
+			return null;
+
+		AABB result = null;
+		for (Intersectable geo : geometries) {
+			geo.setBoundingBoxEnabled(true);
+			AABB box = geo.getBoundingBox();
+			if (box != null) {
+				result = (result == null) ? box : result.union(box);
+			}
+
+		}
+		return result;
+
+	}
+
+	/**
+	 * Returns the list of all intersectable geometries in this collection.
+	 *
+	 * @return list of intersectables
+	 */
+	public List<Intersectable> getAll() {
+		return geometries;
+	}
+
 }

@@ -287,7 +287,7 @@ public class SimpleRayTracer extends RayTracerBase {
 	 * @param ray the ray to intersect with the scene
 	 * @return the closest intersection or null if none found
 	 */
-	private Intersection findClosestIntersection(Ray ray) {
+	protected Intersection findClosestIntersection(Ray ray) {
 		return ray.findClosestIntersection(scene.geometries.calculateIntersections(ray));
 	}
 
@@ -298,7 +298,7 @@ public class SimpleRayTracer extends RayTracerBase {
 	 * @param intersection the intersection point receiving light
 	 * @return the product of transparency coefficients along the path to the light
 	 */
-	private Double3 transparency(Intersection intersection) {
+	protected Double3 transparency(Intersection intersection) {
 		Vector pointToLight = intersection.l.scale(-1); // vector from point to light source
 		Ray ray = new Ray(intersection.point, pointToLight, intersection.normal); // shadow ray towards light
 		var intersections = scene.geometries.calculateIntersections(ray,

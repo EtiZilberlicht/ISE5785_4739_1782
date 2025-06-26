@@ -1,5 +1,8 @@
 package geometries;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import java.util.List;
 
 import lighting.LightSource;
@@ -155,4 +158,137 @@ public abstract class Intersectable {
 			return "Intersection [geometry=" + geometry + ", point=" + point + "]";
 		}
 	}
+
+	/** Indicates whether to use the bounding box for this geometry */
+	protected boolean useBoundingBox = false;
+
+	/** The bounding box for this geometry */
+	protected AABB box = null;
+
+	/**
+	 * Enables or disables the use of a bounding box for this geometry.
+	 * 
+	 * When enabled, if the bounding box has not yet been computed, it will be
+	 * computed automatically.
+	 * 
+	 * @param enabled true to enable bounding box usage, false to disable it
+	 * @return this geometry instance (for method chaining)
+	 */
+	public Intersectable setBoundingBoxEnabled(boolean enabled) {
+		useBoundingBox = enabled;
+		if (enabled && box == null) {
+			box = computeBoundingBox();
+		}
+		return this;
+	}
+
+	/**
+	 * Returns the bounding box of the geometry (if enabled).
+	 *
+	 * @return the bounding box, or null if not used
+	 */
+	public AABB getBoundingBox() {
+		return useBoundingBox ? box : null;
+	}
+
+	/**
+	 * Computes the bounding box for this geometry. Override in concrete classes.
+	 *
+	 * @return the computed bounding box
+	 */
+	protected abstract AABB computeBoundingBox();
+
+	/**
+	 * Represents an axis-aligned bounding box (AABB).
+	 */
+	public static class AABB {
+		/** The minimum corner point of the bounding box */
+		private final Point min;
+
+		/** The maximum corner point of the bounding box */
+		private final Point max;
+
+		/**
+		 * Constructs an AABB with the specified minimum and maximum points.
+		 *
+		 * @param min the minimum corner point (smallest x, y, z)
+		 * @param max the maximum corner point (largest x, y, z)
+		 */
+		public AABB(Point min, Point max) {
+			this.min = min;
+			this.max = max;
+		}
+
+		/**
+		 * Returns the minimum corner point of the bounding box.
+		 *
+		 * @return the min point
+		 */
+		public Point getMin() {
+			return min;
+		}
+
+		/**
+		 * Returns the maximum corner point of the bounding box.
+		 *
+		 * @return the max point
+		 */
+		public Point getMax() {
+			return max;
+		}
+
+		/**
+		 * Checks whether the given ray intersects this bounding box.
+		 *
+		 * @param ray the ray to test
+		 * @return true if the ray intersects the box, false otherwise
+		 */
+		public boolean intersects(Ray ray) {
+			Point origin = ray.getHead();
+			Vector dir = ray.getDirection();
+
+			double tMin = Double.NEGATIVE_INFINITY;
+			double tMax = Double.POSITIVE_INFINITY;
+
+			double[] originArr = { origin.getX(), origin.getY(), origin.getZ() };
+			double[] dirArr = { dir.getX(), dir.getY(), dir.getZ() };
+			double[] minArr = { min.getX(), min.getY(), min.getZ() };
+			double[] maxArr = { max.getX(), max.getY(), max.getZ() };
+
+			for (int i = 0; i < 3; i++) {
+				if (dirArr[i] == 0) {
+					if (originArr[i] < minArr[i] || originArr[i] > maxArr[i])
+						return false;
+				} else {
+					double t1 = (minArr[i] - originArr[i]) / dirArr[i];
+					double t2 = (maxArr[i] - originArr[i]) / dirArr[i];
+					double tNear = min(t1, t2);
+					double tFar = max(t1, t2);
+
+					tMin = max(tMin, tNear);
+					tMax = min(tMax, tFar);
+
+					if (tMin > tMax)
+						return false;
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * Computes the union of this bounding box with another, returning a new AABB
+		 * that fully contains both.
+		 *
+		 * @param other another bounding box to union with
+		 * @return a new AABB that encloses both this and the other bounding box
+		 */
+		public AABB union(AABB other) {
+			Point newMin = new Point(min(this.min.getX(), other.min.getX()), min(this.min.getY(), other.min.getY()),
+					min(this.min.getZ(), other.min.getZ()));
+			Point newMax = new Point(max(this.max.getX(), other.max.getX()), max(this.max.getY(), other.max.getY()),
+					max(this.max.getZ(), other.max.getZ()));
+			return new AABB(newMin, newMax);
+		}
+	}
+
 }

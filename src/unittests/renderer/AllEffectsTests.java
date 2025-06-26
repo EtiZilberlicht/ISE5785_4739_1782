@@ -38,7 +38,7 @@ public class AllEffectsTests {
 	private final Scene scene = new Scene("Test scene");
 	/** Camera builder for the tests with triangles */
 	private final Camera.Builder cameraBuilder = Camera.getBuilder() //
-			.setRayTracer(scene, RayTracerType.SIMPLE).setMultithreading(-1).setDebugPrint(1);
+			.setMultithreading(-1).setDebugPrint(1);
 
 	/**
 	 * An array holding the Sphere objects representing billiard balls. Each Sphere
@@ -251,6 +251,8 @@ public class AllEffectsTests {
 
 		scene.geometries.add(spheres());
 
+		scene.geometries.setBoundingBoxEnabled(true);
+
 		scene.setBackground(/* new Color(0, 128, 128) */Color.BLACK);
 
 		scene.lights.addAll(List.of(
@@ -265,7 +267,7 @@ public class AllEffectsTests {
 
 		));
 
-		Camera oldCamera = cameraBuilder.setLocation(new Point(0, 0, 150))
+		Camera oldCamera = cameraBuilder.setRayTracer(scene, RayTracerType.GRID).setLocation(new Point(0, 0, 150))
 				.setDirection(new Vector(0, 0, -1), new Vector(0, 1, 0)).setVpDistance(300).setVpSize(500, 500)
 				.setResolution(2000, 2000).build().renderImage().writeToImage("Original image_billiards");
 

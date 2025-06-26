@@ -12,6 +12,7 @@ import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
 import renderer.PixelManager.Pixel;
+import renderer.grid.GridRayTracer;
 import scene.Scene;
 
 /**
@@ -454,7 +455,7 @@ public class Camera implements Cloneable {
 				camera.rayTracer = new SimpleRayTracer(scene);
 				break;
 			case RayTracerType.GRID:
-				camera.rayTracer = null;
+				camera.rayTracer = new GridRayTracer(scene);
 				break;
 			default:
 				break;

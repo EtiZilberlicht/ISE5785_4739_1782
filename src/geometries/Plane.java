@@ -72,4 +72,9 @@ public class Plane extends Geometry {
 		return t <= 0 || alignZero(t - maxDistance) > 0 ? null : List.of(new Intersection(this, ray.getPoint(t)));
 	}
 
+	@Override
+	protected AABB computeBoundingBox() {
+		return null; // Plane is infinite and has no bounding box
+	}
+
 }

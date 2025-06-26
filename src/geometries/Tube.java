@@ -151,4 +151,9 @@ public class Tube extends RadialGeometry {
 		return null;
 	}
 
+	@Override
+	protected AABB computeBoundingBox() {
+		return null; // Infinite shape – has no bounding box
+	}
+
 }

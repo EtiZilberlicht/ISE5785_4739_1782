@@ -134,4 +134,23 @@ public class Cylinder extends Tube {
 		return geoPoints.isEmpty() ? null : geoPoints;
 	}
 
+	@Override
+	protected AABB computeBoundingBox() {
+		Point base = axis.getHead();
+		Point top = axis.getPoint(height);
+
+		double minX = Math.min(base.getX(), top.getX()) - radius;
+		double minY = Math.min(base.getY(), top.getY()) - radius;
+		double minZ = Math.min(base.getZ(), top.getZ()) - radius;
+
+		double maxX = Math.max(base.getX(), top.getX()) + radius;
+		double maxY = Math.max(base.getY(), top.getY()) + radius;
+		double maxZ = Math.max(base.getZ(), top.getZ()) + radius;
+
+		Point min = new Point(minX, minY, minZ);
+		Point max = new Point(maxX, maxY, maxZ);
+
+		return new AABB(min, max);
+	}
+
 }

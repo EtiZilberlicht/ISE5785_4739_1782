@@ -67,4 +67,16 @@ public class Sphere extends RadialGeometry {
 				: List.of(new Intersection(this, ray.getPoint(t1)), new Intersection(this, ray.getPoint(t2)));
 	}
 
+	@Override
+	protected AABB computeBoundingBox() {
+		double x = center.getX();
+		double y = center.getY();
+		double z = center.getZ();
+
+		Point min = new Point(x - radius, y - radius, z - radius);
+		Point max = new Point(x + radius, y + radius, z + radius);
+
+		return new AABB(min, max);
+	}
+
 }

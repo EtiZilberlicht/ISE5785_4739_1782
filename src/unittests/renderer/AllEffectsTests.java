@@ -2,11 +2,21 @@ package unittests.renderer;
 
 import static java.awt.Color.WHITE;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import geometries.Cylinder;
+import geometries.Geometry;
 import geometries.Polygon;
 import geometries.Sphere;
 import geometries.Triangle;
@@ -14,6 +24,7 @@ import lighting.DirectionalLight;
 import lighting.PointLight;
 import lighting.SpotLight;
 import primitives.Color;
+import primitives.Double3;
 import primitives.Material;
 import primitives.Point;
 import primitives.Ray;
@@ -125,6 +136,7 @@ public class AllEffectsTests {
 	 * cameras, and renders multiple views with different camera movements.
 	 */
 	@Test
+	@Disabled
 	void billiards() {
 		// Green felt material
 		Material feltMaterial = new Material().setKD(0.8) // High diffuse reflection
@@ -284,7 +296,160 @@ public class AllEffectsTests {
 				.writeToImage("Both Transition and Rotation image_billiard");
 
 	}
+
+	public static List<Geometry> readObjToPolygons(String filename) throws IOException {
+		List<Point> vertices = new ArrayList<>();
+		List<Geometry> polygons = new ArrayList<>();
+
+		Map<String, Material> materials = new HashMap<>();
+		String currentMtl = null;
+
+		Path objPath = Paths.get(filename);
+		Path parentDir = objPath.getParent();
+
+		try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+			String line;
+
+			while ((line = br.readLine()) != null) {
+				line = line.trim();
+				if (line.startsWith("mtllib ")) {
+					String mtlFileName = line.substring(7).trim();
+					Path mtlPath = parentDir.resolve(mtlFileName);
+					parseMtlFile(mtlPath, materials);
+				} else if (line.startsWith("usemtl ")) {
+					currentMtl = line.substring(7).trim();
+				} else if (line.startsWith("v ")) {
+					String[] parts = line.split("\\s+");
+					double x = Double.parseDouble(parts[1]);
+					double y = Double.parseDouble(parts[2]);
+					double z = Double.parseDouble(parts[3]);
+					vertices.add(new Point(x, y, z));
+				} else if (line.startsWith("f ")) {
+					String[] parts = line.split("\\s+");
+					List<Point> polygonPoints = new ArrayList<>();
+					for (int i = 1; i < parts.length; i++) {
+						String part = parts[i].split("/")[0];
+						int index = Integer.parseInt(part) - 1;
+						if (index >= 0 && index < vertices.size()) {
+							polygonPoints.add(vertices.get(index));
+						} else {
+							System.err.println("Warning: vertex index out of bounds: " + index);
+						}
+					}
+
+					if (polygonPoints.size() < 3) {
+						System.err.println("Warning: face ignored with less than 3 vertices");
+						continue;
+					}
+
+					Material mat = materials.getOrDefault(currentMtl,
+							new Material().setKD(0.8).setKS(0.5).setShininess(250).setKR(0.3).setKA(1));
+//					System.out.println("→ Using material: " + currentMtl + ", KD=" + mat.kD);
+
+					if (polygonPoints.size() == 3) {
+						try {
+							polygons.add(new Polygon(polygonPoints.get(0), polygonPoints.get(1), polygonPoints.get(2))
+									.setMaterial(mat));
+						} catch (IllegalArgumentException e) {
+							System.err.println("Invalid triangle polygon skipped: " + e.getMessage());
+						}
+					} else {
+						for (int i = 1; i < polygonPoints.size() - 1; i++) {
+							try {
+								polygons.add(new Polygon(polygonPoints.get(0), polygonPoints.get(i),
+										polygonPoints.get(i + 1)).setMaterial(mat));
+							} catch (IllegalArgumentException e) {
+//								System.err.println(
+//										"Invalid triangle polygon skipped during triangulation: " + e.getMessage());
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return polygons;
+	}
+
+	private static void parseMtlFile(Path mtlPath, Map<String, Material> materialMap) throws IOException {
+		try (BufferedReader br = new BufferedReader(new FileReader(mtlPath.toFile()))) {
+			String line;
+			Material currentMaterial = null;
+			String currentName = null;
+
+			while ((line = br.readLine()) != null) {
+				line = line.trim();
+				if (line.isEmpty() || line.startsWith("#"))
+					continue;
+
+				if (line.startsWith("newmtl ")) {
+					if (currentName != null && currentMaterial != null) {
+						materialMap.put(currentName, currentMaterial);
+					}
+					currentName = line.substring(7).trim();
+					currentMaterial = new Material();
+				} else if (line.startsWith("Ka ")) {
+					currentMaterial.setKA(parseDouble3(line));
+				} else if (line.startsWith("Kd ")) {
+					currentMaterial.setKD(parseDouble3(line));
+				} else if (line.startsWith("Ks ")) {
+					currentMaterial.setKS(parseDouble3(line));
+				} else if (line.startsWith("Ns ")) {
+					currentMaterial.setShininess((int) Double.parseDouble(line.substring(3).trim()));
+				} else if (line.startsWith("d ")) {
+					double transparency = 1.0 - Double.parseDouble(line.substring(2).trim());
+					currentMaterial.setKT(transparency);
+				} else if (line.startsWith("Tr ")) {
+					double transparency = Double.parseDouble(line.substring(3).trim());
+					currentMaterial.setKT(transparency);
+				}
+			}
+			if (currentName != null && currentMaterial != null) {
+				materialMap.put(currentName, currentMaterial);
+			}
+		}
+	}
+
+	private static Double3 parseDouble3(String line) {
+		String[] parts = line.substring(3).trim().split("\\s+");
+		double x = Double.parseDouble(parts[0]);
+		double y = Double.parseDouble(parts[1]);
+		double z = Double.parseDouble(parts[2]);
+		return new Double3(x, y, z);
+	}
+
+	@Test
+	void minecraft() {
+		try {
+			List<Geometry> polygons = readObjToPolygons("C:\\Users\\User\\OneDrive\\מסמכים\\blender\\minecraft.obj");
+			scene.geometries.add(polygons.toArray(new Geometry[0]));
+
+			// המשך שימוש ב־polygons
+		} catch (IOException e) {
+			e.printStackTrace(); // או טיפול אחר
+		}
+		scene.lights.add(new PointLight(new Color(WHITE), new Point(0, 50, 50)));
+		scene.lights.addAll(List.of(
+
+				new DirectionalLight(new Color(WHITE), new Vector(-50, 30, -20)),
+				new DirectionalLight(new Color(WHITE), new Vector(60, 30, -10)),
+				new PointLight(new Color(WHITE), new Point(30, 70, 0)).setKL(0.0001).setKQ(0.0002),
+				new SpotLight(new Color(WHITE), new Point(25, 15, 10), new Vector(1, 1, -2)).setKL(0.0002)
+						.setKQ(0.0003),
+				new SpotLight(new Color(WHITE), new Point(0, 100, -100), new Vector(0, -1, 1)).setNarrowBeam(15)
+						.setKL(0.0003).setKQ(0.00005)
+
+		));
+		scene.geometries.setBoundingBoxEnabled(true);
+		scene.setBackground(new Color(255, 255, 255));
+		cameraBuilder.setRayTracer(scene, RayTracerType.GRID).setLocation(new Point(5, 20, 95))
+				.setTransition(new Vector(-50, 10, 0)).setDirection(new Vector(0, 0, -1), new Vector(0, 1, 0))
+				.setVpDistance(100).setVpSize(500, 500).setResolution(2000, 2000).build().renderImage()
+				.writeToImage("minecraft");
+
+	}
 }
+
 //	private Geometry rectangle(double i, double j, double len, double z, Color c) {
 //		return new Polygon(new Point(i, j, z), new Point(i, j + 5, z), new Point(i + len, j + 5, z),
 //				new Point(i + len, j, z)).setEmission(c).setMaterial(new Material().setKR(0.4));

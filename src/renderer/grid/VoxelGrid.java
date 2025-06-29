@@ -87,19 +87,19 @@ public class VoxelGrid {
 	 */
 	public void addGeometry(Intersectable geometry) {
 		AABB geomBox = geometry.getBoundingBox();
-		if (geomBox == null) {
-			// If no bounding box is available, ignore or handle differently
+		if (geomBox == null)
 			return;
-		}
+
 		Index3D minIndex = pointToIndex(geomBox.getMin());
-		Index3D maxIndex = pointToIndex(geomBox.getMax());
 
-		if (minIndex == null || maxIndex == null) {
-			// Geometry lies outside grid bounds
+		// 🛠 הקטנת קצה עליון של הקוביה כדי למנוע חריגה
+		Point adjustedMax = new Point(geomBox.getMax().getX() - 1e-5, geomBox.getMax().getY() - 1e-5,
+				geomBox.getMax().getZ() - 1e-5);
+		Index3D maxIndex = pointToIndex(adjustedMax);
+
+		if (minIndex == null || maxIndex == null)
 			return;
-		}
 
-		// Iterate over all voxels overlapped by the geometry's bounding box
 		for (int i = minIndex.i; i <= maxIndex.i; i++) {
 			for (int j = minIndex.j; j <= maxIndex.j; j++) {
 				for (int k = minIndex.k; k <= maxIndex.k; k++) {
@@ -128,9 +128,12 @@ public class VoxelGrid {
 	 * @return True if inside bounding box, false otherwise.
 	 */
 	private boolean pointInsideBoundingBox(Point p) {
-		return p.getX() >= boundingBox.getMin().getX() && p.getX() <= boundingBox.getMax().getX()
-				&& p.getY() >= boundingBox.getMin().getY() && p.getY() <= boundingBox.getMax().getY()
-				&& p.getZ() >= boundingBox.getMin().getZ() && p.getZ() <= boundingBox.getMax().getZ();
+		double epsilon = 1e-5;
+		return p.getX() >= boundingBox.getMin().getX() - epsilon && p.getX() <= boundingBox.getMax().getX() + epsilon
+				&& p.getY() >= boundingBox.getMin().getY() - epsilon
+				&& p.getY() <= boundingBox.getMax().getY() + epsilon
+				&& p.getZ() >= boundingBox.getMin().getZ() - epsilon
+				&& p.getZ() <= boundingBox.getMax().getZ() + epsilon;
 	}
 
 	/**

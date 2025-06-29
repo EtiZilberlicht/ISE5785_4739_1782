@@ -1,5 +1,6 @@
 package renderer.grid;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import geometries.Geometries;
@@ -30,6 +31,8 @@ public class GridRayTracer extends SimpleRayTracer {
 	 */
 	private final VoxelGrid grid;
 
+	private final List<Intersectable> infiniteGeometries = new ArrayList<>();
+
 	/**
 	 * Constructs a GridRayTracer for the given scene. Initializes the voxel grid
 	 * based on the scene's bounding box, and inserts all geometries into the
@@ -40,18 +43,34 @@ public class GridRayTracer extends SimpleRayTracer {
 	 */
 	public GridRayTracer(Scene scene) {
 		super(scene);
-
 		Geometries geometries = scene.geometries;
-		AABB sceneBox = geometries.getBoundingBox();
-		if (sceneBox == null) {
+		AABB originalBox = geometries.getBoundingBox();
+		if (originalBox == null) {
 			throw new IllegalArgumentException("Scene must have bounding box");
 		}
 
-		this.grid = new VoxelGrid(sceneBox, 10, 10, 10);
-		for (Intersectable geo : geometries.getAll()) {
-			grid.addGeometry(geo);
-		}
+		double epsilon = 1e-4;
 
+		// נבנה את המינימום החדש
+		Point newMin = new Point(originalBox.getMin().getX() - epsilon, originalBox.getMin().getY() - epsilon,
+				originalBox.getMin().getZ() - epsilon);
+
+		// נבנה את המקסימום החדש
+		Point newMax = new Point(originalBox.getMax().getX() + epsilon, originalBox.getMax().getY() + epsilon,
+				originalBox.getMax().getZ() + epsilon);
+
+		AABB expandedBox = new AABB(newMin, newMax);
+
+		this.grid = new VoxelGrid(expandedBox, 10, 10, 10);
+
+		for (Intersectable geo : geometries.getAll()) {
+			AABB geoBox = geo.getBoundingBox();
+			if (geoBox == null) {
+				infiniteGeometries.add(geo);
+			} else {
+				grid.addGeometry(geo);
+			}
+		}
 	}
 
 	/**
@@ -68,6 +87,24 @@ public class GridRayTracer extends SimpleRayTracer {
 		double y = Math.max(box.getMin().getY(), Math.min(box.getMax().getY(), p.getY()));
 		double z = Math.max(box.getMin().getZ(), Math.min(box.getMax().getZ(), p.getZ()));
 		return new Point(x, y, z);
+	}
+
+	private Intersection findClosestInInfinite(Ray ray) {
+		Intersection closestIntersection = null;
+		double closestDistance = Double.POSITIVE_INFINITY;
+		for (Intersectable geo : infiniteGeometries) {
+			List<Intersectable.Intersection> intersections = geo.calculateIntersections(ray);
+			if (intersections != null) {
+				for (Intersectable.Intersection inter : intersections) {
+					double dist = inter.point.distance(ray.getHead());
+					if (dist < closestDistance) {
+						closestDistance = dist;
+						closestIntersection = inter;
+					}
+				}
+			}
+		}
+		return closestIntersection;
 	}
 
 	@Override

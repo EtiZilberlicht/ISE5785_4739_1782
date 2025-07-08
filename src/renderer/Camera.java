@@ -588,6 +588,10 @@ public class Camera implements Cloneable {
 				camera.distance = camera.cameraPoint.distance(camera.viewPlanePC);
 			}
 
+			if (camera.rayTracer instanceof GridRayTracer gTracer) {
+				gTracer.setupGrid();
+			}
+
 			try {
 				return (Camera) camera.clone();
 			} catch (CloneNotSupportedException e) {

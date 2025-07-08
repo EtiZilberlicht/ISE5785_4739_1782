@@ -74,7 +74,9 @@ public class Plane extends Geometry {
 
 	@Override
 	protected AABB computeBoundingBox() {
-		return null; // Plane is infinite and has no bounding box
+//		double INF = 1e5;
+//		return new AABB(new Point(-INF, -INF, -INF), new Point(INF, INF, INF));
+		return null;
 	}
 
 }

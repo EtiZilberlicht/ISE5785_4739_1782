@@ -153,7 +153,22 @@ public class Tube extends RadialGeometry {
 
 	@Override
 	protected AABB computeBoundingBox() {
-		return null; // Infinite shape – has no bounding box
+//		double INF = 1e5;
+//		Point axisPoint = axis.getHead();
+//		Vector dir = axis.getDirection();
+//
+//		// כל מימד שבו יש רכיב בכיוון – נחשב אינסופי
+//		double minX = dir.getX() == 0 ? axisPoint.getX() - radius : -INF;
+//		double maxX = dir.getX() == 0 ? axisPoint.getX() + radius : INF;
+//
+//		double minY = dir.getY() == 0 ? axisPoint.getY() - radius : -INF;
+//		double maxY = dir.getY() == 0 ? axisPoint.getY() + radius : INF;
+//
+//		double minZ = dir.getZ() == 0 ? axisPoint.getZ() - radius : -INF;
+//		double maxZ = dir.getZ() == 0 ? axisPoint.getZ() + radius : INF;
+//
+//		return new AABB(new Point(minX, minY, minZ), new Point(maxX, maxY, maxZ));
+		return null;
 	}
 
 }

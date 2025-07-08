@@ -192,6 +192,15 @@ public abstract class Intersectable {
 	}
 
 	/**
+	 * Sets the bounding box for this object.
+	 *
+	 * @param box the bounding box to assign
+	 */
+	public void setBoundingBox(AABB box) {
+		this.box = box;
+	}
+
+	/**
 	 * Computes the bounding box for this geometry. Override in concrete classes.
 	 *
 	 * @return the computed bounding box
@@ -203,10 +212,10 @@ public abstract class Intersectable {
 	 */
 	public static class AABB {
 		/** The minimum corner point of the bounding box */
-		private final Point min;
+		private Point min;
 
 		/** The maximum corner point of the bounding box */
-		private final Point max;
+		private Point max;
 
 		/**
 		 * Constructs an AABB with the specified minimum and maximum points.
@@ -289,6 +298,26 @@ public abstract class Intersectable {
 					max(this.max.getZ(), other.max.getZ()));
 			return new AABB(newMin, newMax);
 		}
+
+		/**
+		 * Expands the bounding box to include the given point. Updates the minimum and
+		 * maximum corners if necessary.
+		 *
+		 * @param p the point to include in the bounding box
+		 */
+		public void expandToInclude(Point p) {
+			double minX = Math.min(this.min.getX(), p.getX());
+			double minY = Math.min(this.min.getY(), p.getY());
+			double minZ = Math.min(this.min.getZ(), p.getZ());
+
+			double maxX = Math.max(this.max.getX(), p.getX());
+			double maxY = Math.max(this.max.getY(), p.getY());
+			double maxZ = Math.max(this.max.getZ(), p.getZ());
+
+			this.min = new Point(minX, minY, minZ);
+			this.max = new Point(maxX, maxY, maxZ);
+		}
+
 	}
 
 }

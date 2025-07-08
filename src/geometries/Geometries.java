@@ -1,5 +1,8 @@
 package geometries;
 
+import static geometries.GeometriesObj.readObjToPolygons;
+
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -84,6 +87,20 @@ public class Geometries extends Intersectable {
 	 */
 	public List<Intersectable> getAll() {
 		return geometries;
+	}
+
+	/**
+	 * Loads polygon geometries from an OBJ file and adds them to the scene.
+	 *
+	 * @param filename the name of the OBJ file (without extension or path)
+	 */
+	public void addObjPolygons(String filename) {
+		try {
+			List<Geometry> polygons = readObjToPolygons(filename);
+			add(polygons.toArray(new Geometry[0]));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

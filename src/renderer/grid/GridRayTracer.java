@@ -3,7 +3,6 @@ package renderer.grid;
 import java.util.ArrayList;
 import java.util.List;
 
-import geometries.Geometries;
 import geometries.Intersectable;
 import geometries.Intersectable.AABB;
 import geometries.Intersectable.Intersection;
@@ -15,55 +14,50 @@ import renderer.SimpleRayTracer;
 import scene.Scene;
 
 /**
- * Ray tracer implementation that accelerates ray-scene intersection using a
- * uniform voxel grid (3D spatial subdivision).
- * <p>
- * Divides the scene bounding box into a 10x10x10 voxel grid, assigns geometries
- * to voxels, and performs ray traversal using 3D DDA to find intersections
- * efficiently.
+ * Ray tracer using a fixed-size voxel grid (e.g., 100×100×100) to accelerate
+ * intersection checks. Falls back to default tracing for infinite geometries.
  */
 public class GridRayTracer extends SimpleRayTracer {
-
 	/**
-	 * The voxel grid used for accelerating ray-geometry intersection tests. Divides
-	 * the scene's bounding box into discrete voxels containing geometries, enabling
-	 * efficient traversal with the 3D DDA algorithm.
+	 * The voxel grid used for spatial acceleration.
 	 */
-	private final VoxelGrid grid;
-
+	private VoxelGrid grid;
+	/**
+	 * List of geometries without bounding boxes (e.g., infinite geometries).
+	 */
 	private final List<Intersectable> infiniteGeometries = new ArrayList<>();
 
 	/**
-	 * Constructs a GridRayTracer for the given scene. Initializes the voxel grid
-	 * based on the scene's bounding box, and inserts all geometries into the
-	 * appropriate voxels.
+	 * Constructs a GridRayTracer with the given scene.
 	 *
-	 * @param scene the scene to be ray-traced (must have a bounding box)
-	 * @throws IllegalArgumentException if the scene does not have a bounding box
+	 * @param scene the scene to trace rays in
 	 */
 	public GridRayTracer(Scene scene) {
 		super(scene);
-		Geometries geometries = scene.geometries;
-		AABB originalBox = geometries.getBoundingBox();
+		this.grid = null;
+	}
+
+	/**
+	 * Initializes the voxel grid and assigns geometries to the appropriate voxels.
+	 * Geometries without bounding boxes are stored separately as infinite
+	 * geometries.
+	 */
+	public void setupGrid() {
+		AABB originalBox = scene.geometries.getBoundingBox();
 		if (originalBox == null) {
-			throw new IllegalArgumentException("Scene must have bounding box");
+			// No bounding box means all geometries infinite or empty scene
+			grid = null;
+			infiniteGeometries.clear();
+			infiniteGeometries.addAll(scene.geometries.getAll());
+			return;
 		}
 
-		double epsilon = 1e-4;
+		AABB expandedBox = getExpandedBoundingBox(originalBox);
+		this.grid = new VoxelGrid(expandedBox, 100, 100, 100);
 
-		// נבנה את המינימום החדש
-		Point newMin = new Point(originalBox.getMin().getX() - epsilon, originalBox.getMin().getY() - epsilon,
-				originalBox.getMin().getZ() - epsilon);
+		infiniteGeometries.clear();
 
-		// נבנה את המקסימום החדש
-		Point newMax = new Point(originalBox.getMax().getX() + epsilon, originalBox.getMax().getY() + epsilon,
-				originalBox.getMax().getZ() + epsilon);
-
-		AABB expandedBox = new AABB(newMin, newMax);
-
-		this.grid = new VoxelGrid(expandedBox, 10, 10, 10);
-
-		for (Intersectable geo : geometries.getAll()) {
+		for (Intersectable geo : scene.geometries.getAll()) {
 			AABB geoBox = geo.getBoundingBox();
 			if (geoBox == null) {
 				infiniteGeometries.add(geo);
@@ -74,13 +68,27 @@ public class GridRayTracer extends SimpleRayTracer {
 	}
 
 	/**
-	 * Clamps a given point to lie within the given axis-aligned bounding box
-	 * (AABB). For each coordinate, if the point is outside the box, it is clamped
-	 * to the nearest boundary.
+	 * Returns an expanded version of the given bounding box to avoid precision
+	 * errors on edges.
+	 *
+	 * @param originalBox the original bounding box
+	 * @return a slightly larger bounding box
+	 */
+	private AABB getExpandedBoundingBox(AABB originalBox) {
+		double epsilon = 1e-4;
+		Point newMin = new Point(originalBox.getMin().getX() - epsilon, originalBox.getMin().getY() - epsilon,
+				originalBox.getMin().getZ() - epsilon);
+		Point newMax = new Point(originalBox.getMax().getX() + epsilon, originalBox.getMax().getY() + epsilon,
+				originalBox.getMax().getZ() + epsilon);
+		return new AABB(newMin, newMax);
+	}
+
+	/**
+	 * Clamps the given point to be within the bounds of the specified bounding box.
 	 *
 	 * @param p   the point to clamp
-	 * @param box the bounding box to clamp against
-	 * @return a new Point clamped inside the bounding box
+	 * @param box the bounding box
+	 * @return the clamped point
 	 */
 	private Point clampToBox(Point p, AABB box) {
 		double x = Math.max(box.getMin().getX(), Math.min(box.getMax().getX(), p.getX()));
@@ -89,41 +97,37 @@ public class GridRayTracer extends SimpleRayTracer {
 		return new Point(x, y, z);
 	}
 
-	private Intersection findClosestInInfinite(Ray ray) {
-		Intersection closestIntersection = null;
-		double closestDistance = Double.POSITIVE_INFINITY;
-		for (Intersectable geo : infiniteGeometries) {
-			List<Intersectable.Intersection> intersections = geo.calculateIntersections(ray);
-			if (intersections != null) {
-				for (Intersectable.Intersection inter : intersections) {
-					double dist = inter.point.distance(ray.getHead());
-					if (dist < closestDistance) {
-						closestDistance = dist;
-						closestIntersection = inter;
+	@Override
+	protected Intersection findClosestIntersection(Ray ray) {
+		if (grid == null) {
+			// אם הגריד לא מאותחל – fallback ל־SimpleRayTracer
+			return super.findClosestIntersection(ray);
+		}
+
+		AABB box = grid.getBoundingBox();
+		if (!box.intersects(ray)) {
+			// אם הקרן לא חותכת את הקופסה – בודקים רק גופים אינסופיים
+			Intersection closest = null;
+			double minDist = Double.POSITIVE_INFINITY;
+			for (Intersectable geo : infiniteGeometries) {
+				List<Intersection> inters = geo.calculateIntersections(ray);
+				if (inters != null) {
+					for (Intersection inter : inters) {
+						double t = inter.point.subtract(ray.getHead()).dotProduct(ray.getDirection());
+						if (t >= 0 && t < minDist) {
+							minDist = t;
+							closest = inter;
+						}
 					}
 				}
 			}
-		}
-		return closestIntersection;
-	}
-
-	@Override
-	protected Intersection findClosestIntersection(Ray ray) {
-		AABB box = grid.getBoundingBox();
-		if (!box.intersects(ray)) {
-			return null;
+			return closest;
 		}
 
-		double tMin = findEntryT(ray, box);
-		if (tMin < 0)
-			tMin = 0;
-
-		// נוודא שהנקודה נצמדת פנימה לתוך ה־box
-		Point startPoint = clampToBox(ray.getPoint(tMin + 1e-5), box);
+		Point startPoint = clampToBox(ray.getPoint(findEntryT(ray, box) + 1e-5), box);
 		Index3D voxelIdx = grid.pointToIndex(startPoint);
-		if (voxelIdx == null) {
+		if (voxelIdx == null)
 			return null;
-		}
 
 		Vector dir = ray.getDirection();
 		double voxelSize = grid.getVoxelSize();
@@ -132,23 +136,20 @@ public class GridRayTracer extends SimpleRayTracer {
 		int stepY = dir.getY() >= 0 ? 1 : -1;
 		int stepZ = dir.getZ() >= 0 ? 1 : -1;
 
-		double nextVoxelBoundaryX = box.getMin().getX() + (voxelIdx.i + (stepX > 0 ? 1 : 0)) * voxelSize;
-		double nextVoxelBoundaryY = box.getMin().getY() + (voxelIdx.j + (stepY > 0 ? 1 : 0)) * voxelSize;
-		double nextVoxelBoundaryZ = box.getMin().getZ() + (voxelIdx.k + (stepZ > 0 ? 1 : 0)) * voxelSize;
+		double nextVoxelX = box.getMin().getX() + (voxelIdx.i + (stepX > 0 ? 1 : 0)) * voxelSize;
+		double nextVoxelY = box.getMin().getY() + (voxelIdx.j + (stepY > 0 ? 1 : 0)) * voxelSize;
+		double nextVoxelZ = box.getMin().getZ() + (voxelIdx.k + (stepZ > 0 ? 1 : 0)) * voxelSize;
 
-		double tMaxX = (dir.getX() == 0) ? Double.POSITIVE_INFINITY
-				: (nextVoxelBoundaryX - ray.getHead().getX()) / dir.getX();
-		double tMaxY = (dir.getY() == 0) ? Double.POSITIVE_INFINITY
-				: (nextVoxelBoundaryY - ray.getHead().getY()) / dir.getY();
-		double tMaxZ = (dir.getZ() == 0) ? Double.POSITIVE_INFINITY
-				: (nextVoxelBoundaryZ - ray.getHead().getZ()) / dir.getZ();
+		double tMaxX = (dir.getX() == 0) ? Double.POSITIVE_INFINITY : (nextVoxelX - ray.getHead().getX()) / dir.getX();
+		double tMaxY = (dir.getY() == 0) ? Double.POSITIVE_INFINITY : (nextVoxelY - ray.getHead().getY()) / dir.getY();
+		double tMaxZ = (dir.getZ() == 0) ? Double.POSITIVE_INFINITY : (nextVoxelZ - ray.getHead().getZ()) / dir.getZ();
 
 		double tDeltaX = (dir.getX() == 0) ? Double.POSITIVE_INFINITY : voxelSize / Math.abs(dir.getX());
 		double tDeltaY = (dir.getY() == 0) ? Double.POSITIVE_INFINITY : voxelSize / Math.abs(dir.getY());
 		double tDeltaZ = (dir.getZ() == 0) ? Double.POSITIVE_INFINITY : voxelSize / Math.abs(dir.getZ());
 
-		Intersectable.Intersection closestIntersection = null;
-		double closestDistance = Double.POSITIVE_INFINITY;
+		Intersection closest = null;
+		double minDist = Double.POSITIVE_INFINITY;
 
 		while (voxelIdx.i >= 0 && voxelIdx.i < grid.getSizeX() && voxelIdx.j >= 0 && voxelIdx.j < grid.getSizeY()
 				&& voxelIdx.k >= 0 && voxelIdx.k < grid.getSizeZ()) {
@@ -156,20 +157,24 @@ public class GridRayTracer extends SimpleRayTracer {
 			Voxel voxel = grid.getVoxel(voxelIdx);
 			if (voxel != null && !voxel.isEmpty()) {
 				for (Intersectable geo : voxel.getGeometries()) {
-					List<Intersectable.Intersection> intersections = geo.calculateIntersections(ray);
-					if (intersections != null) {
-						for (Intersectable.Intersection inter : intersections) {
-							double dist = inter.point.distance(ray.getHead());
-							if (dist < closestDistance && dist >= tMin) {
-								closestDistance = dist;
-								closestIntersection = inter;
+					List<Intersection> inters = geo.calculateIntersections(ray);
+					if (inters != null) {
+						for (Intersection inter : inters) {
+							double t = inter.point.subtract(ray.getHead()).dotProduct(ray.getDirection());
+							if (t >= 0 && t < minDist) {
+								minDist = t;
+								closest = inter;
 							}
 						}
 					}
 				}
 			}
 
-			// מעבר לווקסל הבא לפי כיוון הקרן
+			// אם כבר מצאנו חיתוך הכי קרוב שאי אפשר לעבור דרכו – אפשר לעצור
+			if (closest != null)
+				break;
+
+			// מעבר ל־voxel הבא
 			if (tMaxX < tMaxY) {
 				if (tMaxX < tMaxZ) {
 					voxelIdx = voxelIdx.add(stepX, 0, 0);
@@ -189,60 +194,35 @@ public class GridRayTracer extends SimpleRayTracer {
 			}
 		}
 
-		return closestIntersection;
-	}
-
-	/**
-	 * Calculates the parameter t at which the ray first enters the given bounding
-	 * box. If the ray misses the box, returns -1.
-	 *
-	 * @param ray the ray to test
-	 * @param box the axis-aligned bounding box
-	 * @return the entry t parameter along the ray, or -1 if no intersection
-	 */
-	private double findEntryT(Ray ray, AABB box) {
-		Point origin = ray.getHead();
-		Vector dir = ray.getDirection();
-
-		double tMin = Double.NEGATIVE_INFINITY;
-		double tMax = Double.POSITIVE_INFINITY;
-
-		double[] originArr = { origin.getX(), origin.getY(), origin.getZ() };
-		double[] dirArr = { dir.getX(), dir.getY(), dir.getZ() };
-		double[] minArr = { box.getMin().getX(), box.getMin().getY(), box.getMin().getZ() };
-		double[] maxArr = { box.getMax().getX(), box.getMax().getY(), box.getMax().getZ() };
-
-		for (int i = 0; i < 3; i++) {
-			if (dirArr[i] == 0) {
-				if (originArr[i] < minArr[i] || originArr[i] > maxArr[i])
-					return -1;
-			} else {
-				double t1 = (minArr[i] - originArr[i]) / dirArr[i];
-				double t2 = (maxArr[i] - originArr[i]) / dirArr[i];
-				double tNear = Math.min(t1, t2);
-				double tFar = Math.max(t1, t2);
-
-				tMin = Math.max(tMin, tNear);
-				tMax = Math.min(tMax, tFar);
-
-				if (tMin > tMax)
-					return -1;
+		// לבדוק גם גופים אינסופיים – תמיד!
+		for (Intersectable geo : infiniteGeometries) {
+			List<Intersection> inters = geo.calculateIntersections(ray);
+			if (inters != null) {
+				for (Intersection inter : inters) {
+					double t = inter.point.subtract(ray.getHead()).dotProduct(ray.getDirection());
+					if (t >= 0 && t < minDist) {
+						minDist = t;
+						closest = inter;
+					}
+				}
 			}
 		}
-		return tMin;
+
+		return closest;
 	}
 
 	/**
-	 * Finds the closest intersection between the ray and the scene geometries by
-	 * traversing the voxel grid using 3D DDA, but only up to a maximum distance. If
-	 * an intersection is found closer than maxDistance, returns it immediately.
+	 * Finds the closest intersection of a ray with distance limitation using 3D DDA
+	 * voxel traversal.
 	 *
-	 * @param ray         the ray to test for intersections
-	 * @param maxDistance the maximum distance along the ray to consider
-	 *                    intersections
-	 * @return the closest Intersection within maxDistance, or null if none found
+	 * @param ray         the ray to trace
+	 * @param maxDistance the maximum distance to consider
+	 * @return the closest intersection within the distance limit, or null
 	 */
-	protected Intersection findClosestIntersection(Ray ray, double maxDistance) {
+	private Intersection findClosestIntersection(Ray ray, double maxDistance) {
+		if (grid == null)
+			return null;
+
 		AABB box = grid.getBoundingBox();
 		if (!box.intersects(ray))
 			return null;
@@ -278,21 +258,22 @@ public class GridRayTracer extends SimpleRayTracer {
 		double tDeltaY = (dir.getY() == 0) ? Double.POSITIVE_INFINITY : voxelSize / Math.abs(dir.getY());
 		double tDeltaZ = (dir.getZ() == 0) ? Double.POSITIVE_INFINITY : voxelSize / Math.abs(dir.getZ());
 
-		Intersectable.Intersection closestIntersection = null;
+		Intersection closestIntersection = null;
 		double closestDistance = Double.POSITIVE_INFINITY;
 
 		while (voxelIdx.i >= 0 && voxelIdx.i < grid.getSizeX() && voxelIdx.j >= 0 && voxelIdx.j < grid.getSizeY()
 				&& voxelIdx.k >= 0 && voxelIdx.k < grid.getSizeZ()) {
 
 			Voxel voxel = grid.getVoxel(voxelIdx);
+
 			if (voxel != null && !voxel.isEmpty()) {
 				for (Intersectable geo : voxel.getGeometries()) {
-					List<Intersectable.Intersection> intersections = geo.calculateIntersections(ray);
+					List<Intersection> intersections = geo.calculateIntersections(ray);
 					if (intersections != null) {
-						for (Intersectable.Intersection inter : intersections) {
-							double dist = inter.point.distance(ray.getHead());
-							if (dist < closestDistance && dist >= tMin) {
-								closestDistance = dist;
+						for (Intersection inter : intersections) {
+							double t = inter.point.distance(ray.getHead()); // ← שינוי כאן
+							if (t >= tMin && t <= maxDistance && t < closestDistance) {
+								closestDistance = t;
 								closestIntersection = inter;
 							}
 						}
@@ -303,7 +284,6 @@ public class GridRayTracer extends SimpleRayTracer {
 			if (closestDistance <= maxDistance)
 				break;
 
-			// advance to next voxel
 			if (tMaxX < tMaxY) {
 				if (tMaxX < tMaxZ) {
 					voxelIdx = voxelIdx.add(stepX, 0, 0);
@@ -323,7 +303,60 @@ public class GridRayTracer extends SimpleRayTracer {
 			}
 		}
 
+		for (Intersectable geo : infiniteGeometries) {
+			List<Intersection> intersections = geo.calculateIntersections(ray);
+			if (intersections != null) {
+				for (Intersection inter : intersections) {
+					double t = inter.point.distance(ray.getHead()); // ← שינוי כאן
+					if (t >= tMin && t <= maxDistance && t < closestDistance) {
+						closestDistance = t;
+						closestIntersection = inter;
+					}
+				}
+			}
+		}
+
 		return (closestDistance <= maxDistance) ? closestIntersection : null;
+	}
+
+	/**
+	 * Calculates the entry point parameter t where the ray first intersects the
+	 * bounding box.
+	 *
+	 * @param ray the ray to check
+	 * @param box the bounding box
+	 * @return the entry t value, or -1 if no intersection
+	 */
+	private double findEntryT(Ray ray, AABB box) {
+		Point origin = ray.getHead();
+		Vector dir = ray.getDirection();
+
+		double tMin = Double.NEGATIVE_INFINITY;
+		double tMax = Double.POSITIVE_INFINITY;
+
+		double[] originArr = { origin.getX(), origin.getY(), origin.getZ() };
+		double[] dirArr = { dir.getX(), dir.getY(), dir.getZ() };
+		double[] minArr = { box.getMin().getX(), box.getMin().getY(), box.getMin().getZ() };
+		double[] maxArr = { box.getMax().getX(), box.getMax().getY(), box.getMax().getZ() };
+
+		for (int i = 0; i < 3; i++) {
+			if (dirArr[i] == 0) {
+				if (originArr[i] < minArr[i] || originArr[i] > maxArr[i])
+					return -1;
+			} else {
+				double t1 = (minArr[i] - originArr[i]) / dirArr[i];
+				double t2 = (maxArr[i] - originArr[i]) / dirArr[i];
+				double tNear = Math.min(t1, t2);
+				double tFar = Math.max(t1, t2);
+
+				tMin = Math.max(tMin, tNear);
+				tMax = Math.min(tMax, tFar);
+
+				if (tMin > tMax)
+					return -1;
+			}
+		}
+		return tMin;
 	}
 
 	@Override
@@ -334,11 +367,10 @@ public class GridRayTracer extends SimpleRayTracer {
 		Double3 ktr = Double3.ONE;
 		double maxDistance = intersection.light.getDistance(intersection.point);
 
-		Intersectable.Intersection shadowHit = findClosestIntersection(shadowRay, maxDistance);
+		Intersection shadowHit = findClosestIntersection(shadowRay, maxDistance);
 		if (shadowHit == null)
 			return ktr;
 
 		return shadowHit.material.kT.lowerThan(0.001) ? Double3.ZERO : shadowHit.material.kT;
 	}
-
 }

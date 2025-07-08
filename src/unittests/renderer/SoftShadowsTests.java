@@ -81,6 +81,7 @@ public class SoftShadowsTests {
 
 				new Plane(new Point(50, -40, -100), new Point(-50, -40, -100), new Point(-50, -40, 50))
 						.setEmission(generalColor).setMaterial(planeMaterial),
+
 				new Sphere(20d, new Point(0, -20, 50)).setEmission(generalColor).setMaterial(shinyBall),
 				new Cylinder(12d, new Ray(new Point(50, -40, 0), new Vector(0, 1, 0)), 75).setEmission(generalColor)
 						.setMaterial(smoothCylinder),

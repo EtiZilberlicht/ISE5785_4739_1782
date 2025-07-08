@@ -1,22 +1,15 @@
 package unittests.renderer;
 
 import static java.awt.Color.WHITE;
+import static java.awt.Color.YELLOW;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import geometries.Cylinder;
-import geometries.Geometry;
+import geometries.Plane;
 import geometries.Polygon;
 import geometries.Sphere;
 import geometries.Triangle;
@@ -24,7 +17,6 @@ import lighting.DirectionalLight;
 import lighting.PointLight;
 import lighting.SpotLight;
 import primitives.Color;
-import primitives.Double3;
 import primitives.Material;
 import primitives.Point;
 import primitives.Ray;
@@ -49,7 +41,7 @@ public class AllEffectsTests {
 	private final Scene scene = new Scene("Test scene");
 	/** Camera builder for the tests with triangles */
 	private final Camera.Builder cameraBuilder = Camera.getBuilder() //
-			.setMultithreading(-1).setDebugPrint(1);
+			.setMultithreading(-1).setDebugPrint(0.1);
 
 	/**
 	 * An array holding the Sphere objects representing billiard balls. Each Sphere
@@ -137,6 +129,7 @@ public class AllEffectsTests {
 	 */
 	@Test
 	@Disabled
+
 	void billiards() {
 		// Green felt material
 		Material feltMaterial = new Material().setKD(0.8) // High diffuse reflection
@@ -297,247 +290,66 @@ public class AllEffectsTests {
 
 	}
 
-	public static List<Geometry> readObjToPolygons(String filename) throws IOException {
-		List<Point> vertices = new ArrayList<>();
-		List<Geometry> polygons = new ArrayList<>();
-
-		Map<String, Material> materials = new HashMap<>();
-		String currentMtl = null;
-
-		Path objPath = Paths.get(filename);
-		Path parentDir = objPath.getParent();
-
-		try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-			String line;
-
-			while ((line = br.readLine()) != null) {
-				line = line.trim();
-				if (line.startsWith("mtllib ")) {
-					String mtlFileName = line.substring(7).trim();
-					Path mtlPath = parentDir.resolve(mtlFileName);
-					parseMtlFile(mtlPath, materials);
-				} else if (line.startsWith("usemtl ")) {
-					currentMtl = line.substring(7).trim();
-				} else if (line.startsWith("v ")) {
-					String[] parts = line.split("\\s+");
-					double x = Double.parseDouble(parts[1]);
-					double y = Double.parseDouble(parts[2]);
-					double z = Double.parseDouble(parts[3]);
-					vertices.add(new Point(x, y, z));
-				} else if (line.startsWith("f ")) {
-					String[] parts = line.split("\\s+");
-					List<Point> polygonPoints = new ArrayList<>();
-					for (int i = 1; i < parts.length; i++) {
-						String part = parts[i].split("/")[0];
-						int index = Integer.parseInt(part) - 1;
-						if (index >= 0 && index < vertices.size()) {
-							polygonPoints.add(vertices.get(index));
-						} else {
-							System.err.println("Warning: vertex index out of bounds: " + index);
-						}
-					}
-
-					if (polygonPoints.size() < 3) {
-						System.err.println("Warning: face ignored with less than 3 vertices");
-						continue;
-					}
-
-					Material mat = materials.getOrDefault(currentMtl,
-							new Material().setKD(0.8).setKS(0.5).setShininess(250).setKR(0.3).setKA(1));
-//					System.out.println("→ Using material: " + currentMtl + ", KD=" + mat.kD);
-
-					if (polygonPoints.size() == 3) {
-						try {
-							polygons.add(new Polygon(polygonPoints.get(0), polygonPoints.get(1), polygonPoints.get(2))
-									.setMaterial(mat));
-						} catch (IllegalArgumentException e) {
-							System.err.println("Invalid triangle polygon skipped: " + e.getMessage());
-						}
-					} else {
-						for (int i = 1; i < polygonPoints.size() - 1; i++) {
-							try {
-								polygons.add(new Polygon(polygonPoints.get(0), polygonPoints.get(i),
-										polygonPoints.get(i + 1)).setMaterial(mat));
-							} catch (IllegalArgumentException e) {
-//								System.err.println(
-//										"Invalid triangle polygon skipped during triangulation: " + e.getMessage());
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return polygons;
-	}
-
-	private static void parseMtlFile(Path mtlPath, Map<String, Material> materialMap) throws IOException {
-		try (BufferedReader br = new BufferedReader(new FileReader(mtlPath.toFile()))) {
-			String line;
-			Material currentMaterial = null;
-			String currentName = null;
-
-			while ((line = br.readLine()) != null) {
-				line = line.trim();
-				if (line.isEmpty() || line.startsWith("#"))
-					continue;
-
-				if (line.startsWith("newmtl ")) {
-					if (currentName != null && currentMaterial != null) {
-						materialMap.put(currentName, currentMaterial);
-					}
-					currentName = line.substring(7).trim();
-					currentMaterial = new Material();
-				} else if (line.startsWith("Ka ")) {
-					currentMaterial.setKA(parseDouble3(line));
-				} else if (line.startsWith("Kd ")) {
-					currentMaterial.setKD(parseDouble3(line));
-				} else if (line.startsWith("Ks ")) {
-					currentMaterial.setKS(parseDouble3(line));
-				} else if (line.startsWith("Ns ")) {
-					currentMaterial.setShininess((int) Double.parseDouble(line.substring(3).trim()));
-				} else if (line.startsWith("d ")) {
-					double transparency = 1.0 - Double.parseDouble(line.substring(2).trim());
-					currentMaterial.setKT(transparency);
-				} else if (line.startsWith("Tr ")) {
-					double transparency = Double.parseDouble(line.substring(3).trim());
-					currentMaterial.setKT(transparency);
-				}
-			}
-			if (currentName != null && currentMaterial != null) {
-				materialMap.put(currentName, currentMaterial);
-			}
-		}
-	}
-
-	private static Double3 parseDouble3(String line) {
-		String[] parts = line.substring(3).trim().split("\\s+");
-		double x = Double.parseDouble(parts[0]);
-		double y = Double.parseDouble(parts[1]);
-		double z = Double.parseDouble(parts[2]);
-		return new Double3(x, y, z);
-	}
-
+	/**
+	 * Builds and renders a 3D Minecraft-themed scene.
+	 * <p>
+	 * The scene includes various geometric objects such as cylinders (legs), a
+	 * sphere (sun or decoration), planes (ground and sky), and multiple light
+	 * sources including point, spot, and directional lights. Several camera
+	 * transitions are used to render the scene from different angles.
+	 */
 	@Test
+//	@Disabled
 	void minecraft() {
-		try {
-			List<Geometry> polygons = readObjToPolygons("C:\\Users\\User\\OneDrive\\מסמכים\\blender\\minecraft.obj");
-			scene.geometries.add(polygons.toArray(new Geometry[0]));
 
-			// המשך שימוש ב־polygons
-		} catch (IOException e) {
-			e.printStackTrace(); // או טיפול אחר
-		}
-		scene.lights.add(new PointLight(new Color(WHITE), new Point(0, 50, 50)));
-		scene.lights.addAll(List.of(
+		Material legsM = new Material().setKD(0.2).setKS(0.8).setShininess(300);
+		Color legsC = Color.BLACK;
 
-				new DirectionalLight(new Color(WHITE), new Vector(-50, 30, -20)),
-				new DirectionalLight(new Color(WHITE), new Vector(60, 30, -10)),
-				new PointLight(new Color(WHITE), new Point(30, 70, 0)).setKL(0.0001).setKQ(0.0002),
-				new SpotLight(new Color(WHITE), new Point(25, 15, 10), new Vector(1, 1, -2)).setKL(0.0002)
-						.setKQ(0.0003),
-				new SpotLight(new Color(WHITE), new Point(0, 100, -100), new Vector(0, -1, 1)).setNarrowBeam(15)
-						.setKL(0.0003).setKQ(0.00005)
+		Material skyM = new Material().setKD(0.1).setKS(0.1).setShininess(100);
+		Color skyC = new Color(97, 178, 231);
+		scene.geometries.addObjPolygons("minecraft");
+		scene.geometries.add(/* new Sphere(10, new Point(0, 15, 20)), */
 
-		));
+				new Sphere(25, new Point(0, 40, -160)).setEmission(new Color(30, 20, 5))
+						.setMaterial(new Material().setKD(0.05).setKS(0.95).setShininess(300).setKT(0.9).setKR(0.1)),
+				new Cylinder(7, new Ray(new Point(65, 1, -45), new Vector(0, -1, 0)), 30).setEmission(legsC)
+						.setMaterial(legsM),
+				new Cylinder(7, new Ray(new Point(65, 1, 60), new Vector(0, -1, 0)), 30).setEmission(legsC)
+						.setMaterial(legsM),
+				new Cylinder(7, new Ray(new Point(-25, 1, -45), new Vector(0, -1, 0)), 30).setEmission(legsC)
+						.setMaterial(legsM),
+				new Cylinder(7, new Ray(new Point(-25, 1, 60), new Vector(0, -1, 0)), 30).setEmission(legsC)
+						.setMaterial(legsM),
+
+				new Plane(new Point(-25, -27, 60), new Vector(0, 1, 0)).setEmission(new Color(181, 101, 29))
+						.setMaterial(skyM),
+				new Plane(new Point(0, 40, -800), new Vector(0, 0, 1)).setEmission(skyC).setMaterial(skyM));
+
+		scene.lights
+				.addAll(List.of(new PointLight(new Color(YELLOW), new Point(0, 40, -160)).setKL(0.0001).setKQ(0.00001),
+
+						new SpotLight(new Color(1000, 800, 600), new Point(-200, 20, -100), new Vector(2, -1, 1))
+
+								.setKL(0.00002).setKQ(0.00003).setShape("cycle").setSize(9).setNumOfRays(49),
+
+						new DirectionalLight(new Color(1000, 800, 600), new Vector(2, -1, 1)),
+						new DirectionalLight(new Color(300, 240, 180), new Vector(0, -1, -1)),
+						new SpotLight(new Color(500, 500, 600), new Point(-10, 20, 80), new Vector(16, -18, -57))
+								.setKL(0.00002).setKQ(0.00003).setKL(0.00002).setKQ(0.00003).setShape("cycle")
+								.setSize(9).setNumOfRays(49)));
+		scene.setBackground(new Color(97, 178, 231));
 		scene.geometries.setBoundingBoxEnabled(true);
-		scene.setBackground(new Color(255, 255, 255));
-		cameraBuilder.setRayTracer(scene, RayTracerType.GRID).setLocation(new Point(5, 20, 95))
-				.setTransition(new Vector(-50, 10, 0)).setDirection(new Vector(0, 0, -1), new Vector(0, 1, 0))
-				.setVpDistance(100).setVpSize(500, 500).setResolution(2000, 2000).build().renderImage()
-				.writeToImage("minecraft");
+
+		Camera firstCamera = cameraBuilder.setRayTracer(scene, RayTracerType.GRID).setLocation(new Point(10, 20, 70))
+				.setTransition(new Vector(20, 13, 0)).setRotation(7)
+				.setDirection(new Vector(0, 0, -1), new Vector(0, 1, 0)).setVpDistance(130).setVpSize(500, 500)
+				.setResolution(2000, 2000).build().renderImage().writeToImage("minecraft1");
+
+		Camera.getBuilder(firstCamera).setTransition(new Vector(50, 30, 70)).build().renderImage()
+				.writeToImage("minecraft2");
+
+		Camera.getBuilder(firstCamera).setTransition(new Vector(-170, -10, 0)).build().renderImage()
+				.writeToImage("minecraft3");
 
 	}
 }
-
-//	private Geometry rectangle(double i, double j, double len, double z, Color c) {
-//		return new Polygon(new Point(i, j, z), new Point(i, j + 5, z), new Point(i + len, j + 5, z),
-//				new Point(i + len, j, z)).setEmission(c).setMaterial(new Material().setKR(0.4));
-//	}
-//
-//	private Geometry[] allFrame(Point[] points, double surface, double back, Color c) {
-//		Geometry[] frame = new Geometry[17];
-//		for (int i = 0; i < points.length - 1; i++)
-//			frame[i] = thickness(points[i].getX(), points[i].getY(), points[i + 1].getX(), points[i + 1].getY(),
-//					surface, back, c);
-//		return frame;
-//	}
-//
-//	private Geometry thickness(double ax, double ay, double bx, double by, double surface, double back, Color c) {
-//		return new Polygon(new Point(ax, ay, surface), new Point(bx, by, surface), new Point(bx, by, back),
-//				new Point(ax, ay, back)).setEmission(c);
-//	}
-
-//	@Test
-//	void dino() {
-//		double surface_z = -100;
-//		Color surface = new Color(66, 95, 235);
-//		double back_z = -120;
-//		Color back = new Color(235, 0, 0);
-//		Color frameColor = new Color(0, 255, 0);
-//
-//		scene.geometries.add(rectangle(5, 30, 40, surface_z, surface), rectangle(0, 25, 50, surface_z, surface),
-//				rectangle(0, 20, 10, surface_z, surface), rectangle(15, 20, 35, surface_z, surface),
-//				rectangle(0, 15, 50, surface_z, surface), rectangle(0, 10, 50, surface_z, surface),
-//				rectangle(0, 5, 25, surface_z, surface), rectangle(0, 0, 40, surface_z, surface),
-//				rectangle(-45, -5, 5, surface_z, surface), rectangle(-5, -5, 25, surface_z, surface),
-//				rectangle(-45, -10, 5, surface_z, surface), rectangle(-10, -10, 30, surface_z, surface),
-//				rectangle(-45, -15, 10, surface_z, surface), rectangle(-20, -15, 50, surface_z, surface),
-//				rectangle(-45, -20, 15, surface_z, surface), rectangle(-25, -20, 45, surface_z, surface),
-//				rectangle(25, -20, 5, surface_z, surface), rectangle(0, 15, 50, surface_z, surface),
-//				rectangle(-45, -25, 65, surface_z, surface), rectangle(-45, -30, 65, surface_z, surface),
-//				rectangle(-40, -35, 55, surface_z, surface), rectangle(-35, -40, 50, surface_z, surface),
-//				rectangle(-30, -45, 40, surface_z, surface), rectangle(-25, -50, 15, surface_z, surface),
-//				rectangle(-5, -50, 10, surface_z, surface), rectangle(-25, -55, 10, surface_z, surface),
-//				rectangle(0, -55, 5, surface_z, surface), rectangle(-25, -60, 5, surface_z, surface),
-//				rectangle(0, -60, 5, surface_z, surface), rectangle(-25, -65, 10, surface_z, surface),
-//				rectangle(0, -65, 10, surface_z, surface));
-//
-//		scene.geometries.add(rectangle(5, 30, 40, back_z, back), rectangle(0, 25, 50, back_z, back),
-//				rectangle(0, 20, 10, back_z, back), rectangle(15, 20, 35, back_z, back),
-//				rectangle(0, 15, 50, back_z, back), rectangle(0, 10, 50, back_z, back),
-//				rectangle(0, 5, 25, back_z, back), rectangle(0, 0, 40, back_z, back),
-//				rectangle(-45, -5, 5, back_z, back), rectangle(-5, -5, 25, back_z, back),
-//				rectangle(-45, -10, 5, back_z, back), rectangle(-10, -10, 30, back_z, back),
-//				rectangle(-45, -15, 10, back_z, back), rectangle(-20, -15, 50, back_z, back),
-//				rectangle(-45, -20, 15, back_z, back), rectangle(-25, -20, 45, back_z, back),
-//				rectangle(25, -20, 5, back_z, back), rectangle(0, 15, 50, back_z, back),
-//				rectangle(-45, -25, 65, back_z, back), rectangle(-45, -30, 65, back_z, back),
-//				rectangle(-40, -35, 55, back_z, back), rectangle(-35, -40, 50, back_z, back),
-//				rectangle(-30, -45, 40, back_z, back), rectangle(-25, -50, 15, back_z, back),
-//				rectangle(-5, -50, 10, back_z, back), rectangle(-25, -55, 10, back_z, back),
-//				rectangle(0, -55, 5, back_z, back), rectangle(-25, -60, 5, back_z, back),
-//				rectangle(0, -60, 5, back_z, back), rectangle(-25, -65, 10, back_z, back),
-//				rectangle(0, -65, 10, back_z, back));
-//
-//		Point[] frame = { new Point(0, 30, surface_z), new Point(5, 30, surface_z), new Point(5, 35, surface_z),
-//				new Point(45, 35, surface_z), new Point(45, 30, surface_z), new Point(50, 30, surface_z),
-//				new Point(50, 10, surface_z), new Point(25, 10, surface_z), new Point(25, 5, surface_z),
-//				new Point(40, 5, surface_z), new Point(40, 0, surface_z), new Point(20, 0, surface_z),
-//				new Point(20, -10, surface_z), new Point(30, -10, surface_z), new Point(30, -20, surface_z),
-//				new Point(25, -20, surface_z), new Point(25, -15, surface_z), new Point(20, -15, surface_z)
-//
-//		};
-//		scene.geometries.add(allFrame(frame, surface_z, back_z, frameColor));
-////		scene.geometries.add(thickness(0, 30, 5, 30, surface_z, back_z, frameColor),
-////				thickness(5, 30, 5, 35, surface_z, back_z, frameColor),
-////				thickness(5, 35, 45, 35, surface_z, back_z, frameColor),
-////				thickness(45, 35, 45, 30, surface_z, back_z, frameColor),
-////				thickness(45, 30, 50, 30, surface_z, back_z, frameColor),
-////				thickness(50, 30, 50, 10, surface_z, back_z, frameColor),
-////				thickness(50, 10, 25, 10, surface_z, back_z, frameColor),
-////				thickness(25, 10, 25, 5, surface_z, back_z, frameColor),
-////				thickness(25, 5, 40, 5, surface_z, back_z, frameColor),
-////				thickness(40, 5, 40, 0, surface_z, back_z, frameColor),
-////				thickness(40, 0, 20, 0, surface_z, back_z, frameColor),
-////				thickness(20, 0, 20, -10, surface_z, back_z, frameColor),
-////				thickness(20, -10, 30, -10, surface_z, back_z, frameColor),
-////				thickness(30, -10, 30, -20, surface_z, back_z, frameColor),
-////				thickness(30, -20, 25, -20, surface_z, back_z, frameColor));
-//
-//		cameraBuilder.setLocation(new Point(0, 0, 150)).setDirection(new Vector(0, 0, -1), new Vector(0, 1, 0))
-//				.setVpDistance(300).setVpSize(500, 500).setResolution(500, 500).setTransition(new Vector(100, 0, 0))
-//				.build().renderImage().writeToImage("dino");
-//
-//	}
-//}

@@ -1,8 +1,8 @@
 package geometries;
 
-import static java.lang.Math.*;
-
 import java.util.List;
+
+import static java.lang.Math.*;
 
 import lighting.LightSource;
 import primitives.*;
@@ -14,24 +14,23 @@ import primitives.*;
  */
 public abstract class Intersectable {
 
-	/**
-	 * Default constructor for Intersectable.
-	 */
-	public Intersectable() {
-	}
+   /**
+    * Default constructor for Intersectable.
+    */
+   protected Intersectable() {}
 
-	/**
-	 * Finds all intersection points (excluding geometry information) between a
-	 * given ray and this geometry.
-	 *
-	 * @param ray the {@link Ray} used to find intersections
-	 * @return a list of {@link Point} objects representing the intersection points,
-	 *         or {@code null} if no intersections are found
-	 */
-	public final List<Point> findIntersections(Ray ray) {
-		var list = calculateIntersections(ray);
-		return list == null ? null : list.stream().map(intersection -> intersection.point).toList();
-	}
+   /**
+    * Finds all intersection points (excluding geometry information) between a
+    * given ray and this geometry.
+    * @param  ray the {@link Ray} used to find intersections
+    * @return     a list of {@link Point} objects representing the intersection
+    *             points,
+    *             or {@code null} if no intersections are found
+    */
+   public final List<Point> findIntersections(Ray ray) {
+      var list = calculateIntersections(ray);
+      return list == null ? null : list.stream().map(intersection -> intersection.point).toList();
+   }
 
    /**
     * Delegates intersection calculation to the subclass implementation.
@@ -43,36 +42,38 @@ public abstract class Intersectable {
       return calculateIntersections(ray, Double.POSITIVE_INFINITY);
    }
 
-	/**
-	 * Calculates the intersection points between the given {@link Ray} and the
-	 * geometry, up to a specified maximum distance from the ray's origin.
-	 * <p>
-	 * This method delegates the actual computation to
-	 * {@code calculateIntersectionsHelper}.
-	 *
-	 * @param ray         the ray to intersect with the geometry
-	 * @param maxDistance the maximum distance from the ray's origin to consider
-	 *                    intersections
-	 * @return a list of {@link Intersection} objects representing the intersection
-	 *         points, or {@code null} if there are no intersections within the
-	 *         given distance
-	 */
-	public final List<Intersection> calculateIntersections(Ray ray, double maxDistance) {
-		return calculateIntersectionsHelper(ray, maxDistance);
-	}
+   /**
+    * Calculates the intersection points between the given {@link Ray} and the
+    * geometry, up to a specified maximum distance from the ray's origin.
+    * <p>
+    * This method delegates the actual computation to
+    * {@code calculateIntersectionsHelper}.
+    * @param  ray         the ray to intersect with the geometry
+    * @param  maxDistance the maximum distance from the ray's origin to consider
+    *                     intersections
+    * @return             a list of {@link Intersection} objects representing the
+    *                     intersection
+    *                     points, or {@code null} if there are no intersections
+    *                     within the
+    *                     given distance
+    */
+   public final List<Intersection> calculateIntersections(Ray ray, double maxDistance) {
+      return calculateIntersectionsHelper(ray, maxDistance);
+   }
 
-	/**
-	 * Calculates all intersection points between the given {@link Ray} and the
-	 * geometry, up to a specified maximum distance.
-	 *
-	 * @param ray         the ray to intersect with the geometry
-	 * @param maxDistance the maximum allowed distance for intersection points from
-	 *                    the ray origin
-	 * @return a list of {@link Intersection} objects representing the intersection
-	 *         points, or {@code null} if there are no intersections within the
-	 *         given distance
-	 */
-	protected abstract List<Intersection> calculateIntersectionsHelper(Ray ray, double maxDistance);
+   /**
+    * Calculates all intersection points between the given {@link Ray} and the
+    * geometry, up to a specified maximum distance.
+    * @param  ray         the ray to intersect with the geometry
+    * @param  maxDistance the maximum allowed distance for intersection points from
+    *                     the ray origin
+    * @return             a list of {@link Intersection} objects representing the
+    *                     intersection
+    *                     points, or {@code null} if there are no intersections
+    *                     within the
+    *                     given distance
+    */
+   protected abstract List<Intersection> calculateIntersectionsHelper(Ray ray, double maxDistance);
 
    /**
     * Class representing a full intersection record between a ray and a geometry.
@@ -126,20 +127,16 @@ public abstract class Intersectable {
    }
 
    /** The bounding box for this geometry */
-   protected AABB    box            = null;
+   protected AABB box = null;
 
    /**
     * Returns the bounding box of the geometry (if enabled).
-    *
     * @return the bounding box, or null if not used
     */
-   public AABB getBoundingBox() {
-      return box == null ? box = computeBoundingBox() : box;
-   }
+   public AABB getBoundingBox() { return box == null ? box = computeBoundingBox() : box; }
 
    /**
     * Computes the bounding box for this geometry. Override in concrete classes.
-    *
     * @return the computed bounding box
     */
    protected abstract AABB computeBoundingBox();
@@ -155,31 +152,34 @@ public abstract class Intersectable {
 
       /**
        * Checks whether the given ray intersects this bounding box.
-       *
-       * @param ray the ray to test
-       * @return true if the ray intersects the box, false otherwise
+       * @param  ray the ray to test
+       * @return     true if the ray intersects the box, false otherwise
        */
       public boolean intersects(Ray ray) {
-         Point origin = ray.getHead();
-         Vector dir = ray.getDirection();
+         Point    origin    = ray.getHead();
+         Vector   dir       = ray.getDirection();
 
-         double tMin = Double.NEGATIVE_INFINITY;
-         double tMax = Double.POSITIVE_INFINITY;
+         double   tMin      = Double.NEGATIVE_INFINITY;
+         double   tMax      = Double.POSITIVE_INFINITY;
 
-         double[] originArr = { origin.getX(), origin.getY(), origin.getZ() };
-         double[] dirArr = { dir.getX(), dir.getY(), dir.getZ() };
-         double[] minArr = { minCorner.getX(), minCorner.getY(), minCorner.getZ() };
-         double[] maxArr = { maxCorner.getX(), maxCorner.getY(), maxCorner.getZ() };
+         double[] originArr =
+            { origin.getX(), origin.getY(), origin.getZ() };
+         double[] dirArr    =
+            { dir.getX(), dir.getY(), dir.getZ() };
+         double[] minArr    =
+            { minCorner.getX(), minCorner.getY(), minCorner.getZ() };
+         double[] maxArr    =
+            { maxCorner.getX(), maxCorner.getY(), maxCorner.getZ() };
 
          for (int i = 0; i < 3; i++) {
             if (dirArr[i] == 0) {
                if (originArr[i] < minArr[i] || originArr[i] > maxArr[i])
                   return false;
             } else {
-               double t1 = (minArr[i] - originArr[i]) / dirArr[i];
-               double t2 = (maxArr[i] - originArr[i]) / dirArr[i];
+               double t1    = (minArr[i] - originArr[i]) / dirArr[i];
+               double t2    = (maxArr[i] - originArr[i]) / dirArr[i];
                double tNear = min(t1, t2);
-               double tFar = max(t1, t2);
+               double tFar  = max(t1, t2);
 
                tMin = max(tMin, tNear);
                tMax = min(tMax, tFar);
@@ -194,24 +194,22 @@ public abstract class Intersectable {
       /**
        * Computes the union of this bounding box with another, returning a new AABB
        * that fully contains both.
-       *
-       * @param other another bounding box to union with
-       * @return a new AABB that encloses both this and the other bounding box
+       * @param  other another bounding box to union with
+       * @return       a new AABB that encloses both this and the other bounding box
        */
       public AABB union(AABB other) {
          Point newMin = new Point(min(this.minCorner.getX(), other.minCorner.getX()),
-               min(this.minCorner.getY(), other.minCorner.getY()),
-               min(this.minCorner.getZ(), other.minCorner.getZ()));
+                                  min(this.minCorner.getY(), other.minCorner.getY()),
+                                  min(this.minCorner.getZ(), other.minCorner.getZ()));
          Point newMax = new Point(max(this.maxCorner.getX(), other.maxCorner.getX()),
-               max(this.maxCorner.getY(), other.maxCorner.getY()),
-               max(this.maxCorner.getZ(), other.maxCorner.getZ()));
+                                  max(this.maxCorner.getY(), other.maxCorner.getY()),
+                                  max(this.maxCorner.getZ(), other.maxCorner.getZ()));
          return new AABB(newMin, newMax);
       }
 
       /**
        * Expands the bounding box to include the given point. Updates the minimum and
        * maximum corners if necessary.
-       *
        * @param p the point to include in the bounding box
        */
       public AABB expandToInclude(Point p) {
@@ -229,4 +227,3 @@ public abstract class Intersectable {
    }
 
 }
-

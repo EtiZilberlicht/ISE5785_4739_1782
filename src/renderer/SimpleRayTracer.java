@@ -27,18 +27,18 @@ public class SimpleRayTracer extends RayTracerBase {
 	/**
 	 * Maximum recursion level for color calculation to avoid infinite recursion.
 	 */
-	private static final int MAX_CALC_COLOR_LEVEL = 10;
+	protected static final int MAX_CALC_COLOR_LEVEL = 10;
 
 	/**
 	 * Minimum light contribution factor below which the calculation stops to save
 	 * computation.
 	 */
-	private static final double MIN_CALC_COLOR_K = 0.001;
+	protected static final double MIN_CALC_COLOR_K = 0.001;
 
 	/**
 	 * Initial attenuation factor for color calculations.
 	 */
-	private static final Double3 INITIAL_K = Double3.ONE;
+	protected static final Double3 INITIAL_K = Double3.ONE;
 
 	/**
 	 * Constructs a SimpleRayTracer for the given scene.
@@ -292,6 +292,21 @@ public class SimpleRayTracer extends RayTracerBase {
 	}
 
 	/**
+	 * Finds all intersections of a given ray with geometries in the scene, up to a
+	 * specified maximum distance.
+	 *
+	 * @param ray         the ray to trace from the origin point in a given
+	 *                    direction
+	 * @param maxDistance the maximum distance from the ray's origin to consider for
+	 *                    intersections
+	 * @return a list of intersections within the given distance limit, or an empty
+	 *         list if none found
+	 */
+	protected List<Intersection> findAllIntersections(Ray ray, double maxDistance) {
+		return scene.geometries.calculateIntersections(ray, maxDistance);
+	}
+
+	/**
 	 * Computes the transparency attenuation factor between the intersection point
 	 * and the light source, considering all objects that the shadow ray intersects.
 	 *
@@ -301,8 +316,9 @@ public class SimpleRayTracer extends RayTracerBase {
 	protected Double3 transparency(Intersection intersection) {
 		Vector pointToLight = intersection.l.scale(-1); // vector from point to light source
 		Ray ray = new Ray(intersection.point, pointToLight, intersection.normal); // shadow ray towards light
-		var intersections = scene.geometries.calculateIntersections(ray,
-				intersection.light.getDistance(intersection.point));
+//		var intersections = scene.geometries.calculateIntersections(ray,
+//				intersection.light.getDistance(intersection.point));
+		var intersections = findAllIntersections(ray, intersection.light.getDistance(intersection.point));
 
 		Double3 ktr = Double3.ONE;
 

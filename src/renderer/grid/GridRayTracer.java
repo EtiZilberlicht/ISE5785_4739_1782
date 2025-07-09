@@ -6,7 +6,6 @@ import java.util.List;
 import geometries.Intersectable;
 import geometries.Intersectable.AABB;
 import geometries.Intersectable.Intersection;
-import primitives.Double3;
 import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
@@ -212,114 +211,6 @@ public class GridRayTracer extends SimpleRayTracer {
 	}
 
 	/**
-	 * Finds the closest intersection of a ray with distance limitation using 3D DDA
-	 * voxel traversal.
-	 *
-	 * @param ray         the ray to trace
-	 * @param maxDistance the maximum distance to consider
-	 * @return the closest intersection within the distance limit, or null
-	 */
-	private Intersection findClosestIntersection(Ray ray, double maxDistance) {
-		if (grid == null)
-			return null;
-
-		AABB box = grid.getBoundingBox();
-		if (!box.intersects(ray))
-			return null;
-
-		double tMin = findEntryT(ray, box);
-		if (tMin < 0)
-			tMin = 0;
-
-		Point startPoint = clampToBox(ray.getPoint(tMin + 1e-5), box);
-		Index3D voxelIdx = grid.pointToIndex(startPoint);
-		if (voxelIdx == null)
-			return null;
-
-		Vector dir = ray.getDirection();
-		double voxelSize = grid.getVoxelSize();
-
-		int stepX = dir.getX() >= 0 ? 1 : -1;
-		int stepY = dir.getY() >= 0 ? 1 : -1;
-		int stepZ = dir.getZ() >= 0 ? 1 : -1;
-
-		double nextVoxelBoundaryX = box.getMin().getX() + (voxelIdx.i + (stepX > 0 ? 1 : 0)) * voxelSize;
-		double nextVoxelBoundaryY = box.getMin().getY() + (voxelIdx.j + (stepY > 0 ? 1 : 0)) * voxelSize;
-		double nextVoxelBoundaryZ = box.getMin().getZ() + (voxelIdx.k + (stepZ > 0 ? 1 : 0)) * voxelSize;
-
-		double tMaxX = (dir.getX() == 0) ? Double.POSITIVE_INFINITY
-				: (nextVoxelBoundaryX - ray.getHead().getX()) / dir.getX();
-		double tMaxY = (dir.getY() == 0) ? Double.POSITIVE_INFINITY
-				: (nextVoxelBoundaryY - ray.getHead().getY()) / dir.getY();
-		double tMaxZ = (dir.getZ() == 0) ? Double.POSITIVE_INFINITY
-				: (nextVoxelBoundaryZ - ray.getHead().getZ()) / dir.getZ();
-
-		double tDeltaX = (dir.getX() == 0) ? Double.POSITIVE_INFINITY : voxelSize / Math.abs(dir.getX());
-		double tDeltaY = (dir.getY() == 0) ? Double.POSITIVE_INFINITY : voxelSize / Math.abs(dir.getY());
-		double tDeltaZ = (dir.getZ() == 0) ? Double.POSITIVE_INFINITY : voxelSize / Math.abs(dir.getZ());
-
-		Intersection closestIntersection = null;
-		double closestDistance = Double.POSITIVE_INFINITY;
-
-		while (voxelIdx.i >= 0 && voxelIdx.i < grid.getSizeX() && voxelIdx.j >= 0 && voxelIdx.j < grid.getSizeY()
-				&& voxelIdx.k >= 0 && voxelIdx.k < grid.getSizeZ()) {
-
-			Voxel voxel = grid.getVoxel(voxelIdx);
-
-			if (voxel != null && !voxel.isEmpty()) {
-				for (Intersectable geo : voxel.getGeometries()) {
-					List<Intersection> intersections = geo.calculateIntersections(ray);
-					if (intersections != null) {
-						for (Intersection inter : intersections) {
-							double t = inter.point.distance(ray.getHead()); // ← שינוי כאן
-							if (t >= tMin && t <= maxDistance && t < closestDistance) {
-								closestDistance = t;
-								closestIntersection = inter;
-							}
-						}
-					}
-				}
-			}
-
-			if (closestDistance <= maxDistance)
-				break;
-
-			if (tMaxX < tMaxY) {
-				if (tMaxX < tMaxZ) {
-					voxelIdx = voxelIdx.add(stepX, 0, 0);
-					tMaxX += tDeltaX;
-				} else {
-					voxelIdx = voxelIdx.add(0, 0, stepZ);
-					tMaxZ += tDeltaZ;
-				}
-			} else {
-				if (tMaxY < tMaxZ) {
-					voxelIdx = voxelIdx.add(0, stepY, 0);
-					tMaxY += tDeltaY;
-				} else {
-					voxelIdx = voxelIdx.add(0, 0, stepZ);
-					tMaxZ += tDeltaZ;
-				}
-			}
-		}
-
-		for (Intersectable geo : infiniteGeometries) {
-			List<Intersection> intersections = geo.calculateIntersections(ray);
-			if (intersections != null) {
-				for (Intersection inter : intersections) {
-					double t = inter.point.distance(ray.getHead()); // ← שינוי כאן
-					if (t >= tMin && t <= maxDistance && t < closestDistance) {
-						closestDistance = t;
-						closestIntersection = inter;
-					}
-				}
-			}
-		}
-
-		return (closestDistance <= maxDistance) ? closestIntersection : null;
-	}
-
-	/**
 	 * Calculates the entry point parameter t where the ray first intersects the
 	 * bounding box.
 	 *
@@ -360,17 +251,102 @@ public class GridRayTracer extends SimpleRayTracer {
 	}
 
 	@Override
-	protected Double3 transparency(Intersection intersection) {
-		Vector l = intersection.l;
-		Ray shadowRay = new Ray(intersection.point, l.scale(-1), intersection.normal);
+	protected List<Intersection> findAllIntersections(Ray ray, double maxDistance) {
+		if (grid == null)
+			return List.of();
 
-		Double3 ktr = Double3.ONE;
-		double maxDistance = intersection.light.getDistance(intersection.point);
+		AABB box = grid.getBoundingBox();
+		if (!box.intersects(ray))
+			return List.of();
 
-		Intersection shadowHit = findClosestIntersection(shadowRay, maxDistance);
-		if (shadowHit == null)
-			return ktr;
+		double tMin = findEntryT(ray, box);
+		if (tMin < 0)
+			tMin = 0;
 
-		return shadowHit.material.kT.lowerThan(0.001) ? Double3.ZERO : shadowHit.material.kT;
+		Point startPoint = clampToBox(ray.getPoint(tMin + 1e-5), box);
+		Index3D voxelIdx = grid.pointToIndex(startPoint);
+		if (voxelIdx == null)
+			return List.of();
+
+		Vector dir = ray.getDirection();
+		double voxelSize = grid.getVoxelSize();
+
+		int stepX = dir.getX() >= 0 ? 1 : -1;
+		int stepY = dir.getY() >= 0 ? 1 : -1;
+		int stepZ = dir.getZ() >= 0 ? 1 : -1;
+
+		double nextVoxelBoundaryX = box.getMin().getX() + (voxelIdx.i + (stepX > 0 ? 1 : 0)) * voxelSize;
+		double nextVoxelBoundaryY = box.getMin().getY() + (voxelIdx.j + (stepY > 0 ? 1 : 0)) * voxelSize;
+		double nextVoxelBoundaryZ = box.getMin().getZ() + (voxelIdx.k + (stepZ > 0 ? 1 : 0)) * voxelSize;
+
+		double tMaxX = (dir.getX() == 0) ? Double.POSITIVE_INFINITY
+				: (nextVoxelBoundaryX - ray.getHead().getX()) / dir.getX();
+		double tMaxY = (dir.getY() == 0) ? Double.POSITIVE_INFINITY
+				: (nextVoxelBoundaryY - ray.getHead().getY()) / dir.getY();
+		double tMaxZ = (dir.getZ() == 0) ? Double.POSITIVE_INFINITY
+				: (nextVoxelBoundaryZ - ray.getHead().getZ()) / dir.getZ();
+
+		double tDeltaX = (dir.getX() == 0) ? Double.POSITIVE_INFINITY : voxelSize / Math.abs(dir.getX());
+		double tDeltaY = (dir.getY() == 0) ? Double.POSITIVE_INFINITY : voxelSize / Math.abs(dir.getY());
+		double tDeltaZ = (dir.getZ() == 0) ? Double.POSITIVE_INFINITY : voxelSize / Math.abs(dir.getZ());
+
+		List<Intersection> allIntersections = new ArrayList<>();
+
+		while (voxelIdx.i >= 0 && voxelIdx.i < grid.getSizeX() && voxelIdx.j >= 0 && voxelIdx.j < grid.getSizeY()
+				&& voxelIdx.k >= 0 && voxelIdx.k < grid.getSizeZ()) {
+
+			Voxel voxel = grid.getVoxel(voxelIdx);
+
+			if (voxel != null && !voxel.isEmpty()) {
+				for (Intersectable geo : voxel.getGeometries()) {
+					List<Intersection> intersections = geo.calculateIntersections(ray);
+					if (intersections != null) {
+						for (Intersection inter : intersections) {
+							double t = inter.point.distance(ray.getHead());
+							if (t >= tMin && t <= maxDistance) {
+								allIntersections.add(inter);
+							}
+						}
+					}
+				}
+			}
+
+			double currentT = Math.min(Math.min(tMaxX, tMaxY), tMaxZ);
+			if (currentT > maxDistance)
+				break;
+
+			if (tMaxX < tMaxY) {
+				if (tMaxX < tMaxZ) {
+					voxelIdx = voxelIdx.add(stepX, 0, 0);
+					tMaxX += tDeltaX;
+				} else {
+					voxelIdx = voxelIdx.add(0, 0, stepZ);
+					tMaxZ += tDeltaZ;
+				}
+			} else {
+				if (tMaxY < tMaxZ) {
+					voxelIdx = voxelIdx.add(0, stepY, 0);
+					tMaxY += tDeltaY;
+				} else {
+					voxelIdx = voxelIdx.add(0, 0, stepZ);
+					tMaxZ += tDeltaZ;
+				}
+			}
+		}
+
+		for (Intersectable geo : infiniteGeometries) {
+			List<Intersection> intersections = geo.calculateIntersections(ray);
+			if (intersections != null) {
+				for (Intersection inter : intersections) {
+					double t = inter.point.distance(ray.getHead());
+					if (t >= tMin && t <= maxDistance) {
+						allIntersections.add(inter);
+					}
+				}
+			}
+		}
+
+		return allIntersections;
 	}
+
 }

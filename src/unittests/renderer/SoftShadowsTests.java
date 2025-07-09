@@ -4,6 +4,7 @@ import static java.awt.Color.WHITE;
 
 import java.util.List;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import geometries.Cylinder;
@@ -56,7 +57,7 @@ public class SoftShadowsTests {
 	 * resolution. The rendered image is saved as "softShadow.png".
 	 */
 	@Test
-//	@Disabled
+	@Disabled
 	void softShadow() {
 		Material planeMaterial = new Material().setKD(0.6) // פיזור אור
 				.setKS(0.2) // החזר מבריק קל

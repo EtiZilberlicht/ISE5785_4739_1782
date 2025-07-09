@@ -41,7 +41,7 @@ public class AllEffectsTests {
 	private final Scene scene = new Scene("Test scene");
 	/** Camera builder for the tests with triangles */
 	private final Camera.Builder cameraBuilder = Camera.getBuilder() //
-			.setMultithreading(-1).setDebugPrint(0.1);
+			.setMultithreading(-2).setDebugPrint(0.1);
 
 	/**
 	 * An array holding the Sphere objects representing billiard balls. Each Sphere
@@ -128,7 +128,7 @@ public class AllEffectsTests {
 	 * cameras, and renders multiple views with different camera movements.
 	 */
 	@Test
-	@Disabled
+//	@Disabled
 
 	void billiards() {
 		// Green felt material
@@ -299,7 +299,7 @@ public class AllEffectsTests {
 	 * transitions are used to render the scene from different angles.
 	 */
 	@Test
-//	@Disabled
+	@Disabled
 	void minecraft() {
 
 		Material legsM = new Material().setKD(0.2).setKS(0.8).setShininess(300);

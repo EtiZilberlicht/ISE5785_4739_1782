@@ -5,6 +5,7 @@ import static geometries.GeometriesObj.readObjToPolygons;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import primitives.Ray;
 
@@ -35,6 +36,10 @@ public class Geometries extends Intersectable {
 	 */
 	public Geometries(Intersectable... geometries) {
 		add(geometries);
+	}
+
+	public Geometries(List<Intersectable> geometries) {
+		this.geometries.addAll(geometries);
 	}
 
 	/**
@@ -69,12 +74,9 @@ public class Geometries extends Intersectable {
 
 		AABB result = null;
 		for (Intersectable geo : geometries) {
-			geo.setBoundingBoxEnabled(true);
 			AABB box = geo.getBoundingBox();
-			if (box != null) {
+			if (box != null)
 				result = (result == null) ? box : result.union(box);
-			}
-
 		}
 		return result;
 
@@ -86,7 +88,12 @@ public class Geometries extends Intersectable {
 	 * @return list of intersectables
 	 */
 	public List<Intersectable> getAll() {
-		return geometries;
+		return geometries.isEmpty() ? null : getStream().toList();
+	}
+
+	private Stream<Intersectable> getStream() {
+		return geometries.stream().flatMap(
+				geometry -> (geometry instanceof Geometries composite) ? composite.getStream() : Stream.of(geometry));
 	}
 
 	/**
@@ -101,6 +108,10 @@ public class Geometries extends Intersectable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public boolean isEmpty() {
+		return geometries.isEmpty();
 	}
 
 }

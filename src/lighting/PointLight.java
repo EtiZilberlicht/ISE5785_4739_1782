@@ -28,7 +28,7 @@ public class PointLight extends Light implements LightSource {
 	 * The size representing the dimension or scale relevant to this geometry or
 	 * object. Initial value is 0.
 	 */
-	protected int size = 0;
+	protected double size = 0;
 
 	/**
 	 * The blackboard instance used for managing ray grids and calculations, such as
@@ -101,7 +101,7 @@ public class PointLight extends Light implements LightSource {
 	 * @param size the new size to set
 	 * @return this {@code PointLight} instance for method chaining
 	 */
-	public PointLight setSize(int size) {
+	public PointLight setSize(double size) {
 		this.size = size;
 		this.blackboard.setGridSize(size);
 		return this;
@@ -129,15 +129,6 @@ public class PointLight extends Light implements LightSource {
 	public PointLight setShape(String shape) {
 		this.blackboard.setShape(shape);
 		return this;
-	}
-
-	/**
-	 * Returns the size value.
-	 *
-	 * @return the size as an integer
-	 */
-	public int getSize() {
-		return size;
 	}
 
 	@Override

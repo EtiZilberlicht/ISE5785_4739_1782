@@ -1,5 +1,7 @@
 package renderer.grid;
 
+import static java.lang.Math.max;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -43,10 +45,10 @@ public class VoxelGrid {
 		this.sizeZ = sizeZ;
 		// Calculate voxel size assuming uniform cubic voxels fitting the bounding box
 		// exactly
-		this.voxelSize = Math.max(
-				Math.max((boundingBox.getMax().getX() - boundingBox.getMin().getX()) / sizeX,
-						(boundingBox.getMax().getY() - boundingBox.getMin().getY()) / sizeY),
-				(boundingBox.getMax().getZ() - boundingBox.getMin().getZ()) / sizeZ);
+		this.voxelSize = max(
+				max((boundingBox.maxCorner().getX() - boundingBox.minCorner().getX()) / sizeX,
+						(boundingBox.maxCorner().getY() - boundingBox.minCorner().getY()) / sizeY),
+				(boundingBox.maxCorner().getZ() - boundingBox.minCorner().getZ()) / sizeZ);
 	}
 
 	/**
@@ -57,17 +59,16 @@ public class VoxelGrid {
 	 *         outside the bounding box.
 	 */
 	public Index3D pointToIndex(Point p) {
+		if (!pointInsideBoundingBox(p))
+			return null;
+
 		double x = p.getX();
 		double y = p.getY();
 		double z = p.getZ();
 
-		if (!pointInsideBoundingBox(p)) {
-			return null;
-		}
-
-		int i = (int) Math.floor((x - boundingBox.getMin().getX()) / voxelSize);
-		int j = (int) Math.floor((y - boundingBox.getMin().getY()) / voxelSize);
-		int k = (int) Math.floor((z - boundingBox.getMin().getZ()) / voxelSize);
+		int i = (int) Math.floor((x - boundingBox.minCorner().getX()) / voxelSize);
+		int j = (int) Math.floor((y - boundingBox.minCorner().getY()) / voxelSize);
+		int k = (int) Math.floor((z - boundingBox.minCorner().getZ()) / voxelSize);
 
 		// Fix boundary cases where point lies exactly on max edge
 		if (i == sizeX)
@@ -90,11 +91,11 @@ public class VoxelGrid {
 		if (geomBox == null)
 			return;
 
-		Index3D minIndex = pointToIndex(geomBox.getMin());
+		Index3D minIndex = pointToIndex(geomBox.minCorner());
 
 		// 🛠 הקטנת קצה עליון של הקוביה כדי למנוע חריגה
-		Point adjustedMax = new Point(geomBox.getMax().getX() - 1e-5, geomBox.getMax().getY() - 1e-5,
-				geomBox.getMax().getZ() - 1e-5);
+		Point adjustedMax = new Point(geomBox.maxCorner().getX() - 1e-5, geomBox.maxCorner().getY() - 1e-5,
+				geomBox.maxCorner().getZ() - 1e-5);
 		Index3D maxIndex = pointToIndex(adjustedMax);
 
 		if (minIndex == null || maxIndex == null)
@@ -104,8 +105,7 @@ public class VoxelGrid {
 			for (int j = minIndex.j; j <= maxIndex.j; j++) {
 				for (int k = minIndex.k; k <= maxIndex.k; k++) {
 					Index3D idx = new Index3D(i, j, k);
-					voxels.computeIfAbsent(idx, key -> new Voxel(new java.util.LinkedList<>())).getGeometries()
-							.add(geometry);
+					voxels.computeIfAbsent(idx, key -> new Voxel()).getGeometries().add(geometry);
 				}
 			}
 		}
@@ -129,11 +129,12 @@ public class VoxelGrid {
 	 */
 	private boolean pointInsideBoundingBox(Point p) {
 		double epsilon = 1e-5;
-		return p.getX() >= boundingBox.getMin().getX() - epsilon && p.getX() <= boundingBox.getMax().getX() + epsilon
-				&& p.getY() >= boundingBox.getMin().getY() - epsilon
-				&& p.getY() <= boundingBox.getMax().getY() + epsilon
-				&& p.getZ() >= boundingBox.getMin().getZ() - epsilon
-				&& p.getZ() <= boundingBox.getMax().getZ() + epsilon;
+		return p.getX() >= boundingBox.minCorner().getX() - epsilon
+				&& p.getX() <= boundingBox.maxCorner().getX() + epsilon
+				&& p.getY() >= boundingBox.minCorner().getY() - epsilon
+				&& p.getY() <= boundingBox.maxCorner().getY() + epsilon
+				&& p.getZ() >= boundingBox.minCorner().getZ() - epsilon
+				&& p.getZ() <= boundingBox.maxCorner().getZ() + epsilon;
 	}
 
 	/**

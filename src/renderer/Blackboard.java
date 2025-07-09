@@ -21,7 +21,7 @@ public class Blackboard {
 	/**
 	 * The size of the grid over the plane in world units.
 	 */
-	int gridSize = 0;
+	double gridSize = 0;
 
 	/**
 	 * The number of rays to be generated (typically a square number like 16, 25,
@@ -67,7 +67,7 @@ public class Blackboard {
 	 * @param gridSize the new size for the grid
 	 * @return this blackboard instance for method chaining
 	 */
-	public Blackboard setGridSize(int gridSize) {
+	public Blackboard setGridSize(double gridSize) {
 		this.gridSize = gridSize;
 		updateGrid();
 		return this;

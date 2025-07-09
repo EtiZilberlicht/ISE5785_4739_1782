@@ -13,11 +13,7 @@ import geometries.Polygon;
 import geometries.Sphere;
 import lighting.PointLight;
 import lighting.SpotLight;
-import primitives.Color;
-import primitives.Material;
-import primitives.Point;
-import primitives.Ray;
-import primitives.Vector;
+import primitives.*;
 import renderer.Camera;
 import renderer.RayTracerType;
 import scene.Scene;
@@ -92,7 +88,6 @@ public class SoftShadowsTests {
 				new Polygon(p5, p1, p4, p8).setEmission(generalColor).setMaterial(matteMaterial),
 				new Polygon(p4, p3, p7, p8).setEmission(generalColor).setMaterial(matteMaterial));
 
-		scene.geometries.setBoundingBoxEnabled(true);
 		scene.lights.addAll(List.of(
 				new SpotLight(new Color(800, 800, 800), new Point(110, 75, 50), new Vector(-1, -0.5, 0)).setKL(0.0004)
 						.setKQ(0.0002).setSize(81).setShape("circle"),

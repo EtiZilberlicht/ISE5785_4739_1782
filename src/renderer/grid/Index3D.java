@@ -29,6 +29,12 @@ public class Index3D {
 		this.k = k;
 	}
 
+	public Index3D(double x, double y, double z) {
+		i = (int) Math.floor(x);
+		j = (int) Math.floor(y);
+		k = (int) Math.floor(z);
+	}
+
 	/**
 	 * Returns a new Index3D which is the sum of this index and the given offsets.
 	 *

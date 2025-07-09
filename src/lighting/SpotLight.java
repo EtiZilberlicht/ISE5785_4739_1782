@@ -66,8 +66,9 @@ public class SpotLight extends PointLight {
 	 * @return this spotlight instance for method chaining
 	 */
 	public SpotLight setKC(double kC) {
-		super.setKC(kC);
-		return this;
+		if (alignZero(kC) <= 0)
+			throw new IllegalArgumentException("Constant propagation factor must be positive");
+		return (SpotLight) super.setKC(kC);
 	}
 
 	/**
@@ -77,8 +78,9 @@ public class SpotLight extends PointLight {
 	 * @return this spotlight instance for method chaining
 	 */
 	public SpotLight setKL(double kL) {
-		super.setKL(kL);
-		return this;
+		if (kL < 0)
+			throw new IllegalArgumentException("Linear propagation factor must be non-negative");
+		return (SpotLight) super.setKL(kL);
 	}
 
 	/**
@@ -88,15 +90,14 @@ public class SpotLight extends PointLight {
 	 * @return this spotlight instance for method chaining
 	 */
 	public SpotLight setKQ(double kQ) {
-		super.setKQ(kQ);
-		return this;
+		if (kQ < 0)
+			throw new IllegalArgumentException("Quadratic propagation factor must be non-negative");
+		return (SpotLight) super.setKQ(kQ);
 	}
 
 	@Override
-	public SpotLight setSize(int size) {
-		this.size = size;
-		this.blackboard.setGridSize(size);
-		return this;
+	public SpotLight setSize(double size) {
+		return (SpotLight) super.setSize(size);
 	}
 
 	@Override

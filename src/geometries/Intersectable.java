@@ -1,15 +1,11 @@
 package geometries;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 
 import java.util.List;
 
 import lighting.LightSource;
-import primitives.Material;
-import primitives.Point;
-import primitives.Ray;
-import primitives.Vector;
+import primitives.*;
 
 /**
  * Abstract base class for geometric objects that can be intersected by a
@@ -159,28 +155,8 @@ public abstract class Intersectable {
 		}
 	}
 
-	/** Indicates whether to use the bounding box for this geometry */
-	protected boolean useBoundingBox = false;
-
 	/** The bounding box for this geometry */
 	protected AABB box = null;
-
-	/**
-	 * Enables or disables the use of a bounding box for this geometry.
-	 * 
-	 * When enabled, if the bounding box has not yet been computed, it will be
-	 * computed automatically.
-	 * 
-	 * @param enabled true to enable bounding box usage, false to disable it
-	 * @return this geometry instance (for method chaining)
-	 */
-	public Intersectable setBoundingBoxEnabled(boolean enabled) {
-		useBoundingBox = enabled;
-		if (enabled && box == null) {
-			box = computeBoundingBox();
-		}
-		return this;
-	}
 
 	/**
 	 * Returns the bounding box of the geometry (if enabled).
@@ -188,16 +164,7 @@ public abstract class Intersectable {
 	 * @return the bounding box, or null if not used
 	 */
 	public AABB getBoundingBox() {
-		return useBoundingBox ? box : null;
-	}
-
-	/**
-	 * Sets the bounding box for this object.
-	 *
-	 * @param box the bounding box to assign
-	 */
-	public void setBoundingBox(AABB box) {
-		this.box = box;
+		return box == null ? box = computeBoundingBox() : box;
 	}
 
 	/**
@@ -210,41 +177,11 @@ public abstract class Intersectable {
 	/**
 	 * Represents an axis-aligned bounding box (AABB).
 	 */
-	public static class AABB {
-		/** The minimum corner point of the bounding box */
-		private Point min;
-
-		/** The maximum corner point of the bounding box */
-		private Point max;
-
-		/**
-		 * Constructs an AABB with the specified minimum and maximum points.
-		 *
-		 * @param min the minimum corner point (smallest x, y, z)
-		 * @param max the maximum corner point (largest x, y, z)
-		 */
-		public AABB(Point min, Point max) {
-			this.min = min;
-			this.max = max;
-		}
-
-		/**
-		 * Returns the minimum corner point of the bounding box.
-		 *
-		 * @return the min point
-		 */
-		public Point getMin() {
-			return min;
-		}
-
-		/**
-		 * Returns the maximum corner point of the bounding box.
-		 *
-		 * @return the max point
-		 */
-		public Point getMax() {
-			return max;
-		}
+	public static record AABB(
+			/** The minimum corner point of the bounding box */
+			Point minCorner,
+			/** The maximum corner point of the bounding box */
+			Point maxCorner) {
 
 		/**
 		 * Checks whether the given ray intersects this bounding box.
@@ -261,8 +198,8 @@ public abstract class Intersectable {
 
 			double[] originArr = { origin.getX(), origin.getY(), origin.getZ() };
 			double[] dirArr = { dir.getX(), dir.getY(), dir.getZ() };
-			double[] minArr = { min.getX(), min.getY(), min.getZ() };
-			double[] maxArr = { max.getX(), max.getY(), max.getZ() };
+			double[] minArr = { minCorner.getX(), minCorner.getY(), minCorner.getZ() };
+			double[] maxArr = { maxCorner.getX(), maxCorner.getY(), maxCorner.getZ() };
 
 			for (int i = 0; i < 3; i++) {
 				if (dirArr[i] == 0) {
@@ -292,10 +229,12 @@ public abstract class Intersectable {
 		 * @return a new AABB that encloses both this and the other bounding box
 		 */
 		public AABB union(AABB other) {
-			Point newMin = new Point(min(this.min.getX(), other.min.getX()), min(this.min.getY(), other.min.getY()),
-					min(this.min.getZ(), other.min.getZ()));
-			Point newMax = new Point(max(this.max.getX(), other.max.getX()), max(this.max.getY(), other.max.getY()),
-					max(this.max.getZ(), other.max.getZ()));
+			Point newMin = new Point(min(this.minCorner.getX(), other.minCorner.getX()),
+					min(this.minCorner.getY(), other.minCorner.getY()),
+					min(this.minCorner.getZ(), other.minCorner.getZ()));
+			Point newMax = new Point(max(this.maxCorner.getX(), other.maxCorner.getX()),
+					max(this.maxCorner.getY(), other.maxCorner.getY()),
+					max(this.maxCorner.getZ(), other.maxCorner.getZ()));
 			return new AABB(newMin, newMax);
 		}
 
@@ -305,17 +244,16 @@ public abstract class Intersectable {
 		 *
 		 * @param p the point to include in the bounding box
 		 */
-		public void expandToInclude(Point p) {
-			double minX = Math.min(this.min.getX(), p.getX());
-			double minY = Math.min(this.min.getY(), p.getY());
-			double minZ = Math.min(this.min.getZ(), p.getZ());
+		public AABB expandToInclude(Point p) {
+			double minX = min(this.minCorner.getX(), p.getX());
+			double minY = min(this.minCorner.getY(), p.getY());
+			double minZ = min(this.minCorner.getZ(), p.getZ());
 
-			double maxX = Math.max(this.max.getX(), p.getX());
-			double maxY = Math.max(this.max.getY(), p.getY());
-			double maxZ = Math.max(this.max.getZ(), p.getZ());
+			double maxX = max(this.maxCorner.getX(), p.getX());
+			double maxY = max(this.maxCorner.getY(), p.getY());
+			double maxZ = max(this.maxCorner.getZ(), p.getZ());
 
-			this.min = new Point(minX, minY, minZ);
-			this.max = new Point(maxX, maxY, maxZ);
+			return new AABB(new Point(minX, minY, minZ), new Point(maxX, maxY, maxZ));
 		}
 
 	}

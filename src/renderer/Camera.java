@@ -1,7 +1,6 @@
 package renderer;
 
-import static primitives.Util.alignZero;
-import static primitives.Util.isZero;
+import static primitives.Util.*;
 
 import java.util.LinkedList;
 import java.util.MissingResourceException;
@@ -63,7 +62,7 @@ public class Camera implements Cloneable {
 	private double distance = 0d;
 
 	/**
-	 * The precomputed center point of the view plane, used to save computation.
+	 * The pre-computed center point of the view plane, used to save computation.
 	 */
 	private Point viewPlanePC;
 
@@ -177,18 +176,6 @@ public class Camera implements Cloneable {
 	}
 
 	/**
-	 * Renders the image by casting rays through all pixels on the view plane.
-	 *
-	 * @return this camera instance for method chaining
-	 */
-//	public Camera renderImage() {
-//		for (int i = 0; i < nX; i++)
-//			for (int j = 0; j < nY; j++)
-//				castRay(i, j);
-//		return this;
-//	}
-
-	/**
 	 * This function renders image's pixel color map from the scene included in the
 	 * ray tracer object
 	 * 
@@ -292,6 +279,8 @@ public class Camera implements Cloneable {
 	 * Ensures immutability and validation before creating a camera instance.
 	 */
 	public static class Builder {
+		private RayTracerType tracerType = RayTracerType.SIMPLE;
+		private Scene scene = null;
 
 		/**
 		 * default constructor
@@ -450,16 +439,8 @@ public class Camera implements Cloneable {
 		 * @return this builder instance
 		 */
 		public Builder setRayTracer(Scene scene, RayTracerType type) {
-			switch (type) {
-			case RayTracerType.SIMPLE:
-				camera.rayTracer = new SimpleRayTracer(scene);
-				break;
-			case RayTracerType.GRID:
-				camera.rayTracer = new GridRayTracer(scene);
-				break;
-			default:
-				break;
-			}
+			tracerType = type;
+			this.scene = scene;
 			return this;
 		}
 
@@ -544,9 +525,6 @@ public class Camera implements Cloneable {
 			camera.rY = camera.height / camera.nY;
 			camera.rX = camera.width / camera.nX;
 
-			if (camera.rayTracer == null)
-				camera.rayTracer = new SimpleRayTracer(null);
-
 			if (!isZero(camera.rotationAngleDegrees)) {
 				double angleDeg = camera.rotationAngleDegrees % 360;
 				if (angleDeg < 0)
@@ -588,8 +566,15 @@ public class Camera implements Cloneable {
 				camera.distance = camera.cameraPoint.distance(camera.viewPlanePC);
 			}
 
-			if (camera.rayTracer instanceof GridRayTracer gTracer) {
-				gTracer.setupGrid();
+			switch (tracerType) {
+			case RayTracerType.SIMPLE:
+				camera.rayTracer = new SimpleRayTracer(scene);
+				break;
+			case RayTracerType.GRID:
+				camera.rayTracer = new GridRayTracer(scene);
+				break;
+			default:
+				break;
 			}
 
 			try {
